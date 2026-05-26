@@ -5,8 +5,12 @@ import { useRouter } from 'next/navigation';
 
 export default function UnirsePage() {
   const router = useRouter();
-  const [nombre, setNombre] = useState('');
+  const [nombreCompleto, setNombreCompleto] = useState('');
+  const [nombreUsuario, setNombreUsuario] = useState('');
+  const [mail, setMail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [dni, setDni] = useState('');
+  const [sigueIG, setSigueIG] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,7 +23,7 @@ export default function UnirsePage() {
       const res = await fetch('/api/participantes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, whatsapp }),
+        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni }),
       });
 
       const data = await res.json();
@@ -27,7 +31,7 @@ export default function UnirsePage() {
 
       localStorage.setItem('prode_id', String(data.id));
       localStorage.setItem('prode_codigo', data.codigo);
-      localStorage.setItem('prode_nombre', data.nombre);
+      localStorage.setItem('prode_nombre', data.nombre_usuario);
 
       router.push(`/predicciones?participanteId=${data.id}`);
     } catch (err) {
@@ -48,20 +52,53 @@ export default function UnirsePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-5">
+        {/* Nombre completo */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">
-            Tu nombre
+            Nombre completo
           </label>
           <input
             type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Martín"
+            value={nombreCompleto}
+            onChange={(e) => setNombreCompleto(e.target.value)}
+            placeholder="Ej: Martín García"
             required
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
           />
         </div>
 
+        {/* Nombre de usuario */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">
+            Nombre de usuario
+          </label>
+          <input
+            type="text"
+            value={nombreUsuario}
+            onChange={(e) => setNombreUsuario(e.target.value)}
+            placeholder="Ej: martingol"
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+          />
+          <p className="text-xs text-zinc-500">Este es el nombre que aparece en el ranking. Tiene que ser único.</p>
+        </div>
+
+        {/* Mail */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">
+            Mail
+          </label>
+          <input
+            type="email"
+            value={mail}
+            onChange={(e) => setMail(e.target.value)}
+            placeholder="Ej: martin@gmail.com"
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+          />
+        </div>
+
+        {/* WhatsApp */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">
             WhatsApp
@@ -74,8 +111,46 @@ export default function UnirsePage() {
             required
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
           />
-          <p className="text-xs text-zinc-500">Solo para avisarte si ganás algo 😄</p>
         </div>
+
+        {/* DNI */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">
+            DNI
+          </label>
+          <input
+            type="text"
+            value={dni}
+            onChange={(e) => setDni(e.target.value)}
+            placeholder="Ej: 38456789"
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+          />
+          <p className="text-xs text-zinc-500">Solo para evitar multicuentas. No se muestra públicamente.</p>
+        </div>
+
+        {/* Checkbox IG */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={sigueIG}
+            onChange={(e) => setSigueIG(e.target.checked)}
+            required
+            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer"
+          />
+          <span className="text-sm text-zinc-300">
+            Ya sigo a{' '}
+            <a
+              href="https://www.instagram.com/donutmakers.caballito"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 underline"
+            >
+              @donutmakers.caballito
+            </a>{' '}
+            en Instagram
+          </span>
+        </label>
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3">
@@ -85,7 +160,7 @@ export default function UnirsePage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !sigueIG}
           className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold text-lg transition-colors"
         >
           {loading ? 'Registrando...' : 'Entrar al prode ⚽'}

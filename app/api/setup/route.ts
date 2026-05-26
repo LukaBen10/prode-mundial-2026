@@ -8,8 +8,11 @@ export async function GET() {
     await db.execute(`
       CREATE TABLE IF NOT EXISTS participantes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT NOT NULL,
+        nombre_completo TEXT NOT NULL,
+        nombre_usuario TEXT NOT NULL UNIQUE,
+        mail TEXT NOT NULL,
         whatsapp TEXT NOT NULL,
+        dni TEXT NOT NULL UNIQUE,
         codigo TEXT NOT NULL UNIQUE,
         puntos INTEGER DEFAULT 0,
         created_at TEXT DEFAULT (datetime('now'))

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 interface RankingEntry {
   posicion: number;
   id: number;
-  nombre: string;
+  nombre_usuario: string;
   puntos: number;
 }
 
@@ -43,7 +43,7 @@ export default function RankingPage() {
             <thead>
               <tr className="border-b border-zinc-800 text-zinc-400 text-sm">
                 <th className="text-left px-6 py-4 font-medium w-12">#</th>
-                <th className="text-left px-4 py-4 font-medium">Nombre</th>
+                <th className="text-left px-4 py-4 font-medium">Usuario</th>
                 <th className="text-right px-6 py-4 font-medium">Puntos</th>
               </tr>
             </thead>
@@ -58,7 +58,7 @@ export default function RankingPage() {
                       <span className="text-zinc-500 text-base font-mono">{entry.posicion}</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 font-medium">{entry.nombre}</td>
+                  <td className="px-4 py-4 font-medium">{entry.nombre_usuario}</td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-green-400 font-bold text-lg">{entry.puntos}</span>
                     <span className="text-zinc-500 text-sm ml-1">pts</span>

@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react';
 
+interface Participante {
+  id: number;
+  nombre_usuario: string;
+  nombre_completo: string;
+  puntos: number;
+}
+
 interface Partido {
   id: number;
   fase: string;
@@ -26,6 +33,11 @@ export default function AdminPage() {
   const [resultados, setResultados] = useState<Record<number, { local: string; visitante: string }>>({});
   const [loading, setLoading] = useState(false);
   const [mensajes, setMensajes] = useState<Record<number, string>>({});
+
+  // Puntos por consumo
+  const [busqueda, setBusqueda] = useState('');
+  const [resultadosBusqueda, setResultadosBusqueda] = useState<Participante[]>([]);
+  const [msgConsumo, setMsgConsumo] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const saved = sessionStorage.getItem('admin_pass');
@@ -59,6 +71,33 @@ export default function AdminPage() {
     sessionStorage.setItem('admin_pass', password);
     setAutenticado(true);
     cargarPartidos(password);
+  }
+
+  async function buscarParticipante(q: string) {
+    setBusqueda(q);
+    if (q.length < 2) { setResultadosBusqueda([]); return; }
+    const res = await fetch(`/api/admin/puntos-extra?q=${encodeURIComponent(q)}`, {
+      headers: { 'x-admin-password': password },
+    });
+    const data = await res.json();
+    setResultadosBusqueda(Array.isArray(data) ? data : []);
+  }
+
+  async function darPuntoConsumo(nombre_usuario: string) {
+    const res = await fetch('/api/admin/puntos-extra', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
+      body: JSON.stringify({ nombre_usuario, puntos: 1 }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ +1 pt → total: ${data.puntosNuevos} pts` }));
+      setResultadosBusqueda(prev => prev.map(p =>
+        p.nombre_usuario === nombre_usuario ? { ...p, puntos: data.puntosNuevos } : p
+      ));
+    } else {
+      setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `Error: ${data.error}` }));
+    }
   }
 
   async function cargarResultado(partidoId: number) {
@@ -157,6 +196,48 @@ export default function AdminPage() {
               )}
             </div>
           ))
+        )}
+      </section>
+
+      {/* Puntos por consumo */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-semibold text-zinc-300">Puntos por consumo en partido</h2>
+          <p className="text-zinc-500 text-sm mt-1">Buscá al cliente que vino al local durante un partido y dale +1 punto.</p>
+        </div>
+        <input
+          type="text"
+          value={busqueda}
+          onChange={(e) => buscarParticipante(e.target.value)}
+          placeholder="Buscar por usuario o nombre..."
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
+        />
+        {resultadosBusqueda.length > 0 && (
+          <div className="space-y-2">
+            {resultadosBusqueda.map((p) => (
+              <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
+                <div>
+                  <span className="font-semibold text-white">@{p.nombre_usuario}</span>
+                  <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-green-400 font-bold">{p.puntos} pts</span>
+                  <button
+                    onClick={() => darPuntoConsumo(p.nombre_usuario)}
+                    className="bg-orange-500 hover:bg-orange-400 text-white px-3 py-1.5 rounded-lg text-sm font-semibold"
+                  >
+                    +1 punto
+                  </button>
+                </div>
+                {msgConsumo[p.nombre_usuario] && (
+                  <span className="text-xs text-green-400 ml-2">{msgConsumo[p.nombre_usuario]}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {busqueda.length >= 2 && resultadosBusqueda.length === 0 && (
+          <p className="text-zinc-500 text-sm">No se encontró ningún usuario con ese nombre.</p>
         )}
       </section>
 
