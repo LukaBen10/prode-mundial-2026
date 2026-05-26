@@ -141,12 +141,12 @@ export default function UnirsePage() {
           <span className="text-sm text-zinc-300">
             Ya sigo a{' '}
             <a
-              href="https://www.instagram.com/donutmakers.caballito"
+              href="https://www.instagram.com/donut.makers.caballito"
               target="_blank"
               rel="noopener noreferrer"
               className="text-orange-400 hover:text-orange-300 underline"
             >
-              @donutmakers.caballito
+              @donut.makers.caballito
             </a>{' '}
             en Instagram
           </span>
