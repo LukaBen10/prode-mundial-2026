@@ -88,6 +88,8 @@ export default function AdminPage() {
   const [resultados, setResultados] = useState<Record<number, { local: string; visitante: string }>>({});
   const [loadingPartidos, setLoadingPartidos] = useState(false);
   const [mensajes, setMensajes] = useState<Record<number, string>>({});
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
 
   // Consumos
   const [busqueda, setBusqueda] = useState('');
@@ -207,6 +209,27 @@ export default function AdminPage() {
       cargarParticipantes();
     } else {
       alert(`Error: ${data.error}`);
+    }
+  }
+
+  async function sincronizarResultados() {
+    setSyncing(true);
+    setSyncMsg('');
+    const res = await fetch('/api/admin/sync-resultados', {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    const data = await res.json();
+    setSyncing(false);
+    if (data.ok) {
+      const n = data.actualizados ?? 0;
+      setSyncMsg(n > 0
+        ? `✓ ${n} partido${n > 1 ? 's' : ''} actualizado${n > 1 ? 's' : ''}: ${(data.log ?? []).join(' | ')}`
+        : '✓ Sin partidos nuevos para actualizar'
+      );
+      if (n > 0) { cargarPartidos(); cargarParticipantes(); }
+    } else {
+      setSyncMsg(`✗ ${data.error ?? 'Error desconocido'}`);
     }
   }
 
@@ -511,6 +534,29 @@ export default function AdminPage() {
       {/* ── Tab: Resultados ────────────────────────────────────── */}
       {tab === 'resultados' && (
         <div className="space-y-6">
+
+          {/* Sync automático */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-white">🔄 Sincronización automática</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Trae resultados reales de football-data.org y calcula puntos</p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              {syncMsg && (
+                <span className={`text-xs font-medium max-w-xs ${syncMsg.startsWith('✓') ? 'text-green-400' : 'text-red-400'}`}>
+                  {syncMsg}
+                </span>
+              )}
+              <button
+                onClick={sincronizarResultados}
+                disabled={syncing}
+                className="bg-green-500 hover:bg-green-400 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+              >
+                {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar ahora'}
+              </button>
+            </div>
+          </div>
+
           <section className="space-y-3">
             <h2 className="font-semibold text-zinc-300">Partidos pendientes ({pendientes.length})</h2>
             {loadingPartidos ? <p className="text-zinc-500">Cargando...</p> : pendientes.length === 0 ? (
