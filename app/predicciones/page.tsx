@@ -53,7 +53,9 @@ interface RankingEntry { posicion: number; id: number; nombre_usuario: string; p
 function PrediccionesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const participanteId = searchParams.get('participanteId');
+  const paramId = searchParams.get('participanteId');
+  // Si no viene por URL, leerlo de localStorage (navegación desde la navbar)
+  const participanteId = paramId ?? (typeof window !== 'undefined' ? localStorage.getItem('prode_id') : null);
 
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [predicciones, setPredicciones] = useState<Record<number, { local: string; visitante: string }>>({});
@@ -65,7 +67,7 @@ function PrediccionesContent() {
   const [miRanking, setMiRanking] = useState<{ posicion: number; puntos: number; puntosLider: number; puntosNext: number | null } | null>(null);
 
   useEffect(() => {
-    if (!participanteId) { router.push('/unirse'); return; }
+    if (!participanteId) { router.push('/login'); return; }
 
     const n = localStorage.getItem('prode_nombre');
     if (n) setNombre(n);
