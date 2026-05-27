@@ -229,15 +229,16 @@ export default function AdminPage() {
     setResultadosBusqueda(Array.isArray(data) ? data : []);
   }
 
-  async function darPuntoConsumo(nombre_usuario: string) {
+  async function darPuntoConsumo(nombre_usuario: string, delta: number = 1) {
     const res = await fetch('/api/admin/puntos-extra', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getHeaders() },
-      body: JSON.stringify({ nombre_usuario, puntos: 1 }),
+      body: JSON.stringify({ nombre_usuario, puntos: delta }),
     });
     const data = await res.json();
     if (data.ok) {
-      setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ +1 pt → total: ${data.puntosNuevos} pts` }));
+      const signo = delta > 0 ? '+' : '';
+      setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ ${signo}${delta} pt → total: ${data.puntosNuevos} pts` }));
       setResultadosBusqueda(prev => prev.map(p => p.nombre_usuario === nombre_usuario ? { ...p, puntos: data.puntosNuevos } : p));
       cargarParticipantes();
     } else {
@@ -511,7 +512,7 @@ export default function AdminPage() {
       {/* ── Tab: Consumos ──────────────────────────────────────── */}
       {tab === 'consumos' && (
         <div className="space-y-4">
-          <p className="text-zinc-400 text-sm">Buscá al cliente que vino al local durante un partido y dale +1 punto.</p>
+          <p className="text-zinc-400 text-sm">Buscá al cliente y sumale o restale puntos de visita al local.</p>
           <input type="text" value={busqueda} onChange={e => buscarParticipante(e.target.value)}
             placeholder="Buscar por usuario o nombre..."
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
@@ -523,11 +524,15 @@ export default function AdminPage() {
                     <span className="font-semibold text-white">@{p.nombre_usuario}</span>
                     <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-green-400 font-bold">{p.puntos} pts</span>
-                    <button onClick={() => darPuntoConsumo(p.nombre_usuario)}
-                      className="bg-orange-500 hover:bg-orange-400 text-white px-4 py-1.5 rounded-lg text-sm font-semibold">
-                      +1 punto
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400 font-bold min-w-[50px] text-right">{p.puntos} pts</span>
+                    <button onClick={() => darPuntoConsumo(p.nombre_usuario, -1)}
+                      className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
+                      −1
+                    </button>
+                    <button onClick={() => darPuntoConsumo(p.nombre_usuario, 1)}
+                      className="bg-orange-500 hover:bg-orange-400 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
+                      +1
                     </button>
                     {msgConsumo[p.nombre_usuario] && (
                       <span className="text-xs text-green-400">{msgConsumo[p.nombre_usuario]}</span>

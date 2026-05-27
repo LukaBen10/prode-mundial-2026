@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { BANDERAS } from '@/lib/data/banderas';
+import FlagIcon from '@/components/FlagIcon';
 
 interface Partido {
   id: number;
@@ -298,7 +299,7 @@ function PrediccionesContent() {
               <div className="flex items-center gap-3">
                 <div className="flex-1 text-right">
                   <span className="font-semibold text-sm">
-                    {BANDERAS[partido.equipo_local] && <span className="mr-1">{BANDERAS[partido.equipo_local]}</span>}
+                    {BANDERAS[partido.equipo_local] && <FlagIcon code={BANDERAS[partido.equipo_local]} alt={partido.equipo_local} className="mr-1.5" />}
                     {partido.equipo_local}
                   </span>
                 </div>
@@ -317,7 +318,7 @@ function PrediccionesContent() {
                 </div>
                 <div className="flex-1">
                   <span className="font-semibold text-sm">
-                    {BANDERAS[partido.equipo_visitante] && <span className="mr-1">{BANDERAS[partido.equipo_visitante]}</span>}
+                    {BANDERAS[partido.equipo_visitante] && <FlagIcon code={BANDERAS[partido.equipo_visitante]} alt={partido.equipo_visitante} className="mr-1.5" />}
                     {partido.equipo_visitante}
                   </span>
                 </div>
