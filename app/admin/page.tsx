@@ -40,7 +40,7 @@ interface Stats {
 }
 
 type Tab = 'participantes' | 'resultados' | 'consumos' | 'admins';
-type AuthMode = 'participant' | 'password' | null;
+type AuthMode = 'participant' | null;
 
 function formatFecha(fecha: string) {
   const d = new Date(fecha + 'T12:00:00');
@@ -60,7 +60,6 @@ function waLink(numero: string): string {
 
 export default function AdminPage() {
   const [authMode, setAuthMode] = useState<AuthMode>(null);
-  const [password, setPassword] = useState('');
   const [tab, setTab] = useState<Tab>('participantes');
 
   // Participantes
@@ -86,32 +85,17 @@ export default function AdminPage() {
   const [msgAdmin, setMsgAdmin] = useState<Record<number, string>>({});
 
   useEffect(() => {
-    // 1. ¿Está logueado y es admin?
     const isAdmin = localStorage.getItem('prode_admin') === '1';
     const participanteId = localStorage.getItem('prode_id');
     if (isAdmin && participanteId) {
       setAuthMode('participant');
       cargarTodo('participant', participanteId, '');
-      return;
-    }
-
-    // 2. Contraseña guardada en session
-    const saved = sessionStorage.getItem('admin_pass');
-    if (saved) {
-      setPassword(saved);
-      setAuthMode('password');
-      cargarTodo('password', '', saved);
+    } else {
+      // No es admin → redirigir
+      window.location.href = participanteId ? '/mi-prode' : '/login';
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /** Devuelve los headers de auth según el modo */
-  function authHeaders(mode: AuthMode, participanteId: string, pass: string): Record<string, string> {
-    if (mode === 'participant') {
-      return { 'x-admin-participante-id': participanteId };
-    }
-    return { 'x-admin-password': pass };
-  }
 
   async function cargarTodo(mode: AuthMode, participanteId: string, pass: string) {
     cargarParticipantes(mode, participanteId, pass);
@@ -120,9 +104,10 @@ export default function AdminPage() {
 
   async function cargarParticipantes(mode: AuthMode, participanteId: string, pass: string) {
     setLoadingParts(true);
-    const res = await fetch('/api/admin/participantes', {
-      headers: authHeaders(mode, participanteId, pass),
-    });
+    const headers: Record<string, string> = mode === 'participant'
+      ? { 'x-admin-participante-id': participanteId }
+      : { 'x-admin-password': pass };
+    const res = await fetch('/api/admin/participantes', { headers });
     const data = await res.json();
     setParticipantes(data.participantes ?? []);
     setStats(data.stats ?? null);
@@ -142,26 +127,8 @@ export default function AdminPage() {
     setLoadingPartidos(false);
   }
 
-  async function login(e: React.FormEvent) {
-    e.preventDefault();
-    // Verificamos con un request de prueba
-    const res = await fetch('/api/admin/resultado', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
-      body: JSON.stringify({ partido_id: -1, goles_local: 0, goles_visitante: 0 }),
-    });
-    if (res.status === 401) { alert('Contraseña incorrecta'); return; }
-    sessionStorage.setItem('admin_pass', password);
-    setAuthMode('password');
-    cargarTodo('password', '', password);
-  }
-
-  /** Obtiene los headers actuales (usando state) */
   function getHeaders(): Record<string, string> {
-    if (authMode === 'participant') {
-      return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
-    }
-    return { 'x-admin-password': password };
+    return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
   }
 
   async function cargarResultado(partidoId: number) {
@@ -176,8 +143,7 @@ export default function AdminPage() {
     if (data.ok) {
       setMensajes(prev => ({ ...prev, [partidoId]: `✓ ${data.prediccionesActualizadas} predicciones actualizadas` }));
       cargarPartidos();
-      if (authMode === 'participant') cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
-      else cargarParticipantes('password', '', password);
+      cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
     } else {
       setMensajes(prev => ({ ...prev, [partidoId]: `Error: ${data.error}` }));
     }
@@ -201,8 +167,7 @@ export default function AdminPage() {
     if (data.ok) {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ +1 pt → total: ${data.puntosNuevos} pts` }));
       setResultadosBusqueda(prev => prev.map(p => p.nombre_usuario === nombre_usuario ? { ...p, puntos: data.puntosNuevos } : p));
-      if (authMode === 'participant') cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
-      else cargarParticipantes('password', '', password);
+      cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
     } else {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `Error: ${data.error}` }));
     }
@@ -225,28 +190,14 @@ export default function AdminPage() {
     const data = await res.json();
     if (data.ok) {
       setMsgAdmin(prev => ({ ...prev, [id]: hacerAdmin ? '✓ Ahora es admin' : '✓ Ya no es admin' }));
-      if (authMode === 'participant') cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
-      else cargarParticipantes('password', '', password);
+      cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
     } else {
       setMsgAdmin(prev => ({ ...prev, [id]: `Error: ${data.error}` }));
     }
   }
 
-  // ── Pantalla de login (solo si no es admin por cuenta) ──────────
   if (!authMode) {
-    return (
-      <div className="max-w-sm mx-auto mt-16 space-y-6">
-        <h1 className="text-2xl font-bold text-center">Panel Admin</h1>
-        <form onSubmit={login} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-            placeholder="Contraseña" autoFocus
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500" />
-          <button type="submit" className="w-full bg-green-500 hover:bg-green-400 text-white py-3 rounded-xl font-bold">
-            Entrar
-          </button>
-        </form>
-      </div>
-    );
+    return <div className="text-center py-20 text-zinc-500">Verificando acceso...</div>;
   }
 
   const pendientes = partidos.filter(p => !p.jugado);

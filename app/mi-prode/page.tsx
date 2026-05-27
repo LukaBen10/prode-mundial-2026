@@ -16,6 +16,7 @@ export default function MiProdePage() {
   const [puntosLider, setPuntosLider] = useState(0);
   const [totalParticipantes, setTotalParticipantes] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [esAdmin, setEsAdmin] = useState(false);
 
   useEffect(() => {
     const id = localStorage.getItem('prode_id');
@@ -25,6 +26,7 @@ export default function MiProdePage() {
 
     setParticipanteId(id);
     setNombre(n ?? '');
+    setEsAdmin(localStorage.getItem('prode_admin') === '1');
 
     fetch('/api/ranking')
       .then(r => r.json())
@@ -123,6 +125,20 @@ export default function MiProdePage() {
           </div>
           <span className="text-zinc-500 group-hover:text-white transition-colors text-2xl">→</span>
         </Link>
+
+        {/* Panel admin — solo visible para admins */}
+        {esAdmin && (
+          <Link
+            href="/admin"
+            className="flex items-center justify-between w-full bg-zinc-900 border border-amber-500/20 hover:border-amber-500/50 rounded-2xl p-5 transition-colors group"
+          >
+            <div className="space-y-0.5">
+              <div className="font-bold text-lg">🔑 Panel Admin</div>
+              <div className="text-zinc-400 text-sm">Participantes, resultados y consumos</div>
+            </div>
+            <span className="text-zinc-500 group-hover:text-amber-400 transition-colors text-2xl">→</span>
+          </Link>
+        )}
       </div>
 
       {/* Reglas */}
