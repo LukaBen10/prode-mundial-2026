@@ -15,7 +15,7 @@ export default function Navbar() {
     const n = localStorage.getItem('prode_nombre');
     setLogueado(!!id);
     setNombre(n ?? '');
-  }, [pathname]); // re-check en cada cambio de ruta
+  }, [pathname]);
 
   function cerrarSesion() {
     localStorage.removeItem('prode_id');
@@ -25,43 +25,52 @@ export default function Navbar() {
     router.push('/');
   }
 
+  const linkClass = (path: string) =>
+    `text-sm font-medium transition-colors px-1 ${
+      pathname === path
+        ? 'text-white'
+        : 'text-zinc-400 hover:text-white'
+    }`;
+
   return (
     <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
           <span className="text-2xl">🍩</span>
           <span className="text-white">Prode</span>
           <span className="text-green-400">Mundial 26</span>
         </Link>
 
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/ranking" className="text-zinc-400 hover:text-white transition-colors">
-            Ranking
+        {/* Nav links — siempre visibles */}
+        <div className="flex items-center gap-1 sm:gap-3">
+          <Link href="/predicciones" className={linkClass('/predicciones')}>
+            ⚽ Predicciones
+          </Link>
+          <Link href="/ranking" className={linkClass('/ranking')}>
+            🏆 Ranking
           </Link>
 
           {logueado ? (
             <>
-              <Link
-                href="/mi-prode"
-                className="text-zinc-300 hover:text-white transition-colors font-medium"
-              >
-                @{nombre}
+              <Link href="/mi-prode" className={linkClass('/mi-prode')}>
+                👤 @{nombre}
               </Link>
               <button
                 onClick={cerrarSesion}
-                className="text-zinc-500 hover:text-zinc-300 transition-colors text-xs"
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors ml-1"
               >
                 Salir
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-zinc-300 hover:text-white transition-colors">
+              <Link href="/login" className={linkClass('/login')}>
                 Entrar
               </Link>
               <Link
                 href="/unirse"
-                className="bg-orange-500 hover:bg-orange-400 text-white px-4 py-1.5 rounded-full font-semibold transition-colors"
+                className="bg-orange-500 hover:bg-orange-400 text-white text-sm px-4 py-1.5 rounded-full font-semibold transition-colors ml-1"
               >
                 Participar
               </Link>
