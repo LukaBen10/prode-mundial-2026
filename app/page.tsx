@@ -108,9 +108,14 @@ export default function Home() {
               Cada vez que venís a <strong className="text-white">Donut Makers</strong> a ver un partido
               del Mundial, te sumamos un punto extra al ranking. Donut + fútbol = imbatible.
             </p>
-            <p className="text-orange-400 text-xs font-bold pt-1">
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Av.+La+Plata+702+Caballito+CABA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 text-xs font-bold pt-1 inline-block underline underline-offset-2 transition-colors"
+            >
               📍 Av. La Plata 702, Caballito · CABA
-            </p>
+            </a>
           </div>
         </div>
       </section>
