@@ -1,5 +1,5 @@
 const GRUPOS: Record<string, string[]> = {
-  A: ['México', 'Sudáfrica', 'Corea del Sur', 'Chequia'],
+  A: ['México', 'Sudáfrica', 'Corea del Sur', 'República Checa'],
   B: ['Canadá', 'Bosnia y Herzegovina', 'Catar', 'Suiza'],
   C: ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
   D: ['Estados Unidos', 'Paraguay', 'Australia', 'Turquía'],

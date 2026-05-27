@@ -4,7 +4,7 @@ export const BANDERAS: Record<string, string> = {
   'México': 'mx',
   'Sudáfrica': 'za',
   'Corea del Sur': 'kr',
-  'Chequia': 'cz',
+  'República Checa': 'cz',
   'Canadá': 'ca',
   'Bosnia y Herzegovina': 'ba',
   'Catar': 'qa',

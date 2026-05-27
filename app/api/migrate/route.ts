@@ -71,6 +71,20 @@ export async function GET() {
     results.push({ column: 'partidos.schedule', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }
 
+  // ── renombrar equipos ─────────────────────────────────────────
+  const renombres = [
+    { viejo: 'Chequia', nuevo: 'República Checa' },
+  ];
+  for (const { viejo, nuevo } of renombres) {
+    try {
+      await db.execute({ sql: 'UPDATE partidos SET equipo_local = ? WHERE equipo_local = ?', args: [nuevo, viejo] });
+      await db.execute({ sql: 'UPDATE partidos SET equipo_visitante = ? WHERE equipo_visitante = ?', args: [nuevo, viejo] });
+      results.push({ column: `rename.${viejo}`, status: `→ ${nuevo}` });
+    } catch (err) {
+      results.push({ column: `rename.${viejo}`, status: `error: ${err instanceof Error ? err.message : String(err)}` });
+    }
+  }
+
   // ── marcar luka como admin ─────────────────────────────────────
   try {
     const r = await db.execute({
