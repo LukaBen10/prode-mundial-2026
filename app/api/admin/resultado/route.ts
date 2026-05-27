@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { checkAdminAuth } from '@/lib/adminAuth';
+import { checkSuperAdminAuth } from '@/lib/adminAuth';
 
 export async function POST(req: NextRequest) {
-  if (!(await checkAdminAuth(req))) {
+  if (!(await checkSuperAdminAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 

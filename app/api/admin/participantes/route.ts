@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { checkAdminAuth } from '@/lib/adminAuth';
+import { checkAdminAuth, checkSuperAdminAuth } from '@/lib/adminAuth';
 
 export async function GET(req: NextRequest) {
   if (!(await checkAdminAuth(req))) {
@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) {
     is_admin: r[8] ?? 0,
   }));
 
-  // Stats generales
   const total = participantes.length;
   const conPredicciones = await db.execute(
     'SELECT COUNT(DISTINCT participante_id) as c FROM predicciones'
@@ -42,15 +41,24 @@ export async function GET(req: NextRequest) {
   });
 }
 
-/** PUT /api/admin/participantes — editar datos de un participante */
+/** PUT — solo superadmin puede editar participantes */
 export async function PUT(req: NextRequest) {
-  if (!(await checkAdminAuth(req))) {
+  if (!(await checkSuperAdminAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   try {
     const { id, nombre_completo, nombre_usuario, mail, whatsapp, dni, puntos } = await req.json();
     if (!id) return NextResponse.json({ error: 'Falta id' }, { status: 400 });
+
+    // Proteger superadmin: no editar datos base, solo puntos
+    const check = await db.execute({
+      sql: 'SELECT is_admin FROM participantes WHERE id = ?',
+      args: [id],
+    });
+    if ((check.rows[0]?.[0] as number) >= 2) {
+      return NextResponse.json({ error: 'No se puede editar el superadmin' }, { status: 403 });
+    }
 
     await db.execute({
       sql: `UPDATE participantes
@@ -66,15 +74,24 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-/** DELETE /api/admin/participantes — eliminar participante y sus predicciones */
+/** DELETE — solo superadmin, y nunca el superadmin mismo */
 export async function DELETE(req: NextRequest) {
-  if (!(await checkAdminAuth(req))) {
+  if (!(await checkSuperAdminAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   try {
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: 'Falta id' }, { status: 400 });
+
+    // Bloquear borrado del superadmin
+    const check = await db.execute({
+      sql: 'SELECT is_admin FROM participantes WHERE id = ?',
+      args: [id],
+    });
+    if ((check.rows[0]?.[0] as number) >= 2) {
+      return NextResponse.json({ error: 'No se puede eliminar el superadmin' }, { status: 403 });
+    }
 
     await db.execute({ sql: 'DELETE FROM predicciones WHERE participante_id = ?', args: [id] });
     await db.execute({ sql: 'DELETE FROM participantes WHERE id = ?', args: [id] });
@@ -86,9 +103,9 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-/** PATCH /api/admin/participantes — toggle is_admin de un usuario */
+/** PATCH — toggle is_admin, solo superadmin */
 export async function PATCH(req: NextRequest) {
-  if (!(await checkAdminAuth(req))) {
+  if (!(await checkSuperAdminAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
@@ -96,6 +113,15 @@ export async function PATCH(req: NextRequest) {
     const { id, is_admin } = await req.json();
     if (id == null || is_admin == null) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
+    }
+
+    // No degradar superadmin
+    const check = await db.execute({
+      sql: 'SELECT is_admin FROM participantes WHERE id = ?',
+      args: [id],
+    });
+    if ((check.rows[0]?.[0] as number) >= 2) {
+      return NextResponse.json({ error: 'No se puede modificar el superadmin' }, { status: 403 });
     }
 
     await db.execute({

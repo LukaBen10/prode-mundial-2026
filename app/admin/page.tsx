@@ -99,13 +99,18 @@ export default function AdminPage() {
   const [resultadosAdmin, setResultadosAdmin] = useState<ParticipanteBusqueda[]>([]);
   const [msgAdmin, setMsgAdmin] = useState<Record<number, string>>({});
 
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
   useEffect(() => {
-    const isAdmin = localStorage.getItem('prode_admin') === '1';
+    const adminLevel = parseInt(localStorage.getItem('prode_admin') ?? '0');
     const participanteId = localStorage.getItem('prode_id');
-    if (isAdmin && participanteId) {
+    if (adminLevel >= 1 && participanteId) {
       setAuthMode('participant');
+      setIsSuperAdmin(adminLevel >= 2);
       cargarParticipantes(participanteId);
-      cargarPartidos();
+      if (adminLevel >= 2) cargarPartidos();
+      // Admin regular: forzar tab consumos
+      if (adminLevel < 2) setTab('consumos');
     } else {
       window.location.href = participanteId ? '/mi-prode' : '/login';
     }
@@ -302,9 +307,14 @@ export default function AdminPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold">Panel Admin</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold">Panel Admin</h1>
+          {isSuperAdmin && (
+            <span className="text-xs bg-amber-400/15 border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-full font-bold">⭐ superadmin</span>
+          )}
+        </div>
         <div className="flex items-center gap-4 flex-wrap">
-          {stats && (
+          {stats && isSuperAdmin && (
             <div className="flex gap-4 text-sm text-zinc-400">
               <span><strong className="text-white">{stats.total}</strong> inscriptos</span>
               <span><strong className="text-white">{stats.conPredicciones as number}</strong> con predicciones</span>
@@ -321,21 +331,23 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — superadmin ve todo, admin regular solo consumos */}
       <div className="flex gap-2 border-b border-zinc-800 pb-0 flex-wrap">
         {([
-          { id: 'participantes', label: '👥 Participantes' },
-          { id: 'resultados',    label: '⚽ Resultados' },
-          { id: 'consumos',      label: '🍩 Consumos' },
-          { id: 'admins',        label: '🔑 Admins' },
-        ] as { id: Tab; label: string }[]).map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
-              tab === t.id ? 'text-white border-green-500' : 'text-zinc-400 border-transparent hover:text-white'
-            }`}>
-            {t.label}
-          </button>
-        ))}
+          { id: 'participantes', label: '👥 Participantes', superOnly: true },
+          { id: 'resultados',    label: '⚽ Resultados',    superOnly: true },
+          { id: 'consumos',      label: '🍩 Consumos',      superOnly: false },
+          { id: 'admins',        label: '🔑 Admins',        superOnly: true },
+        ] as { id: Tab; label: string; superOnly: boolean }[])
+          .filter(t => isSuperAdmin || !t.superOnly)
+          .map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
+                tab === t.id ? 'text-white border-green-500' : 'text-zinc-400 border-transparent hover:text-white'
+              }`}>
+              {t.label}
+            </button>
+          ))}
       </div>
 
       {/* ── Tab: Participantes ─────────────────────────────────── */}
@@ -421,12 +433,15 @@ export default function AdminPage() {
                       );
                     }
 
+                    const esSuperAdmin = (p.is_admin as number) >= 2;
                     return (
-                      <tr key={p.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/20 transition-colors">
+                      <tr key={p.id} className={`border-b border-zinc-800/50 last:border-0 transition-colors ${esSuperAdmin ? 'bg-amber-400/5' : 'hover:bg-zinc-800/20'}`}>
                         <td className="px-3 py-3 text-zinc-500 font-mono">{i + 1}</td>
                         <td className="px-3 py-3 font-semibold text-white">
                           @{p.nombre_usuario}
-                          {p.is_admin ? <span className="ml-1 text-xs text-amber-400">🔑</span> : null}
+                          {esSuperAdmin
+                            ? <span className="ml-1 text-xs text-amber-400">⭐</span>
+                            : p.is_admin ? <span className="ml-1 text-xs text-amber-400">🔑</span> : null}
                         </td>
                         <td className="px-3 py-3 text-zinc-300">{p.nombre_completo}</td>
                         <td className="px-3 py-3 text-zinc-400 font-mono">{p.dni}</td>
@@ -456,7 +471,9 @@ export default function AdminPage() {
                         </td>
                         <td className="px-3 py-3 text-right text-zinc-500 text-xs whitespace-nowrap">{formatFechaHora(p.created_at)}</td>
                         <td className="px-3 py-3">
-                          {isConfirmingDelete ? (
+                          {esSuperAdmin ? (
+                            <span className="text-xs text-amber-400/60 font-semibold pr-2">🔒 protegido</span>
+                          ) : isConfirmingDelete ? (
                             <div className="flex items-center justify-end gap-1.5">
                               <span className="text-xs text-red-400 mr-1">¿Eliminar?</span>
                               <button onClick={() => eliminarParticipante(p.id)} disabled={isDeleting}

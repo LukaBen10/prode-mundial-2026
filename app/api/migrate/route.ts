@@ -85,13 +85,13 @@ export async function GET() {
     }
   }
 
-  // ── marcar luka como admin ─────────────────────────────────────
+  // ── marcar luka como superadmin (is_admin = 2) ────────────────
   try {
     const r = await db.execute({
-      sql: "UPDATE participantes SET is_admin = 1 WHERE nombre_usuario = 'luka'",
+      sql: "UPDATE participantes SET is_admin = 2 WHERE nombre_usuario = 'luka'",
       args: [],
     });
-    results.push({ column: 'luka.is_admin', status: r.rowsAffected ? 'marcado como admin' : 'usuario luka no encontrado todavía' });
+    results.push({ column: 'luka.is_admin', status: r.rowsAffected ? 'marcado como superadmin (2)' : 'usuario luka no encontrado' });
   } catch (err) {
     results.push({ column: 'luka.is_admin', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }

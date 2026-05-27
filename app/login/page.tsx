@@ -29,8 +29,8 @@ export default function LoginPage() {
       localStorage.setItem('prode_id', String(data.id));
       localStorage.setItem('prode_codigo', data.codigo);
       localStorage.setItem('prode_nombre', data.nombre_usuario);
-      if (data.is_admin) {
-        localStorage.setItem('prode_admin', '1');
+      if (data.is_admin >= 1) {
+        localStorage.setItem('prode_admin', String(data.is_admin));
       } else {
         localStorage.removeItem('prode_admin');
       }
