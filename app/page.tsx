@@ -38,12 +38,12 @@ export default function Home() {
         {/* Título */}
         <div className="space-y-1">
           <h1 className="text-6xl sm:text-8xl font-black tracking-tight leading-[0.88]">
-            El prode<br />
+            El prode de<br />
             <span
               className="text-transparent bg-clip-text"
               style={{ backgroundImage: 'linear-gradient(135deg, #f97316 0%, #fb923c 40%, #fbbf24 100%)' }}
             >
-              del barrio.
+              Donut Makers.
             </span>
           </h1>
           <p className="text-zinc-200 text-lg sm:text-xl font-semibold pt-3">
@@ -52,8 +52,9 @@ export default function Home() {
         </div>
 
         {/* Countdown */}
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-2">
           <Countdown />
+          <p className="text-orange-400 font-bold text-sm tracking-wide">🍩 Donut Makers · Caballito</p>
         </div>
 
         {/* Descripción */}
@@ -76,6 +77,44 @@ export default function Home() {
           >
             Ver el ranking
           </Link>
+        </div>
+      </section>
+
+      {/* ── Premios ────────────────────────────────────────────── */}
+      <section>
+        <div
+          className="rounded-2xl p-7 relative overflow-hidden space-y-4"
+          style={{
+            background: 'linear-gradient(135deg, rgba(251,191,36,0.20) 0%, rgba(249,115,22,0.10) 50%, rgba(15,15,20,0.80) 100%)',
+            border: '1.5px solid rgba(251,191,36,0.45)',
+            boxShadow: '0 0 40px rgba(251,191,36,0.10)',
+          }}
+        >
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 70%)' }} />
+          <div className="flex items-center gap-3 relative z-10">
+            <span className="text-4xl">🏆</span>
+            <div>
+              <h2 className="text-xl font-black text-white">¡Hay premios!</h2>
+              <p className="text-amber-400/80 text-sm font-semibold">Para los mejores pronosticadores del Mundial</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3 relative z-10">
+            {[
+              { pos: '🥇', label: '1er lugar', premio: 'Premio sorpresa de Donut Makers' },
+              { pos: '🥈', label: '2do lugar', premio: 'Premio sorpresa de Donut Makers' },
+              { pos: '🥉', label: '3er lugar', premio: 'Premio sorpresa de Donut Makers' },
+            ].map((p) => (
+              <div key={p.pos} className="bg-black/20 rounded-xl p-4 text-center space-y-1 border border-amber-400/15">
+                <div className="text-3xl">{p.pos}</div>
+                <div className="text-white font-bold text-sm">{p.label}</div>
+                <div className="text-zinc-400 text-xs">{p.premio}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-zinc-400 text-xs text-center relative z-10">
+            Los premios se anuncian antes de que arranque el Mundial. ¡Seguinos en IG para enterarte!
+          </p>
         </div>
       </section>
 
@@ -184,7 +223,10 @@ export default function Home() {
             }}
           >
             <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #16a34a, transparent)' }} />
-            <div className="text-7xl font-black text-green-400 leading-none relative">3</div>
+            <div className="leading-none relative">
+              <span className="text-7xl font-black text-green-400">3</span>
+              <span className="text-2xl font-black text-green-400"> puntos</span>
+            </div>
             <div className="font-bold text-white text-base">Resultado exacto</div>
             <div className="text-zinc-400 text-xs">Predijiste 2-1 y salió 2-1</div>
           </div>
@@ -198,7 +240,10 @@ export default function Home() {
             }}
           >
             <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #f97316, transparent)' }} />
-            <div className="text-7xl font-black text-orange-400 leading-none relative">1</div>
+            <div className="leading-none relative">
+              <span className="text-7xl font-black text-orange-400">1</span>
+              <span className="text-2xl font-black text-orange-400"> punto</span>
+            </div>
             <div className="font-bold text-white text-base">Ganador correcto</div>
             <div className="text-zinc-400 text-xs">Acertaste quién ganaba</div>
           </div>
@@ -212,11 +257,9 @@ export default function Home() {
             }}
           >
             <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #fbbf24, transparent)' }} />
-            <div
-              className="text-7xl font-black leading-none relative text-transparent bg-clip-text"
-              style={{ backgroundImage: 'linear-gradient(135deg, #fb923c, #fbbf24)' }}
-            >
-              +1
+            <div className="leading-none relative">
+              <span className="text-7xl font-black text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #fb923c, #fbbf24)' }}>+1</span>
+              <span className="text-2xl font-black text-amber-400"> punto</span>
             </div>
             <div className="font-bold text-white text-base">Visitás el local</div>
             <div className="text-zinc-400 text-xs">Durante cualquier partido</div>
