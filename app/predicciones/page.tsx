@@ -341,7 +341,7 @@ function PrediccionesContent() {
       </div>
 
       {/* Botón guardar */}
-      <div className="sticky bottom-4 pt-4">
+      <div className="pt-4 pb-6">
         <button
           onClick={guardar}
           disabled={saving || guardado}
