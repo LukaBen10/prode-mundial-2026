@@ -9,6 +9,7 @@ export async function GET() {
     { name: 'nombre_usuario', sql: 'ALTER TABLE participantes ADD COLUMN nombre_usuario TEXT NOT NULL DEFAULT ""' },
     { name: 'mail', sql: 'ALTER TABLE participantes ADD COLUMN mail TEXT NOT NULL DEFAULT ""' },
     { name: 'dni', sql: 'ALTER TABLE participantes ADD COLUMN dni TEXT NOT NULL DEFAULT ""' },
+    { name: 'password_hash', sql: 'ALTER TABLE participantes ADD COLUMN password_hash TEXT NOT NULL DEFAULT ""' },
   ];
 
   for (const col of columns) {

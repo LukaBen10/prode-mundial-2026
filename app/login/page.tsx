@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function LoginPage() {
   const router = useRouter();
   const [nombreUsuario, setNombreUsuario] = useState('');
-  const [dni, setDni] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_usuario: nombreUsuario, dni }),
+        body: JSON.stringify({ nombre_usuario: nombreUsuario, password }),
       });
 
       const data = await res.json();
@@ -43,7 +43,7 @@ export default function LoginPage() {
       <div className="text-center space-y-2">
         <div className="text-5xl">👋</div>
         <h1 className="text-3xl font-bold">Bienvenido de vuelta</h1>
-        <p className="text-zinc-400 text-sm">Ingresá con tu usuario y DNI</p>
+        <p className="text-zinc-400 text-sm">Ingresá con tu usuario y contraseña</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-5">
@@ -60,12 +60,12 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">DNI</label>
+          <label className="block text-sm font-medium text-zinc-300">Contraseña</label>
           <input
-            type="text"
-            value={dni}
-            onChange={e => setDni(e.target.value)}
-            placeholder="Ej: 38456789"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Tu contraseña"
             required
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
           />

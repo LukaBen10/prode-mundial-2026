@@ -10,6 +10,8 @@ export default function UnirsePage() {
   const [mail, setMail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [dni, setDni] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [sigueIG, setSigueIG] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,13 +19,23 @@ export default function UnirsePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+
+    if (password.length < 6) {
+      setError('La contraseña tiene que tener al menos 6 caracteres');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch('/api/participantes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni }),
+        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni, password }),
       });
 
       const data = await res.json();
@@ -129,6 +141,36 @@ export default function UnirsePage() {
           <p className="text-xs text-zinc-500">Solo para evitar multicuentas. No se muestra públicamente.</p>
         </div>
 
+        {/* Contraseña */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">
+            Contraseña
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mínimo 6 caracteres"
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+          />
+        </div>
+
+        {/* Confirmar contraseña */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">
+            Confirmá la contraseña
+          </label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Repetí la contraseña"
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+          />
+        </div>
+
         {/* Checkbox IG */}
         <label className="flex items-start gap-3 cursor-pointer">
           <input
@@ -169,17 +211,8 @@ export default function UnirsePage() {
 
       <p className="text-center text-zinc-500 text-sm">
         Ya participás?{' '}
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            const id = localStorage.getItem('prode_id');
-            if (id) router.push(`/predicciones?participanteId=${id}`);
-            else alert('No encontré tu registro en este dispositivo. Registrate de nuevo.');
-          }}
-          className="text-green-400 hover:text-green-300 underline"
-        >
-          Ir a mis predicciones
+        <a href="/login" className="text-green-400 hover:text-green-300 underline">
+          Iniciá sesión
         </a>
       </p>
     </div>
