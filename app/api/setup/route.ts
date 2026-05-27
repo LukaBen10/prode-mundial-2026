@@ -29,7 +29,10 @@ export async function GET() {
         fecha TEXT NOT NULL,
         goles_local INTEGER,
         goles_visitante INTEGER,
-        jugado INTEGER DEFAULT 0
+        jugado INTEGER DEFAULT 0,
+        hora TEXT NOT NULL DEFAULT '19:00',
+        estadio TEXT NOT NULL DEFAULT '',
+        ciudad TEXT NOT NULL DEFAULT ''
       )
     `);
 
@@ -55,8 +58,8 @@ export async function GET() {
       const partidos = generarPartidosGrupos();
       for (const p of partidos) {
         await db.execute({
-          sql: 'INSERT INTO partidos (fase, grupo, equipo_local, equipo_visitante, fecha) VALUES (?, ?, ?, ?, ?)',
-          args: [p.fase, p.grupo, p.equipo_local, p.equipo_visitante, p.fecha],
+          sql: 'INSERT INTO partidos (fase, grupo, equipo_local, equipo_visitante, fecha, hora, estadio, ciudad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          args: [p.fase, p.grupo, p.equipo_local, p.equipo_visitante, p.fecha, p.hora, p.estadio, p.ciudad],
         });
       }
       return NextResponse.json({ ok: true, message: `DB inicializada. ${partidos.length} partidos cargados.` });

@@ -25,6 +25,9 @@ export async function GET(req: NextRequest) {
     goles_local: r[6],
     goles_visitante: r[7],
     jugado: r[8],
+    hora: r[9] ?? '19:00',
+    estadio: r[10] ?? '',
+    ciudad: r[11] ?? '',
   }));
 
   return NextResponse.json(partidos);

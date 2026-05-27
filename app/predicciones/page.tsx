@@ -10,6 +10,9 @@ interface Partido {
   equipo_local: string;
   equipo_visitante: string;
   fecha: string;
+  hora: string;
+  estadio: string;
+  ciudad: string;
   jugado: number;
 }
 
@@ -24,6 +27,58 @@ const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 function formatFecha(fecha: string) {
   const d = new Date(fecha + 'T12:00:00');
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+}
+
+/** Devuelve el Date del inicio del partido en hora AR (UTC-3) */
+function kickoffDate(partido: Partido): Date {
+  return new Date(`${partido.fecha}T${partido.hora || '19:00'}:00-03:00`);
+}
+
+/** true si ya pasó la hora de inicio */
+function estaLocked(partido: Partido): boolean {
+  if (partido.jugado) return true;
+  return new Date() >= kickoffDate(partido);
+}
+
+/** Badge con info del cierre */
+function DeadlineBadge({ partido }: { partido: Partido }) {
+  const [texto, setTexto] = useState('');
+  const [color, setColor] = useState('');
+
+  useEffect(() => {
+    function calcular() {
+      const kickoff = kickoffDate(partido);
+      const diffMs = kickoff.getTime() - Date.now();
+
+      if (diffMs <= 0) {
+        setTexto('🔒 Cerrado');
+        setColor('text-zinc-500');
+        return;
+      }
+      const diffH = diffMs / 3600000;
+      if (diffH < 1) {
+        const mins = Math.floor(diffMs / 60000);
+        setTexto(`⏰ Cierra en ${mins}m`);
+        setColor('text-red-400');
+      } else if (diffH < 24) {
+        setTexto(`⏰ Cierra en ${Math.floor(diffH)}h`);
+        setColor('text-orange-400');
+      } else {
+        const dia = kickoff.toLocaleDateString('es-AR', {
+          day: 'numeric', month: 'short',
+          timeZone: 'America/Argentina/Buenos_Aires',
+        });
+        setTexto(`Cierra el ${dia} · ${partido.hora}hs AR`);
+        setColor('text-zinc-500');
+      }
+    }
+    calcular();
+    const t = setInterval(calcular, 30000);
+    return () => clearInterval(t);
+  }, [partido]);
+
+  if (!texto) return null;
+  return <span className={`text-xs font-medium ${color}`}>{texto}</span>;
 }
 
 function GoalInput({
@@ -54,7 +109,6 @@ function PrediccionesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const paramId = searchParams.get('participanteId');
-  // Si no viene por URL, leerlo de localStorage (navegación desde la navbar)
   const participanteId = paramId ?? (typeof window !== 'undefined' ? localStorage.getItem('prode_id') : null);
 
   const [partidos, setPartidos] = useState<Partido[]>([]);
@@ -84,7 +138,6 @@ function PrediccionesContent() {
       }
       setPredicciones(map);
 
-      // Calcular posición
       const lista = ranking as RankingEntry[];
       const yo = lista.find((r) => String(r.id) === participanteId);
       if (yo) {
@@ -96,7 +149,6 @@ function PrediccionesContent() {
           puntosNext: anterior ? anterior.puntos - yo.puntos : null,
         });
       } else if (lista.length > 0) {
-        // Participante registrado pero sin puntos todavía
         setMiRanking({ posicion: lista.length + 1, puntos: 0, puntosLider: lista[0]?.puntos ?? 0, puntosNext: null });
       }
 
@@ -140,9 +192,7 @@ function PrediccionesContent() {
   const totalPartidos = partidos.length;
 
   if (loading) {
-    return (
-      <div className="text-center py-20 text-zinc-400">Cargando partidos...</div>
-    );
+    return <div className="text-center py-20 text-zinc-400">Cargando partidos...</div>;
   }
 
   return (
@@ -153,6 +203,16 @@ function PrediccionesContent() {
         </h1>
         <p className="text-zinc-400 text-sm">
           {predCount} de {totalPartidos} partidos completados
+        </p>
+      </div>
+
+      {/* Aviso fecha límite */}
+      <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl px-4 py-3 flex items-start gap-3">
+        <span className="text-orange-400 text-lg shrink-0">⏰</span>
+        <p className="text-sm text-orange-200">
+          <strong>¡Atención!</strong> Cada predicción se cierra automáticamente en el momento en que arranca el partido.
+          Una vez que el partido empezó, ya no podés editarla.
+          Los horarios son <strong>hora Argentina (ART)</strong>.
         </p>
       </div>
 
@@ -208,16 +268,13 @@ function PrediccionesContent() {
             <button
               key={g}
               onClick={() => setGrupoActivo(g)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors relative ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 grupoActivo === g
                   ? 'bg-green-500 text-white'
                   : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'
               }`}
             >
-              Grupo {g}
-              {completo && (
-                <span className="ml-1 text-xs">✓</span>
-              )}
+              Grupo {g}{completo && ' ✓'}
             </button>
           );
         })}
@@ -228,32 +285,47 @@ function PrediccionesContent() {
         <h2 className="font-bold text-lg text-zinc-300">Grupo {grupoActivo}</h2>
         {partidosGrupo.map((partido) => {
           const pred = predicciones[partido.id];
+          const locked = estaLocked(partido);
           return (
             <div
               key={partido.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-3"
+              className={`bg-zinc-900 border rounded-xl p-4 space-y-3 ${
+                locked ? 'border-zinc-800 opacity-70' : 'border-zinc-700'
+              }`}
             >
-              <div className="flex-1 text-right">
-                <span className="font-semibold text-sm">{partido.equipo_local}</span>
+              {/* Fila principal: equipos + inputs */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 text-right">
+                  <span className="font-semibold text-sm">{partido.equipo_local}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <GoalInput
+                    value={pred?.local ?? ''}
+                    onChange={(v) => updatePred(partido.id, 'local', v)}
+                    disabled={locked}
+                  />
+                  <span className="text-zinc-500 font-bold">-</span>
+                  <GoalInput
+                    value={pred?.visitante ?? ''}
+                    onChange={(v) => updatePred(partido.id, 'visitante', v)}
+                    disabled={locked}
+                  />
+                </div>
+                <div className="flex-1">
+                  <span className="font-semibold text-sm">{partido.equipo_visitante}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <GoalInput
-                  value={pred?.local ?? ''}
-                  onChange={(v) => updatePred(partido.id, 'local', v)}
-                  disabled={!!partido.jugado}
-                />
-                <span className="text-zinc-500 font-bold">-</span>
-                <GoalInput
-                  value={pred?.visitante ?? ''}
-                  onChange={(v) => updatePred(partido.id, 'visitante', v)}
-                  disabled={!!partido.jugado}
-                />
-              </div>
-              <div className="flex-1">
-                <span className="font-semibold text-sm">{partido.equipo_visitante}</span>
-              </div>
-              <div className="text-zinc-500 text-xs w-14 text-right shrink-0">
-                {formatFecha(partido.fecha)}
+
+              {/* Fila info: fecha, estadio, ciudad, deadline */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 border-t border-zinc-800 pt-2">
+                <span>📅 {formatFecha(partido.fecha)}</span>
+                <span>🕐 {partido.hora}hs AR</span>
+                {partido.estadio && (
+                  <span>🏟️ {partido.estadio}, {partido.ciudad}</span>
+                )}
+                <span className="ml-auto">
+                  <DeadlineBadge partido={partido} />
+                </span>
               </div>
             </div>
           );
