@@ -352,8 +352,8 @@ export default function AdminPage() {
               {participantes.length === 0 ? 'Todavía no se inscribió nadie.' : 'No hay resultados para ese filtro.'}
             </div>
           ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-auto">
-              <table className="w-full text-sm min-w-[800px]">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-400">
                     <th className="text-left px-3 py-3 font-medium">#</th>
@@ -436,7 +436,7 @@ export default function AdminPage() {
                             {p.whatsapp}
                           </a>
                         </td>
-                        <td className="px-3 py-3 text-zinc-400">{p.mail}</td>
+                        <td className="px-3 py-3 text-zinc-400 break-all">{p.mail}</td>
                         <td className="px-3 py-3">
                           <div className="flex items-center justify-end gap-1">
                             <button
