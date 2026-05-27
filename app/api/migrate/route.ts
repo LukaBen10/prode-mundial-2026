@@ -12,6 +12,7 @@ export async function GET() {
     { name: 'mail',            sql: 'ALTER TABLE participantes ADD COLUMN mail TEXT NOT NULL DEFAULT ""' },
     { name: 'dni',             sql: 'ALTER TABLE participantes ADD COLUMN dni TEXT NOT NULL DEFAULT ""' },
     { name: 'password_hash',   sql: 'ALTER TABLE participantes ADD COLUMN password_hash TEXT NOT NULL DEFAULT ""' },
+    { name: 'is_admin',        sql: 'ALTER TABLE participantes ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0' },
   ];
 
   for (const col of colsParticipantes) {
@@ -68,6 +69,17 @@ export async function GET() {
     results.push({ column: 'partidos.schedule', status: `${updatedCount} partidos actualizados` });
   } catch (err) {
     results.push({ column: 'partidos.schedule', status: `error: ${err instanceof Error ? err.message : String(err)}` });
+  }
+
+  // ── marcar luka como admin ─────────────────────────────────────
+  try {
+    const r = await db.execute({
+      sql: "UPDATE participantes SET is_admin = 1 WHERE nombre_usuario = 'luka'",
+      args: [],
+    });
+    results.push({ column: 'luka.is_admin', status: r.rowsAffected ? 'marcado como admin' : 'usuario luka no encontrado todavía' });
+  } catch (err) {
+    results.push({ column: 'luka.is_admin', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }
 
   return NextResponse.json({ ok: true, results });

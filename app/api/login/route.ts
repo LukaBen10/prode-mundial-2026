@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await db.execute({
-      sql: 'SELECT id, nombre_completo, nombre_usuario, puntos, codigo, password_hash FROM participantes WHERE nombre_usuario = ?',
+      sql: 'SELECT id, nombre_completo, nombre_usuario, puntos, codigo, password_hash, is_admin FROM participantes WHERE nombre_usuario = ?',
       args: [nombre_usuario.trim()],
     });
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Usuario o contraseña incorrectos' }, { status: 401 });
     }
 
-    return NextResponse.json({ id: row[0], nombre_completo: row[1], nombre_usuario: row[2], puntos: row[3], codigo: row[4] });
+    return NextResponse.json({ id: row[0], nombre_completo: row[1], nombre_usuario: row[2], puntos: row[3], codigo: row[4], is_admin: row[6] ?? 0 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });

@@ -11,6 +11,7 @@ interface ParticipanteCompleto {
   dni: string;
   puntos: number;
   created_at: string;
+  is_admin: number;
 }
 
 interface ParticipanteBusqueda {
@@ -38,7 +39,8 @@ interface Stats {
   totalPredicciones: number;
 }
 
-type Tab = 'participantes' | 'resultados' | 'consumos';
+type Tab = 'participantes' | 'resultados' | 'consumos' | 'admins';
+type AuthMode = 'participant' | 'password' | null;
 
 function formatFecha(fecha: string) {
   const d = new Date(fecha + 'T12:00:00');
@@ -50,9 +52,15 @@ function formatFechaHora(iso: string) {
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+/** Formatea número de WhatsApp argentino → wa.me link */
+function waLink(numero: string): string {
+  const clean = numero.replace(/\D/g, '').replace(/^0+/, '');
+  return `https://wa.me/549${clean}`;
+}
+
 export default function AdminPage() {
+  const [authMode, setAuthMode] = useState<AuthMode>(null);
   const [password, setPassword] = useState('');
-  const [autenticado, setAutenticado] = useState(false);
   const [tab, setTab] = useState<Tab>('participantes');
 
   // Participantes
@@ -72,26 +80,56 @@ export default function AdminPage() {
   const [resultadosBusqueda, setResultadosBusqueda] = useState<ParticipanteBusqueda[]>([]);
   const [msgConsumo, setMsgConsumo] = useState<Record<string, string>>({});
 
+  // Admins
+  const [busquedaAdmin, setBusquedaAdmin] = useState('');
+  const [resultadosAdmin, setResultadosAdmin] = useState<ParticipanteBusqueda[]>([]);
+  const [msgAdmin, setMsgAdmin] = useState<Record<number, string>>({});
+
   useEffect(() => {
+    // 1. ¿Está logueado y es admin?
+    const isAdmin = localStorage.getItem('prode_admin') === '1';
+    const participanteId = localStorage.getItem('prode_id');
+    if (isAdmin && participanteId) {
+      setAuthMode('participant');
+      cargarTodo('participant', participanteId, '');
+      return;
+    }
+
+    // 2. Contraseña guardada en session
     const saved = sessionStorage.getItem('admin_pass');
-    if (saved) { setPassword(saved); setAutenticado(true); cargarTodo(saved); }
+    if (saved) {
+      setPassword(saved);
+      setAuthMode('password');
+      cargarTodo('password', '', saved);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function cargarTodo(pass: string) {
-    cargarParticipantes(pass);
-    cargarPartidos(pass);
+  /** Devuelve los headers de auth según el modo */
+  function authHeaders(mode: AuthMode, participanteId: string, pass: string): Record<string, string> {
+    if (mode === 'participant') {
+      return { 'x-admin-participante-id': participanteId };
+    }
+    return { 'x-admin-password': pass };
   }
 
-  async function cargarParticipantes(pass: string) {
+  async function cargarTodo(mode: AuthMode, participanteId: string, pass: string) {
+    cargarParticipantes(mode, participanteId, pass);
+    cargarPartidos();
+  }
+
+  async function cargarParticipantes(mode: AuthMode, participanteId: string, pass: string) {
     setLoadingParts(true);
-    const res = await fetch('/api/admin/participantes', { headers: { 'x-admin-password': pass } });
+    const res = await fetch('/api/admin/participantes', {
+      headers: authHeaders(mode, participanteId, pass),
+    });
     const data = await res.json();
     setParticipantes(data.participantes ?? []);
     setStats(data.stats ?? null);
     setLoadingParts(false);
   }
 
-  async function cargarPartidos(pass: string) {
+  async function cargarPartidos() {
     setLoadingPartidos(true);
     const res = await fetch('/api/partidos');
     const data = await res.json();
@@ -106,6 +144,7 @@ export default function AdminPage() {
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
+    // Verificamos con un request de prueba
     const res = await fetch('/api/admin/resultado', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
@@ -113,8 +152,16 @@ export default function AdminPage() {
     });
     if (res.status === 401) { alert('Contraseña incorrecta'); return; }
     sessionStorage.setItem('admin_pass', password);
-    setAutenticado(true);
-    cargarTodo(password);
+    setAuthMode('password');
+    cargarTodo('password', '', password);
+  }
+
+  /** Obtiene los headers actuales (usando state) */
+  function getHeaders(): Record<string, string> {
+    if (authMode === 'participant') {
+      return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
+    }
+    return { 'x-admin-password': password };
   }
 
   async function cargarResultado(partidoId: number) {
@@ -122,14 +169,15 @@ export default function AdminPage() {
     if (!res) return;
     const r = await fetch('/api/admin/resultado', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
       body: JSON.stringify({ partido_id: partidoId, goles_local: parseInt(res.local) || 0, goles_visitante: parseInt(res.visitante) || 0 }),
     });
     const data = await r.json();
     if (data.ok) {
       setMensajes(prev => ({ ...prev, [partidoId]: `✓ ${data.prediccionesActualizadas} predicciones actualizadas` }));
-      cargarPartidos(password);
-      cargarParticipantes(password);
+      cargarPartidos();
+      if (authMode === 'participant') cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
+      else cargarParticipantes('password', '', password);
     } else {
       setMensajes(prev => ({ ...prev, [partidoId]: `Error: ${data.error}` }));
     }
@@ -138,7 +186,7 @@ export default function AdminPage() {
   async function buscarParticipante(q: string) {
     setBusqueda(q);
     if (q.length < 2) { setResultadosBusqueda([]); return; }
-    const res = await fetch(`/api/admin/puntos-extra?q=${encodeURIComponent(q)}`, { headers: { 'x-admin-password': password } });
+    const res = await fetch(`/api/admin/puntos-extra?q=${encodeURIComponent(q)}`, { headers: getHeaders() });
     const data = await res.json();
     setResultadosBusqueda(Array.isArray(data) ? data : []);
   }
@@ -146,21 +194,46 @@ export default function AdminPage() {
   async function darPuntoConsumo(nombre_usuario: string) {
     const res = await fetch('/api/admin/puntos-extra', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
       body: JSON.stringify({ nombre_usuario, puntos: 1 }),
     });
     const data = await res.json();
     if (data.ok) {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ +1 pt → total: ${data.puntosNuevos} pts` }));
       setResultadosBusqueda(prev => prev.map(p => p.nombre_usuario === nombre_usuario ? { ...p, puntos: data.puntosNuevos } : p));
-      cargarParticipantes(password);
+      if (authMode === 'participant') cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
+      else cargarParticipantes('password', '', password);
     } else {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `Error: ${data.error}` }));
     }
   }
 
-  // Login
-  if (!autenticado) {
+  async function buscarAdmin(q: string) {
+    setBusquedaAdmin(q);
+    if (q.length < 2) { setResultadosAdmin([]); return; }
+    const res = await fetch(`/api/admin/puntos-extra?q=${encodeURIComponent(q)}`, { headers: getHeaders() });
+    const data = await res.json();
+    setResultadosAdmin(Array.isArray(data) ? data : []);
+  }
+
+  async function toggleAdmin(id: number, hacerAdmin: boolean) {
+    const res = await fetch('/api/admin/participantes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id, is_admin: hacerAdmin }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setMsgAdmin(prev => ({ ...prev, [id]: hacerAdmin ? '✓ Ahora es admin' : '✓ Ya no es admin' }));
+      if (authMode === 'participant') cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
+      else cargarParticipantes('password', '', password);
+    } else {
+      setMsgAdmin(prev => ({ ...prev, [id]: `Error: ${data.error}` }));
+    }
+  }
+
+  // ── Pantalla de login (solo si no es admin por cuenta) ──────────
+  if (!authMode) {
     return (
       <div className="max-w-sm mx-auto mt-16 space-y-6">
         <h1 className="text-2xl font-bold text-center">Panel Admin</h1>
@@ -183,6 +256,7 @@ export default function AdminPage() {
     p.nombre_usuario.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
     p.dni.includes(filtroBusqueda) || p.mail.toLowerCase().includes(filtroBusqueda.toLowerCase())
   );
+  const adminsActuales = participantes.filter(p => p.is_admin);
 
   return (
     <div className="space-y-6">
@@ -199,11 +273,12 @@ export default function AdminPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-zinc-800 pb-0">
+      <div className="flex gap-2 border-b border-zinc-800 pb-0 flex-wrap">
         {([
           { id: 'participantes', label: '👥 Participantes' },
-          { id: 'resultados', label: '⚽ Resultados' },
-          { id: 'consumos', label: '🍩 Consumos' },
+          { id: 'resultados',    label: '⚽ Resultados' },
+          { id: 'consumos',      label: '🍩 Consumos' },
+          { id: 'admins',        label: '🔑 Admins' },
         ] as { id: Tab; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
@@ -214,7 +289,7 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* Tab: Participantes */}
+      {/* ── Tab: Participantes ─────────────────────────────────── */}
       {tab === 'participantes' && (
         <div className="space-y-4">
           <input type="text" value={filtroBusqueda} onChange={e => setFiltroBusqueda(e.target.value)}
@@ -246,12 +321,15 @@ export default function AdminPage() {
                   {participantesFiltrados.map((p, i) => (
                     <tr key={p.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/20 transition-colors">
                       <td className="px-4 py-3 text-zinc-500 font-mono">{i + 1}</td>
-                      <td className="px-4 py-3 font-semibold text-white">@{p.nombre_usuario}</td>
+                      <td className="px-4 py-3 font-semibold text-white">
+                        @{p.nombre_usuario}
+                        {p.is_admin ? <span className="ml-1 text-xs text-amber-400">🔑</span> : null}
+                      </td>
                       <td className="px-4 py-3 text-zinc-300">{p.nombre_completo}</td>
                       <td className="px-4 py-3 text-zinc-400 font-mono">{p.dni}</td>
                       <td className="px-4 py-3">
-                        <a href={`https://wa.me/54${p.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                          className="text-green-400 hover:text-green-300">
+                        <a href={waLink(p.whatsapp)} target="_blank" rel="noopener noreferrer"
+                          className="text-green-400 hover:text-green-300 underline underline-offset-2">
                           {p.whatsapp}
                         </a>
                       </td>
@@ -269,7 +347,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Tab: Resultados */}
+      {/* ── Tab: Resultados ────────────────────────────────────── */}
       {tab === 'resultados' && (
         <div className="space-y-6">
           <section className="space-y-3">
@@ -323,12 +401,10 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Tab: Consumos */}
+      {/* ── Tab: Consumos ──────────────────────────────────────── */}
       {tab === 'consumos' && (
         <div className="space-y-4">
-          <div>
-            <p className="text-zinc-400 text-sm">Buscá al cliente que vino al local durante un partido y dale +1 punto.</p>
-          </div>
+          <p className="text-zinc-400 text-sm">Buscá al cliente que vino al local durante un partido y dale +1 punto.</p>
           <input type="text" value={busqueda} onChange={e => buscarParticipante(e.target.value)}
             placeholder="Buscar por usuario o nombre..."
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
@@ -357,6 +433,80 @@ export default function AdminPage() {
           {busqueda.length >= 2 && resultadosBusqueda.length === 0 && (
             <p className="text-zinc-500 text-sm">No se encontró ningún usuario.</p>
           )}
+        </div>
+      )}
+
+      {/* ── Tab: Admins ────────────────────────────────────────── */}
+      {tab === 'admins' && (
+        <div className="space-y-6">
+
+          {/* Admins actuales */}
+          <section className="space-y-3">
+            <h2 className="font-semibold text-zinc-300">Admins actuales ({adminsActuales.length})</h2>
+            {adminsActuales.length === 0 ? (
+              <p className="text-zinc-500 text-sm">No hay admins cargados todavía.</p>
+            ) : (
+              <div className="space-y-2">
+                {adminsActuales.map(p => (
+                  <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <span className="font-semibold text-white">@{p.nombre_usuario}</span>
+                      <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
+                      <span className="ml-2 text-amber-400 text-xs">🔑 admin</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
+                      <button
+                        onClick={() => toggleAdmin(p.id, false)}
+                        className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+                      >
+                        Quitar admin
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Agregar admin */}
+          <section className="space-y-3">
+            <h2 className="font-semibold text-zinc-300">Dar acceso admin</h2>
+            <p className="text-zinc-500 text-sm">Buscá un participante y hacelo admin. Va a poder entrar al panel con su cuenta.</p>
+            <input type="text" value={busquedaAdmin} onChange={e => buscarAdmin(e.target.value)}
+              placeholder="Buscar por usuario o nombre..."
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500" />
+            {resultadosAdmin.length > 0 && (
+              <div className="space-y-2">
+                {resultadosAdmin.map(p => {
+                  const yaEsAdmin = adminsActuales.some(a => a.id === p.id);
+                  return (
+                    <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                      <div>
+                        <span className="font-semibold text-white">@{p.nombre_usuario}</span>
+                        <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
+                        {yaEsAdmin && <span className="ml-2 text-amber-400 text-xs">🔑 ya es admin</span>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
+                        {!yaEsAdmin && (
+                          <button
+                            onClick={() => toggleAdmin(p.id, true)}
+                            className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+                          >
+                            Hacer admin
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {busquedaAdmin.length >= 2 && resultadosAdmin.length === 0 && (
+              <p className="text-zinc-500 text-sm">No se encontró ningún usuario.</p>
+            )}
+          </section>
         </div>
       )}
     </div>

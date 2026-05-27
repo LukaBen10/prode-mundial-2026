@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { checkAdminAuth } from '@/lib/adminAuth';
 
 export async function POST(req: NextRequest) {
-  const password = req.headers.get('x-admin-password');
-  if (password !== process.env.ADMIN_PASSWORD) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
@@ -36,8 +36,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const password = req.headers.get('x-admin-password');
-  if (password !== process.env.ADMIN_PASSWORD) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
