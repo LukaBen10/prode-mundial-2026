@@ -23,10 +23,11 @@ export default function Countdown() {
 
   return (
     <div
-      className="inline-flex items-center gap-3 px-6 py-3 rounded-full border"
+      className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full border"
       style={{
-        background: 'rgba(251,191,36,0.07)',
-        borderColor: 'rgba(251,191,36,0.25)',
+        background: 'rgba(251,191,36,0.12)',
+        borderColor: 'rgba(251,191,36,0.45)',
+        boxShadow: '0 0 24px rgba(251,191,36,0.12)',
       }}
     >
       <span className="text-zinc-500 text-sm font-semibold tracking-wide uppercase">Faltan</span>

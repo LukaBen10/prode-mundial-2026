@@ -3,38 +3,50 @@ import Countdown from '@/components/Countdown';
 
 export default function Home() {
   return (
-    <div className="space-y-24">
+    <div className="space-y-20">
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="text-center pt-12 pb-4 space-y-8 relative">
+      <section className="text-center pt-10 pb-4 space-y-7 relative">
 
-        {/* Glow de fondo sutil */}
-        <div
-          className="absolute inset-0 -z-10 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(251,146,60,0.07) 0%, transparent 70%)',
-          }}
-        />
+        {/* Luces de estadio — glow verde fuerte arriba */}
+        <div className="absolute inset-0 -z-10 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 90% 65% at 50% 20%, rgba(22,163,74,0.45) 0%, rgba(16,120,55,0.15) 55%, transparent 80%)',
+        }} />
+        {/* Luces laterales ambientales */}
+        <div className="absolute inset-0 -z-10 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 40% 50% at 10% 50%, rgba(22,163,74,0.10) 0%, transparent 70%)',
+        }} />
+        <div className="absolute inset-0 -z-10 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 40% 50% at 90% 50%, rgba(251,191,36,0.08) 0%, transparent 70%)',
+        }} />
 
         {/* Badge host */}
         <div className="flex justify-center">
-          <span className="inline-flex items-center gap-2 bg-zinc-900/80 border border-zinc-700/60 text-zinc-400 text-xs font-semibold px-4 py-1.5 rounded-full tracking-widest uppercase">
+          <span
+            className="inline-flex items-center gap-2 text-xs font-black px-5 py-2 rounded-full tracking-widest uppercase"
+            style={{
+              background: 'rgba(22,163,74,0.22)',
+              border: '1.5px solid rgba(22,163,74,0.55)',
+              color: '#4ade80',
+              boxShadow: '0 0 20px rgba(22,163,74,0.15)',
+            }}
+          >
             🌎 USA · Canada · México · 2026
           </span>
         </div>
 
         {/* Título */}
-        <div className="space-y-2">
-          <h1 className="text-6xl sm:text-8xl font-black tracking-tight leading-[0.9]">
+        <div className="space-y-1">
+          <h1 className="text-6xl sm:text-8xl font-black tracking-tight leading-[0.88]">
             El prode<br />
             <span
               className="text-transparent bg-clip-text"
-              style={{ backgroundImage: 'linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%)' }}
+              style={{ backgroundImage: 'linear-gradient(135deg, #f97316 0%, #fb923c 40%, #fbbf24 100%)' }}
             >
               del barrio.
             </span>
           </h1>
-          <p className="text-zinc-400 text-lg sm:text-xl font-medium pt-2">
+          <p className="text-zinc-200 text-lg sm:text-xl font-semibold pt-3">
             72 partidos · 48 equipos · una sola copa
           </p>
         </div>
@@ -45,22 +57,22 @@ export default function Home() {
         </div>
 
         {/* Descripción */}
-        <p className="text-zinc-400 max-w-sm mx-auto text-sm sm:text-base leading-relaxed">
+        <p className="text-zinc-300 max-w-sm mx-auto text-sm sm:text-base leading-relaxed">
           Los clientes de <span className="text-white font-bold">Donut Makers</span> predicen
           el Mundial. Cargá tus resultados antes de cada partido y demostrá que sabés de fútbol.
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-1">
           <Link
             href="/unirse"
-            className="bg-orange-500 hover:bg-orange-400 text-white px-10 py-3.5 rounded-full font-bold text-lg transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5"
+            className="bg-orange-500 hover:bg-orange-400 text-white px-10 py-3.5 rounded-full font-bold text-lg transition-all shadow-xl shadow-orange-500/40 hover:shadow-orange-500/60 hover:-translate-y-0.5"
           >
             Quiero participar
           </Link>
           <Link
             href="/ranking"
-            className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-10 py-3.5 rounded-full font-semibold text-lg transition-colors"
+            className="border border-white/30 hover:border-white/60 bg-white/10 hover:bg-white/15 text-white px-10 py-3.5 rounded-full font-semibold text-lg transition-all backdrop-blur-sm"
           >
             Ver el ranking
           </Link>
@@ -72,31 +84,31 @@ export default function Home() {
         <div
           className="rounded-2xl p-7 flex items-start gap-5 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(24,24,27,0.95) 60%)',
-            border: '1px solid rgba(249,115,22,0.25)',
+            background: 'linear-gradient(135deg, rgba(249,115,22,0.22) 0%, rgba(251,191,36,0.10) 40%, rgba(15,15,20,0.75) 100%)',
+            border: '1.5px solid rgba(249,115,22,0.45)',
+            boxShadow: '0 0 40px rgba(249,115,22,0.10)',
           }}
         >
-          {/* Glow decorativo */}
           <div
-            className="absolute top-0 left-0 w-32 h-32 -translate-x-8 -translate-y-8 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%)' }}
+            className="absolute -top-12 -left-12 w-48 h-48 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%)' }}
           />
-          <span className="text-5xl shrink-0 relative">🍩</span>
-          <div className="space-y-2 relative">
-            <div className="flex items-center gap-2">
+          <span className="text-5xl shrink-0 relative z-10">🍩</span>
+          <div className="space-y-2 relative z-10">
+            <div className="flex items-center gap-2 flex-wrap">
               <span
-                className="text-3xl font-black text-transparent bg-clip-text"
+                className="text-4xl font-black text-transparent bg-clip-text leading-none"
                 style={{ backgroundImage: 'linear-gradient(135deg, #fb923c, #fbbf24)' }}
               >
                 +1
               </span>
-              <span className="font-black text-lg text-white">punto por venir al local</span>
+              <span className="font-black text-xl text-white">punto por venir al local</span>
             </div>
-            <p className="text-zinc-400 text-sm leading-relaxed">
+            <p className="text-zinc-300 text-sm leading-relaxed">
               Cada vez que venís a <strong className="text-white">Donut Makers</strong> a ver un partido
-              del Mundial, te sumamos un punto extra al ranking. Donut + fútbol = combinación imbatible.
+              del Mundial, te sumamos un punto extra al ranking. Donut + fútbol = imbatible.
             </p>
-            <p className="text-orange-400/70 text-xs font-medium pt-1">
+            <p className="text-orange-400 text-xs font-bold pt-1">
               📍 Av. La Plata 702, Caballito · CABA
             </p>
           </div>
@@ -104,98 +116,120 @@ export default function Home() {
       </section>
 
       {/* ── Cómo funciona ──────────────────────────────────────── */}
-      <section className="space-y-8">
-        <h2 className="text-3xl font-black tracking-tight text-center">¿Cómo funciona?</h2>
+      <section className="space-y-7">
+        <div className="text-center space-y-1">
+          <h2 className="text-3xl font-black tracking-tight">¿Cómo funciona?</h2>
+          <p className="text-zinc-400 text-sm">Tres pasos, cero complicaciones</p>
+        </div>
         <div className="grid sm:grid-cols-3 gap-4">
           {[
             {
-              n: '01',
-              icon: '✍️',
-              titulo: 'Te registrás',
+              n: '01', icon: '✍️', titulo: 'Te registrás',
               desc: 'Gratis, en menos de un minuto. Usuario, mail y listo.',
+              bg: 'rgba(22,163,74,0.18)', border: 'rgba(22,163,74,0.45)',
+              glow: 'rgba(22,163,74,0.12)', numColor: '#4ade80',
             },
             {
-              n: '02',
-              icon: '⚽',
-              titulo: 'Cargás tus predicciones',
+              n: '02', icon: '⚽', titulo: 'Cargás predicciones',
               desc: 'Elegís el resultado de cada partido antes de que arranque. Cuando empieza, se cierra.',
+              bg: 'rgba(249,115,22,0.18)', border: 'rgba(249,115,22,0.45)',
+              glow: 'rgba(249,115,22,0.10)', numColor: '#fb923c',
             },
             {
-              n: '03',
-              icon: '🏆',
-              titulo: 'Sumás puntos',
-              desc: 'Resultado exacto = 3 pts. Ganador correcto = 1 pt. El que más acumule se lleva el premio.',
+              n: '03', icon: '🏆', titulo: 'Sumás puntos',
+              desc: 'Resultado exacto = 3 pts. Ganador correcto = 1 pt. El que más acumule gana.',
+              bg: 'rgba(251,191,36,0.18)', border: 'rgba(251,191,36,0.45)',
+              glow: 'rgba(251,191,36,0.10)', numColor: '#fbbf24',
             },
           ].map((paso) => (
             <div
               key={paso.n}
-              className="bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-6 space-y-4 transition-all hover:-translate-y-0.5 group"
+              className="rounded-2xl p-6 space-y-4 transition-all hover:-translate-y-1"
+              style={{
+                background: paso.bg,
+                border: `1.5px solid ${paso.border}`,
+                boxShadow: `0 8px 32px ${paso.glow}`,
+              }}
             >
               <div className="flex items-center justify-between">
                 <span className="text-3xl">{paso.icon}</span>
-                <span
-                  className="text-4xl font-black opacity-20 group-hover:opacity-30 transition-opacity"
-                  style={{ color: '#fbbf24' }}
-                >
-                  {paso.n}
-                </span>
+                <span className="text-5xl font-black opacity-20" style={{ color: paso.numColor }}>{paso.n}</span>
               </div>
-              <h3 className="font-bold text-lg">{paso.titulo}</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">{paso.desc}</p>
+              <h3 className="font-bold text-lg text-white">{paso.titulo}</h3>
+              <p className="text-zinc-300 text-sm leading-relaxed">{paso.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── Sistema de puntos ──────────────────────────────────── */}
-      <section className="space-y-5">
-        <h2 className="text-3xl font-black tracking-tight text-center">Sistema de puntos</h2>
+      <section className="space-y-6">
+        <div className="text-center space-y-1">
+          <h2 className="text-3xl font-black tracking-tight">Sistema de puntos</h2>
+          <p className="text-zinc-400 text-sm">Simple y directo — sin trampas</p>
+        </div>
         <div className="grid sm:grid-cols-3 gap-4">
 
           <div
-            className="rounded-2xl p-6 text-center space-y-2"
-            style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(24,24,27,0.9))', border: '1px solid rgba(34,197,94,0.2)' }}
+            className="rounded-2xl p-8 text-center space-y-3 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(145deg, rgba(22,163,74,0.28) 0%, rgba(15,30,20,0.70) 100%)',
+              border: '1.5px solid rgba(22,163,74,0.50)',
+              boxShadow: '0 0 40px rgba(22,163,74,0.12)',
+            }}
           >
-            <div className="text-6xl font-black text-green-400 leading-none">3</div>
-            <div className="font-bold text-white">Resultado exacto</div>
-            <div className="text-zinc-500 text-xs">Predijiste 2-1 y salió 2-1</div>
+            <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #16a34a, transparent)' }} />
+            <div className="text-7xl font-black text-green-400 leading-none relative">3</div>
+            <div className="font-bold text-white text-base">Resultado exacto</div>
+            <div className="text-zinc-400 text-xs">Predijiste 2-1 y salió 2-1</div>
           </div>
 
           <div
-            className="rounded-2xl p-6 text-center space-y-2"
-            style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.1), rgba(24,24,27,0.9))', border: '1px solid rgba(249,115,22,0.2)' }}
+            className="rounded-2xl p-8 text-center space-y-3 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(145deg, rgba(249,115,22,0.28) 0%, rgba(25,15,5,0.70) 100%)',
+              border: '1.5px solid rgba(249,115,22,0.50)',
+              boxShadow: '0 0 40px rgba(249,115,22,0.12)',
+            }}
           >
-            <div className="text-6xl font-black text-orange-400 leading-none">1</div>
-            <div className="font-bold text-white">Ganador correcto</div>
-            <div className="text-zinc-500 text-xs">Acertaste quién ganaba</div>
+            <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #f97316, transparent)' }} />
+            <div className="text-7xl font-black text-orange-400 leading-none relative">1</div>
+            <div className="font-bold text-white text-base">Ganador correcto</div>
+            <div className="text-zinc-400 text-xs">Acertaste quién ganaba</div>
           </div>
 
           <div
-            className="rounded-2xl p-6 text-center space-y-2"
-            style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(24,24,27,0.9))', border: '1px solid rgba(251,191,36,0.2)' }}
+            className="rounded-2xl p-8 text-center space-y-3 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(145deg, rgba(251,191,36,0.28) 0%, rgba(25,20,5,0.70) 100%)',
+              border: '1.5px solid rgba(251,191,36,0.50)',
+              boxShadow: '0 0 40px rgba(251,191,36,0.12)',
+            }}
           >
+            <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #fbbf24, transparent)' }} />
             <div
-              className="text-6xl font-black leading-none text-transparent bg-clip-text"
+              className="text-7xl font-black leading-none relative text-transparent bg-clip-text"
               style={{ backgroundImage: 'linear-gradient(135deg, #fb923c, #fbbf24)' }}
             >
               +1
             </div>
-            <div className="font-bold text-white">Visitás el local</div>
-            <div className="text-zinc-500 text-xs">Durante cualquier partido</div>
+            <div className="font-bold text-white text-base">Visitás el local</div>
+            <div className="text-zinc-400 text-xs">Durante cualquier partido</div>
           </div>
 
         </div>
       </section>
 
       {/* ── CTA final ──────────────────────────────────────────── */}
-      <section className="text-center py-10 space-y-5">
-        <div className="space-y-2">
-          <p className="text-3xl font-black tracking-tight">¿Qué esperás?</p>
-          <p className="text-zinc-400">Gratis. Sin complicaciones. Solo para clientes del local 🍩</p>
-        </div>
+      <section className="text-center py-10 space-y-5 relative">
+        <div className="absolute inset-0 -z-10 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(249,115,22,0.08) 0%, transparent 70%)',
+        }} />
+        <p className="text-3xl font-black tracking-tight">¿Qué esperás?</p>
+        <p className="text-zinc-400">Gratis. Sin complicaciones. Solo para clientes del local 🍩</p>
         <Link
           href="/unirse"
-          className="inline-block bg-orange-500 hover:bg-orange-400 text-white px-14 py-4 rounded-full font-bold text-xl transition-all shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5"
+          className="inline-block bg-orange-500 hover:bg-orange-400 text-white px-14 py-4 rounded-full font-bold text-xl transition-all shadow-xl shadow-orange-500/40 hover:-translate-y-0.5"
         >
           Me anoto ahora
         </Link>
