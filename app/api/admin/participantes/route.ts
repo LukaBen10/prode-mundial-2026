@@ -42,6 +42,50 @@ export async function GET(req: NextRequest) {
   });
 }
 
+/** PUT /api/admin/participantes — editar datos de un participante */
+export async function PUT(req: NextRequest) {
+  if (!(await checkAdminAuth(req))) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  try {
+    const { id, nombre_completo, nombre_usuario, mail, whatsapp, dni, puntos } = await req.json();
+    if (!id) return NextResponse.json({ error: 'Falta id' }, { status: 400 });
+
+    await db.execute({
+      sql: `UPDATE participantes
+            SET nombre_completo=?, nombre_usuario=?, mail=?, whatsapp=?, dni=?, puntos=?
+            WHERE id=?`,
+      args: [nombre_completo, nombre_usuario, mail, whatsapp, dni, puntos ?? 0, id],
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
+/** DELETE /api/admin/participantes — eliminar participante y sus predicciones */
+export async function DELETE(req: NextRequest) {
+  if (!(await checkAdminAuth(req))) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  try {
+    const { id } = await req.json();
+    if (!id) return NextResponse.json({ error: 'Falta id' }, { status: 400 });
+
+    await db.execute({ sql: 'DELETE FROM predicciones WHERE participante_id = ?', args: [id] });
+    await db.execute({ sql: 'DELETE FROM participantes WHERE id = ?', args: [id] });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
 /** PATCH /api/admin/participantes — toggle is_admin de un usuario */
 export async function PATCH(req: NextRequest) {
   if (!(await checkAdminAuth(req))) {

@@ -39,8 +39,16 @@ interface Stats {
   totalPredicciones: number;
 }
 
+interface CamposEdicion {
+  nombre_completo: string;
+  nombre_usuario: string;
+  mail: string;
+  whatsapp: string;
+  dni: string;
+  puntos: string;
+}
+
 type Tab = 'participantes' | 'resultados' | 'consumos' | 'admins';
-type AuthMode = 'participant' | null;
 
 function formatFecha(fecha: string) {
   const d = new Date(fecha + 'T12:00:00');
@@ -52,14 +60,15 @@ function formatFechaHora(iso: string) {
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
-/** Formatea número de WhatsApp argentino → wa.me link */
 function waLink(numero: string): string {
   const clean = numero.replace(/\D/g, '').replace(/^0+/, '');
   return `https://wa.me/549${clean}`;
 }
 
+const inputCell = "w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-green-500 min-w-0";
+
 export default function AdminPage() {
-  const [authMode, setAuthMode] = useState<AuthMode>(null);
+  const [authMode, setAuthMode] = useState<'participant' | null>(null);
   const [tab, setTab] = useState<Tab>('participantes');
 
   // Participantes
@@ -67,6 +76,11 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loadingParts, setLoadingParts] = useState(false);
   const [filtroBusqueda, setFiltroBusqueda] = useState('');
+  const [editando, setEditando] = useState<{ id: number; campos: CamposEdicion } | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [msgEdit, setMsgEdit] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Resultados
   const [partidos, setPartidos] = useState<Partido[]>([]);
@@ -89,25 +103,24 @@ export default function AdminPage() {
     const participanteId = localStorage.getItem('prode_id');
     if (isAdmin && participanteId) {
       setAuthMode('participant');
-      cargarTodo('participant', participanteId, '');
+      cargarParticipantes(participanteId);
+      cargarPartidos();
     } else {
-      // No es admin → redirigir
       window.location.href = participanteId ? '/mi-prode' : '/login';
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function cargarTodo(mode: AuthMode, participanteId: string, pass: string) {
-    cargarParticipantes(mode, participanteId, pass);
-    cargarPartidos();
+  function getHeaders(): Record<string, string> {
+    return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
   }
 
-  async function cargarParticipantes(mode: AuthMode, participanteId: string, pass: string) {
+  async function cargarParticipantes(pid?: string) {
     setLoadingParts(true);
-    const headers: Record<string, string> = mode === 'participant'
-      ? { 'x-admin-participante-id': participanteId }
-      : { 'x-admin-password': pass };
-    const res = await fetch('/api/admin/participantes', { headers });
+    const id = pid ?? localStorage.getItem('prode_id') ?? '';
+    const res = await fetch('/api/admin/participantes', {
+      headers: { 'x-admin-participante-id': id },
+    });
     const data = await res.json();
     setParticipantes(data.participantes ?? []);
     setStats(data.stats ?? null);
@@ -127,8 +140,67 @@ export default function AdminPage() {
     setLoadingPartidos(false);
   }
 
-  function getHeaders(): Record<string, string> {
-    return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
+  // ── Editar participante ──────────────────────────────────────────
+  function iniciarEdicion(p: ParticipanteCompleto) {
+    setEditando({
+      id: p.id,
+      campos: {
+        nombre_completo: p.nombre_completo,
+        nombre_usuario: p.nombre_usuario,
+        mail: p.mail,
+        whatsapp: p.whatsapp,
+        dni: p.dni,
+        puntos: String(p.puntos),
+      },
+    });
+    setMsgEdit('');
+    setConfirmDelete(null);
+  }
+
+  function cancelarEdicion() {
+    setEditando(null);
+    setMsgEdit('');
+  }
+
+  async function guardarEdicion() {
+    if (!editando) return;
+    setSavingEdit(true);
+    const res = await fetch('/api/admin/participantes', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({
+        id: editando.id,
+        ...editando.campos,
+        puntos: parseInt(editando.campos.puntos) || 0,
+      }),
+    });
+    const data = await res.json();
+    setSavingEdit(false);
+    if (data.ok) {
+      setEditando(null);
+      setMsgEdit('');
+      cargarParticipantes();
+    } else {
+      setMsgEdit(data.error ?? 'Error al guardar');
+    }
+  }
+
+  // ── Eliminar participante ────────────────────────────────────────
+  async function eliminarParticipante(id: number) {
+    setDeletingId(id);
+    const res = await fetch('/api/admin/participantes', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    setDeletingId(null);
+    setConfirmDelete(null);
+    if (data.ok) {
+      cargarParticipantes();
+    } else {
+      alert(`Error: ${data.error}`);
+    }
   }
 
   async function cargarResultado(partidoId: number) {
@@ -143,7 +215,7 @@ export default function AdminPage() {
     if (data.ok) {
       setMensajes(prev => ({ ...prev, [partidoId]: `✓ ${data.prediccionesActualizadas} predicciones actualizadas` }));
       cargarPartidos();
-      cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
+      cargarParticipantes();
     } else {
       setMensajes(prev => ({ ...prev, [partidoId]: `Error: ${data.error}` }));
     }
@@ -167,7 +239,7 @@ export default function AdminPage() {
     if (data.ok) {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ +1 pt → total: ${data.puntosNuevos} pts` }));
       setResultadosBusqueda(prev => prev.map(p => p.nombre_usuario === nombre_usuario ? { ...p, puntos: data.puntosNuevos } : p));
-      cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
+      cargarParticipantes();
     } else {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `Error: ${data.error}` }));
     }
@@ -190,7 +262,7 @@ export default function AdminPage() {
     const data = await res.json();
     if (data.ok) {
       setMsgAdmin(prev => ({ ...prev, [id]: hacerAdmin ? '✓ Ahora es admin' : '✓ Ya no es admin' }));
-      cargarParticipantes('participant', localStorage.getItem('prode_id') ?? '', '');
+      cargarParticipantes();
     } else {
       setMsgAdmin(prev => ({ ...prev, [id]: `Error: ${data.error}` }));
     }
@@ -203,14 +275,17 @@ export default function AdminPage() {
   const pendientes = partidos.filter(p => !p.jugado);
   const jugados = partidos.filter(p => p.jugado);
   const participantesFiltrados = participantes.filter(p =>
-    !filtroBusqueda || p.nombre_completo.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
+    !filtroBusqueda ||
+    p.nombre_completo.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
     p.nombre_usuario.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-    p.dni.includes(filtroBusqueda) || p.mail.toLowerCase().includes(filtroBusqueda.toLowerCase())
+    p.dni.includes(filtroBusqueda) ||
+    p.mail.toLowerCase().includes(filtroBusqueda.toLowerCase())
   );
   const adminsActuales = participantes.filter(p => p.is_admin);
 
   return (
     <div className="space-y-6">
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-bold">Panel Admin</h1>
@@ -255,42 +330,123 @@ export default function AdminPage() {
             </div>
           ) : (
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-auto">
-              <table className="w-full text-sm min-w-[700px]">
+              <table className="w-full text-sm min-w-[800px]">
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-400">
-                    <th className="text-left px-4 py-3 font-medium">#</th>
-                    <th className="text-left px-4 py-3 font-medium">Usuario</th>
-                    <th className="text-left px-4 py-3 font-medium">Nombre completo</th>
-                    <th className="text-left px-4 py-3 font-medium">DNI</th>
-                    <th className="text-left px-4 py-3 font-medium">WhatsApp</th>
-                    <th className="text-left px-4 py-3 font-medium">Mail</th>
-                    <th className="text-right px-4 py-3 font-medium">Puntos</th>
-                    <th className="text-right px-4 py-3 font-medium">Inscripto</th>
+                    <th className="text-left px-3 py-3 font-medium">#</th>
+                    <th className="text-left px-3 py-3 font-medium">Usuario</th>
+                    <th className="text-left px-3 py-3 font-medium">Nombre completo</th>
+                    <th className="text-left px-3 py-3 font-medium">DNI</th>
+                    <th className="text-left px-3 py-3 font-medium">WhatsApp</th>
+                    <th className="text-left px-3 py-3 font-medium">Mail</th>
+                    <th className="text-right px-3 py-3 font-medium">Pts</th>
+                    <th className="text-right px-3 py-3 font-medium">Inscripto</th>
+                    <th className="text-right px-3 py-3 font-medium">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {participantesFiltrados.map((p, i) => (
-                    <tr key={p.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/20 transition-colors">
-                      <td className="px-4 py-3 text-zinc-500 font-mono">{i + 1}</td>
-                      <td className="px-4 py-3 font-semibold text-white">
-                        @{p.nombre_usuario}
-                        {p.is_admin ? <span className="ml-1 text-xs text-amber-400">🔑</span> : null}
-                      </td>
-                      <td className="px-4 py-3 text-zinc-300">{p.nombre_completo}</td>
-                      <td className="px-4 py-3 text-zinc-400 font-mono">{p.dni}</td>
-                      <td className="px-4 py-3">
-                        <a href={waLink(p.whatsapp)} target="_blank" rel="noopener noreferrer"
-                          className="text-green-400 hover:text-green-300 underline underline-offset-2">
-                          {p.whatsapp}
-                        </a>
-                      </td>
-                      <td className="px-4 py-3 text-zinc-400">{p.mail}</td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`font-bold ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>{p.puntos}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right text-zinc-500 text-xs">{formatFechaHora(p.created_at as string)}</td>
-                    </tr>
-                  ))}
+                  {participantesFiltrados.map((p, i) => {
+                    const isEditing = editando?.id === p.id;
+                    const isConfirmingDelete = confirmDelete === p.id;
+                    const isDeleting = deletingId === p.id;
+
+                    if (isEditing) {
+                      // Fila en modo edición
+                      const c = editando.campos;
+                      return (
+                        <tr key={p.id} className="border-b border-zinc-800/50 bg-zinc-800/30">
+                          <td className="px-3 py-2 text-zinc-500 font-mono">{i + 1}</td>
+                          <td className="px-3 py-2">
+                            <input className={inputCell} value={c.nombre_usuario}
+                              onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, nombre_usuario: e.target.value } }))} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input className={inputCell} value={c.nombre_completo}
+                              onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, nombre_completo: e.target.value } }))} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input className={inputCell} value={c.dni}
+                              onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, dni: e.target.value } }))} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input className={inputCell} value={c.whatsapp}
+                              onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, whatsapp: e.target.value } }))} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input className={inputCell} value={c.mail}
+                              onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, mail: e.target.value } }))} />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input className={`${inputCell} w-14 text-right`} type="number" value={c.puntos}
+                              onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, puntos: e.target.value } }))} />
+                          </td>
+                          <td className="px-3 py-2 text-zinc-500 text-xs text-right">{formatFechaHora(p.created_at)}</td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center justify-end gap-1.5 flex-nowrap">
+                              {msgEdit && <span className="text-xs text-red-400 mr-1">{msgEdit}</span>}
+                              <button onClick={guardarEdicion} disabled={savingEdit}
+                                className="bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap">
+                                {savingEdit ? '...' : 'Guardar'}
+                              </button>
+                              <button onClick={cancelarEdicion}
+                                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">
+                                Cancelar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return (
+                      <tr key={p.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/20 transition-colors">
+                        <td className="px-3 py-3 text-zinc-500 font-mono">{i + 1}</td>
+                        <td className="px-3 py-3 font-semibold text-white">
+                          @{p.nombre_usuario}
+                          {p.is_admin ? <span className="ml-1 text-xs text-amber-400">🔑</span> : null}
+                        </td>
+                        <td className="px-3 py-3 text-zinc-300">{p.nombre_completo}</td>
+                        <td className="px-3 py-3 text-zinc-400 font-mono">{p.dni}</td>
+                        <td className="px-3 py-3">
+                          <a href={waLink(p.whatsapp)} target="_blank" rel="noopener noreferrer"
+                            className="text-green-400 hover:text-green-300 underline underline-offset-2">
+                            {p.whatsapp}
+                          </a>
+                        </td>
+                        <td className="px-3 py-3 text-zinc-400">{p.mail}</td>
+                        <td className="px-3 py-3 text-right">
+                          <span className={`font-bold ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>{p.puntos}</span>
+                        </td>
+                        <td className="px-3 py-3 text-right text-zinc-500 text-xs whitespace-nowrap">{formatFechaHora(p.created_at)}</td>
+                        <td className="px-3 py-3">
+                          {isConfirmingDelete ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <span className="text-xs text-red-400 mr-1">¿Eliminar?</span>
+                              <button onClick={() => eliminarParticipante(p.id)} disabled={isDeleting}
+                                className="bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white px-2.5 py-1 rounded text-xs font-semibold">
+                                {isDeleting ? '...' : 'Sí'}
+                              </button>
+                              <button onClick={() => setConfirmDelete(null)}
+                                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button onClick={() => iniciarEdicion(p)}
+                                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-200 px-2.5 py-1 rounded text-xs font-semibold transition-colors">
+                                Editar
+                              </button>
+                              <button onClick={() => { setConfirmDelete(p.id); setEditando(null); }}
+                                className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1 rounded text-xs font-semibold transition-colors">
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -314,11 +470,11 @@ export default function AdminPage() {
                     <div className="flex-1 flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium truncate flex-1 text-right">{partido.equipo_local}</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
-                        onChange={e => setResultados(p => ({ ...p, [partido.id]: { ...p[partido.id], local: e.target.value } }))}
+                        onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local: e.target.value } }))}
                         className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-green-500" />
                       <span className="text-zinc-500">-</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
-                        onChange={e => setResultados(p => ({ ...p, [partido.id]: { ...p[partido.id], visitante: e.target.value } }))}
+                        onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante: e.target.value } }))}
                         className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-green-500" />
                       <span className="text-sm font-medium truncate flex-1">{partido.equipo_visitante}</span>
                     </div>
@@ -390,8 +546,6 @@ export default function AdminPage() {
       {/* ── Tab: Admins ────────────────────────────────────────── */}
       {tab === 'admins' && (
         <div className="space-y-6">
-
-          {/* Admins actuales */}
           <section className="space-y-3">
             <h2 className="font-semibold text-zinc-300">Admins actuales ({adminsActuales.length})</h2>
             {adminsActuales.length === 0 ? (
@@ -407,10 +561,8 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
-                      <button
-                        onClick={() => toggleAdmin(p.id, false)}
-                        className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
-                      >
+                      <button onClick={() => toggleAdmin(p.id, false)}
+                        className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">
                         Quitar admin
                       </button>
                     </div>
@@ -420,7 +572,6 @@ export default function AdminPage() {
             )}
           </section>
 
-          {/* Agregar admin */}
           <section className="space-y-3">
             <h2 className="font-semibold text-zinc-300">Dar acceso admin</h2>
             <p className="text-zinc-500 text-sm">Buscá un participante y hacelo admin. Va a poder entrar al panel con su cuenta.</p>
@@ -441,10 +592,8 @@ export default function AdminPage() {
                       <div className="flex items-center gap-3">
                         {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
                         {!yaEsAdmin && (
-                          <button
-                            onClick={() => toggleAdmin(p.id, true)}
-                            className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
-                          >
+                          <button onClick={() => toggleAdmin(p.id, true)}
+                            className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">
                             Hacer admin
                           </button>
                         )}
