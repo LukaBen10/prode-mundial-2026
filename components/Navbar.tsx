@@ -39,7 +39,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
           <span className="text-2xl">🍩</span>
           <span className="text-white">Prode</span>
-          <span className="text-green-400">Mundial 26</span>
+          <span className="text-amber-400">Mundial 26</span>
         </Link>
 
         {/* Nav links — siempre visibles */}

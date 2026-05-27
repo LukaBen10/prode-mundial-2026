@@ -40,22 +40,24 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-sm mx-auto space-y-8 pt-4">
+
       <div className="text-center space-y-2">
-        <div className="text-5xl">👋</div>
-        <h1 className="text-3xl font-bold">Bienvenido de vuelta</h1>
+        <div className="text-5xl">🍩⚽</div>
+        <h1 className="text-3xl font-black tracking-tight">Dale, entrá</h1>
         <p className="text-zinc-400 text-sm">Ingresá con tu usuario y contraseña</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-5">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Nombre de usuario</label>
+          <label className="block text-sm font-medium text-zinc-300">Usuario</label>
           <input
             type="text"
             value={nombreUsuario}
             onChange={e => setNombreUsuario(e.target.value)}
             placeholder="Ej: martingol"
             required autoFocus
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+            autoComplete="username"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
           />
         </div>
 
@@ -67,7 +69,8 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             placeholder="Tu contraseña"
             required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
+            autoComplete="current-password"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
           />
         </div>
 
@@ -80,7 +83,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition-colors"
+          className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition-colors"
         >
           {loading ? 'Entrando...' : 'Entrar al prode ⚽'}
         </button>
@@ -92,6 +95,7 @@ export default function LoginPage() {
           Registrate acá
         </Link>
       </p>
+
     </div>
   );
 }

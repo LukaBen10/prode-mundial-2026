@@ -49,28 +49,34 @@ export default function MiProdePage() {
 
   const medalla = posicion === 1 ? '🥇' : posicion === 2 ? '🥈' : posicion === 3 ? '🥉' : null;
 
+  const saludos = ['¡Ahí estás', '¡Buenas', 'Bienvenido de vuelta', '¡Hola'];
+  const saludo = saludos[nombre.length % saludos.length];
+
   return (
     <div className="max-w-lg mx-auto space-y-6">
+
       {/* Saludo */}
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold">
-          Hola, <span className="text-green-400">@{nombre}</span> 👋
+        <h1 className="text-3xl font-black tracking-tight">
+          {saludo}, <span className="text-orange-400">@{nombre}</span>! 👋
         </h1>
-        <p className="text-zinc-400">Acá está todo lo tuyo en el prode.</p>
+        <p className="text-zinc-400">Acá está tu prode. Que arranque el partido.</p>
       </div>
 
-      {/* Cards de stats */}
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center space-y-1">
-          <div className="text-4xl font-bold">
+          <div className="text-4xl font-black">
             {medalla ?? <span className="text-white">#{posicion}</span>}
           </div>
           <div className="text-zinc-400 text-xs">Tu posición</div>
-          <div className="text-zinc-500 text-xs">de {totalParticipantes}</div>
+          {totalParticipantes > 0 && (
+            <div className="text-zinc-600 text-xs">de {totalParticipantes}</div>
+          )}
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center space-y-1">
-          <div className="text-4xl font-bold text-green-400">{puntos}</div>
+          <div className="text-4xl font-black text-green-400">{puntos}</div>
           <div className="text-zinc-400 text-xs">Tus puntos</div>
         </div>
 
@@ -78,16 +84,16 @@ export default function MiProdePage() {
           {posicion === 1 ? (
             <>
               <div className="text-4xl">🏆</div>
-              <div className="text-zinc-400 text-xs">Vas primero!</div>
+              <div className="text-amber-400 text-xs font-semibold">¡Vas primero!</div>
             </>
           ) : puntosNext !== null && puntosNext > 0 ? (
             <>
-              <div className="text-4xl font-bold text-orange-400">+{puntosNext}</div>
+              <div className="text-4xl font-black text-orange-400">+{puntosNext}</div>
               <div className="text-zinc-400 text-xs">Para subir un puesto</div>
             </>
           ) : (
             <>
-              <div className="text-4xl font-bold text-zinc-400">{puntosLider}</div>
+              <div className="text-4xl font-black text-zinc-400">{puntosLider}</div>
               <div className="text-zinc-400 text-xs">Puntos del líder</div>
             </>
           )}
@@ -98,13 +104,13 @@ export default function MiProdePage() {
       <div className="space-y-3">
         <Link
           href={`/predicciones?participanteId=${participanteId}`}
-          className="flex items-center justify-between w-full bg-zinc-900 border border-zinc-800 hover:border-green-500/50 rounded-2xl p-5 transition-colors group"
+          className="flex items-center justify-between w-full bg-zinc-900 border border-zinc-800 hover:border-orange-500/40 rounded-2xl p-5 transition-colors group"
         >
           <div className="space-y-0.5">
-            <div className="font-bold text-lg">Mis predicciones</div>
-            <div className="text-zinc-400 text-sm">Cargá o editá tus resultados para cada partido</div>
+            <div className="font-bold text-lg">⚽ Mis predicciones</div>
+            <div className="text-zinc-400 text-sm">Cargá o editá tus resultados antes de cada partido</div>
           </div>
-          <span className="text-zinc-500 group-hover:text-green-400 transition-colors text-2xl">→</span>
+          <span className="text-zinc-500 group-hover:text-orange-400 transition-colors text-2xl">→</span>
         </Link>
 
         <Link
@@ -112,31 +118,32 @@ export default function MiProdePage() {
           className="flex items-center justify-between w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-2xl p-5 transition-colors group"
         >
           <div className="space-y-0.5">
-            <div className="font-bold text-lg">Tabla de posiciones</div>
+            <div className="font-bold text-lg">🏆 Tabla de posiciones</div>
             <div className="text-zinc-400 text-sm">Ver cómo van todos</div>
           </div>
           <span className="text-zinc-500 group-hover:text-white transition-colors text-2xl">→</span>
         </Link>
       </div>
 
-      {/* Reglas rápidas */}
+      {/* Reglas */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
         <h2 className="font-semibold text-zinc-300 text-sm">Cómo se suman los puntos</h2>
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-3">
-            <span className="text-green-400 font-bold text-lg w-6">3</span>
+            <span className="text-green-400 font-black text-lg w-6">3</span>
             <span className="text-zinc-400">Resultado exacto (ej: predijiste 2-1 y salió 2-1)</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-orange-400 font-bold text-lg w-6">1</span>
-            <span className="text-zinc-400">Ganador correcto (ej: predijiste que ganaba y ganó)</span>
+            <span className="text-orange-400 font-black text-lg w-6">1</span>
+            <span className="text-zinc-400">Ganador correcto</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-orange-400 font-bold text-lg w-6">+1</span>
-            <span className="text-zinc-400">Por venir a consumir al local durante un partido</span>
+            <span className="text-orange-300 font-black text-lg w-6">+1</span>
+            <span className="text-zinc-400">Por venir a <strong className="text-white">Donut Makers</strong> durante un partido</span>
           </div>
         </div>
       </div>
+
     </div>
   );
 }

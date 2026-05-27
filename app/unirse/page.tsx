@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function UnirsePage() {
   const router = useRouter();
@@ -53,146 +54,82 @@ export default function UnirsePage() {
     }
   }
 
+  const inputClass = "w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors";
+
   return (
     <div className="max-w-md mx-auto space-y-8">
+
       <div className="text-center space-y-3">
-        <div className="text-5xl">🏆</div>
-        <h1 className="text-3xl font-bold">Sumate al prode</h1>
-        <p className="text-zinc-400">
-          Completá tus datos y en un momento ya estás cargando predicciones.
+        <div className="text-5xl">🍩⚽</div>
+        <h1 className="text-3xl font-black tracking-tight">Sumate al prode</h1>
+        <p className="text-zinc-400 text-sm">
+          Gratis. Tarda menos de 1 minuto.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-5">
-        {/* Nombre completo */}
+
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            Nombre completo
-          </label>
-          <input
-            type="text"
-            value={nombreCompleto}
-            onChange={(e) => setNombreCompleto(e.target.value)}
-            placeholder="Ej: Martín García"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
+          <label className="block text-sm font-medium text-zinc-300">Nombre completo</label>
+          <input type="text" value={nombreCompleto} onChange={(e) => setNombreCompleto(e.target.value)}
+            placeholder="Ej: Martín García" required className={inputClass} />
         </div>
 
-        {/* Nombre de usuario */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            Nombre de usuario
-          </label>
-          <input
-            type="text"
-            value={nombreUsuario}
-            onChange={(e) => setNombreUsuario(e.target.value)}
-            placeholder="Ej: martingol"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
-          <p className="text-xs text-zinc-500">Este es el nombre que aparece en el ranking. Tiene que ser único.</p>
+          <label className="block text-sm font-medium text-zinc-300">Usuario</label>
+          <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)}
+            placeholder="Ej: martingol" required className={inputClass} />
+          <p className="text-xs text-zinc-500">Es lo que aparece en el ranking. Tiene que ser único.</p>
         </div>
 
-        {/* Mail */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            Mail
-          </label>
-          <input
-            type="email"
-            value={mail}
-            onChange={(e) => setMail(e.target.value)}
-            placeholder="Ej: martin@gmail.com"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
+          <label className="block text-sm font-medium text-zinc-300">Mail</label>
+          <input type="email" value={mail} onChange={(e) => setMail(e.target.value)}
+            placeholder="Ej: martin@gmail.com" required className={inputClass} />
         </div>
 
-        {/* WhatsApp */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            WhatsApp
-          </label>
-          <input
-            type="tel"
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="Ej: 1123456789"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
+          <label className="block text-sm font-medium text-zinc-300">WhatsApp</label>
+          <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+            placeholder="Ej: 1123456789" required className={inputClass} />
         </div>
 
-        {/* DNI */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            DNI
-          </label>
-          <input
-            type="text"
-            value={dni}
-            onChange={(e) => setDni(e.target.value)}
-            placeholder="Ej: 38456789"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
+          <label className="block text-sm font-medium text-zinc-300">DNI</label>
+          <input type="text" value={dni} onChange={(e) => setDni(e.target.value)}
+            placeholder="Ej: 38456789" required className={inputClass} />
           <p className="text-xs text-zinc-500">Solo para evitar multicuentas. No se muestra públicamente.</p>
         </div>
 
-        {/* Contraseña */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            Contraseña
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mínimo 6 caracteres"
-            autoComplete="new-password"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
+          <label className="block text-sm font-medium text-zinc-300">Contraseña</label>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mínimo 6 caracteres" required autoComplete="new-password" className={inputClass} />
         </div>
 
-        {/* Confirmar contraseña */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">
-            Confirmá la contraseña
-          </label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Repetí la contraseña"
-            autoComplete="new-password"
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500 transition-colors"
-          />
+          <label className="block text-sm font-medium text-zinc-300">Confirmá la contraseña</label>
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Repetí la contraseña" required autoComplete="new-password" className={inputClass} />
         </div>
 
         {/* Checkbox IG */}
-        <label className="flex items-start gap-3 cursor-pointer">
+        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
           <input
             type="checkbox"
             checked={sigueIG}
             onChange={(e) => setSigueIG(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer"
+            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
           />
-          <span className="text-sm text-zinc-300">
+          <span className="text-sm text-zinc-300 leading-relaxed">
             Ya sigo a{' '}
-            <a
-              href="https://www.instagram.com/donut.makers.caballito"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-orange-400 hover:text-orange-300 underline"
-            >
+            <a href="https://www.instagram.com/donut.makers.caballito" target="_blank" rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 underline font-semibold">
               @donut.makers.caballito
             </a>{' '}
-            en Instagram
+            en Instagram.{' '}
+            <span className="text-zinc-500">(Imprescindible para recibir el premio)</span>
           </span>
         </label>
 
@@ -205,18 +142,19 @@ export default function UnirsePage() {
         <button
           type="submit"
           disabled={loading || !sigueIG}
-          className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold text-lg transition-colors"
+          className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-orange-500/20"
         >
           {loading ? 'Registrando...' : 'Entrar al prode ⚽'}
         </button>
       </form>
 
       <p className="text-center text-zinc-500 text-sm">
-        Ya participás?{' '}
-        <a href="/login" className="text-green-400 hover:text-green-300 underline">
+        ¿Ya participás?{' '}
+        <Link href="/login" className="text-orange-400 hover:text-orange-300 underline">
           Iniciá sesión
-        </a>
+        </Link>
       </p>
+
     </div>
   );
 }

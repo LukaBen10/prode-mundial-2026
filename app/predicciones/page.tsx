@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { BANDERAS } from '@/lib/data/banderas';
 
 interface Partido {
   id: number;
@@ -296,7 +297,10 @@ function PrediccionesContent() {
               {/* Fila principal: equipos + inputs */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 text-right">
-                  <span className="font-semibold text-sm">{partido.equipo_local}</span>
+                  <span className="font-semibold text-sm">
+                    {BANDERAS[partido.equipo_local] && <span className="mr-1">{BANDERAS[partido.equipo_local]}</span>}
+                    {partido.equipo_local}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <GoalInput
@@ -312,7 +316,10 @@ function PrediccionesContent() {
                   />
                 </div>
                 <div className="flex-1">
-                  <span className="font-semibold text-sm">{partido.equipo_visitante}</span>
+                  <span className="font-semibold text-sm">
+                    {BANDERAS[partido.equipo_visitante] && <span className="mr-1">{BANDERAS[partido.equipo_visitante]}</span>}
+                    {partido.equipo_visitante}
+                  </span>
                 </div>
               </div>
 
