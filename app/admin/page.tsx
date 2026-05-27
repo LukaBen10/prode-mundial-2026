@@ -81,6 +81,7 @@ export default function AdminPage() {
   const [msgEdit, setMsgEdit] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [ajustando, setAjustando] = useState<number | null>(null);
 
   // Resultados
   const [partidos, setPartidos] = useState<Partido[]>([]);
@@ -219,6 +220,17 @@ export default function AdminPage() {
     } else {
       setMensajes(prev => ({ ...prev, [partidoId]: `Error: ${data.error}` }));
     }
+  }
+
+  async function ajustarPuntosRapido(nombre_usuario: string, id: number, delta: number) {
+    setAjustando(id);
+    const res = await fetch('/api/admin/puntos-extra', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ nombre_usuario, puntos: delta }),
+    });
+    setAjustando(null);
+    if ((await res.json()).ok) cargarParticipantes();
   }
 
   async function buscarParticipante(q: string) {
@@ -415,8 +427,22 @@ export default function AdminPage() {
                           </a>
                         </td>
                         <td className="px-3 py-3 text-zinc-400">{p.mail}</td>
-                        <td className="px-3 py-3 text-right">
-                          <span className={`font-bold ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>{p.puntos}</span>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, -1)}
+                              disabled={ajustando === p.id}
+                              className="w-6 h-6 flex items-center justify-center rounded bg-red-500/15 hover:bg-red-500/35 text-red-400 text-sm font-bold transition-colors disabled:opacity-40"
+                            >−</button>
+                            <span className={`font-bold w-7 text-center tabular-nums ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
+                              {ajustando === p.id ? '…' : p.puntos}
+                            </span>
+                            <button
+                              onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, 1)}
+                              disabled={ajustando === p.id}
+                              className="w-6 h-6 flex items-center justify-center rounded bg-green-500/15 hover:bg-green-500/35 text-green-400 text-sm font-bold transition-colors disabled:opacity-40"
+                            >+</button>
+                          </div>
                         </td>
                         <td className="px-3 py-3 text-right text-zinc-500 text-xs whitespace-nowrap">{formatFechaHora(p.created_at)}</td>
                         <td className="px-3 py-3">
