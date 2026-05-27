@@ -147,21 +147,6 @@ function PrediccionesContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participanteId, router]);
 
-  // Polling de resultados cada 60s — actualiza partidos y ranking sin tocar las predicciones del usuario
-  useEffect(() => {
-    if (!participanteId) return;
-    const interval = setInterval(() => {
-      Promise.all([
-        fetch('/api/partidos').then(r => r.json()),
-        fetch('/api/ranking').then(r => r.json()),
-      ]).then(([partidos, ranking]) => {
-        setPartidos(partidos);
-        actualizarRanking(ranking as RankingEntry[]);
-      });
-    }, 60000);
-    return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [participanteId]);
 
   const partidosGrupo = partidos.filter((p) => p.grupo === grupoActivo);
   const jugados = partidos.filter(p => p.jugado);
@@ -322,11 +307,10 @@ function PrediccionesContent() {
               <div className="text-5xl">⏳</div>
               <p className="text-zinc-300 font-bold text-lg">Todavía no se jugó ningún partido.</p>
               <p className="text-zinc-500 text-sm">Los resultados van a aparecer acá cuando empiecen.</p>
-              <p className="text-zinc-600 text-xs">Se actualiza automáticamente cada 60 segundos.</p>
             </div>
           ) : (
             <>
-              <p className="text-zinc-500 text-xs">Se actualiza automáticamente · {jugados.length} {jugados.length === 1 ? 'partido jugado' : 'partidos jugados'}</p>
+              <p className="text-zinc-500 text-xs">{jugados.length} {jugados.length === 1 ? 'partido jugado' : 'partidos jugados'}</p>
 
               {/* Tabs de grupos — solo los que tienen jugados */}
               <div className="flex flex-wrap gap-2">
