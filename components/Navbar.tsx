@@ -53,19 +53,15 @@ export default function Navbar() {
 
         {/* Nav */}
         <div className="flex items-center gap-1 sm:gap-4">
-          {logueado && (
-            <>
-              <Link href="/predicciones" className={linkClass('/predicciones')}>
-                ⚽ Predicciones
-              </Link>
-              <Link href="/resultados" className={linkClass('/resultados')}>
-                📊 Resultados
-              </Link>
-              <Link href="/ranking" className={linkClass('/ranking')}>
-                🏆 Ranking
-              </Link>
-            </>
-          )}
+          <Link href="/predicciones" className={linkClass('/predicciones')}>
+            ⚽ Predicciones
+          </Link>
+          <Link href="/resultados" className={linkClass('/resultados')}>
+            📊 Resultados
+          </Link>
+          <Link href="/ranking" className={linkClass('/ranking')}>
+            🏆 Ranking
+          </Link>
 
           {logueado ? (
             <>
