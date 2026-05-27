@@ -303,13 +303,22 @@ export default function AdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-bold">Panel Admin</h1>
-        {stats && (
-          <div className="flex gap-4 text-sm text-zinc-400">
-            <span><strong className="text-white">{stats.total}</strong> inscriptos</span>
-            <span><strong className="text-white">{stats.conPredicciones as number}</strong> con predicciones</span>
-            <span><strong className="text-white">{jugados.length}</strong> partidos jugados</span>
-          </div>
-        )}
+        <div className="flex items-center gap-4 flex-wrap">
+          {stats && (
+            <div className="flex gap-4 text-sm text-zinc-400">
+              <span><strong className="text-white">{stats.total}</strong> inscriptos</span>
+              <span><strong className="text-white">{stats.conPredicciones as number}</strong> con predicciones</span>
+              <span><strong className="text-white">{jugados.length}</strong> partidos jugados</span>
+            </div>
+          )}
+          <button
+            onClick={() => cargarParticipantes()}
+            disabled={loadingParts}
+            className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+          >
+            {loadingParts ? '⏳' : '🔄 Actualizar'}
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}

@@ -43,7 +43,14 @@ export default function Home() {
               className="text-transparent bg-clip-text"
               style={{ backgroundImage: 'linear-gradient(135deg, #f97316 0%, #fb923c 40%, #fbbf24 100%)' }}
             >
-              Donut Makers.
+              Donut Makers
+            </span>
+            <br />
+            <span
+              className="text-transparent bg-clip-text"
+              style={{ backgroundImage: 'linear-gradient(135deg, #f97316 0%, #fb923c 40%, #fbbf24 100%)' }}
+            >
+              Caballito.
             </span>
           </h1>
           <p className="text-zinc-200 text-lg sm:text-xl font-semibold pt-3">
