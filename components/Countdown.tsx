@@ -15,15 +15,30 @@ export default function Countdown() {
 
   if (dias === 0) {
     return (
-      <span className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-semibold px-4 py-2 rounded-full">
+      <div className="inline-flex items-center gap-2.5 bg-green-500/10 border border-green-500/30 text-green-400 font-bold px-6 py-3 rounded-full text-base">
         ⚽ ¡El Mundial arrancó!
-      </span>
+      </div>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-400 text-sm font-bold px-4 py-2 rounded-full">
-      ⏳ El Mundial arranca en {dias} {dias === 1 ? 'día' : 'días'}
-    </span>
+    <div
+      className="inline-flex items-center gap-3 px-6 py-3 rounded-full border"
+      style={{
+        background: 'rgba(251,191,36,0.07)',
+        borderColor: 'rgba(251,191,36,0.25)',
+      }}
+    >
+      <span className="text-zinc-500 text-sm font-semibold tracking-wide uppercase">Faltan</span>
+      <span
+        className="text-4xl font-black leading-none text-transparent bg-clip-text"
+        style={{ backgroundImage: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}
+      >
+        {dias}
+      </span>
+      <span className="text-zinc-500 text-sm font-semibold tracking-wide uppercase">
+        {dias === 1 ? 'día' : 'días'}
+      </span>
+    </div>
   );
 }

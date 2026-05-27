@@ -21,29 +21,38 @@ export default function Navbar() {
     localStorage.removeItem('prode_id');
     localStorage.removeItem('prode_codigo');
     localStorage.removeItem('prode_nombre');
+    localStorage.removeItem('prode_admin');
     setLogueado(false);
     router.push('/');
   }
 
   const linkClass = (path: string) =>
-    `text-sm font-medium transition-colors px-1 ${
+    `text-sm font-semibold transition-colors px-1 pb-0.5 ${
       pathname === path
-        ? 'text-white'
-        : 'text-zinc-400 hover:text-white'
+        ? 'text-white border-b-2 border-orange-500'
+        : 'text-zinc-400 hover:text-white border-b-2 border-transparent'
     }`;
 
   return (
-    <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 bg-zinc-950/85 backdrop-blur-md border-b border-zinc-800/50">
+      {/* Línea de acento degradado */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[1px]"
+        style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(251,146,60,0.5) 30%, rgba(251,191,36,0.6) 50%, rgba(251,146,60,0.5) 70%, transparent 100%)' }}
+      />
+
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
-          <span className="text-2xl">🍩</span>
-          <span className="text-white">Prode</span>
-          <span className="text-amber-400">Mundial 26</span>
+        <Link href="/" className="flex items-center gap-2 shrink-0 group">
+          <span className="text-xl">🍩</span>
+          <div className="leading-none">
+            <span className="font-black text-base text-white tracking-tight">Prode </span>
+            <span className="font-black text-base text-amber-400 tracking-tight">Mundial 26</span>
+          </div>
         </Link>
 
-        {/* Nav links — siempre visibles */}
-        <div className="flex items-center gap-1 sm:gap-3">
+        {/* Nav */}
+        <div className="flex items-center gap-1 sm:gap-4">
           <Link href="/predicciones" className={linkClass('/predicciones')}>
             ⚽ Predicciones
           </Link>
@@ -70,7 +79,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/unirse"
-                className="bg-orange-500 hover:bg-orange-400 text-white text-sm px-4 py-1.5 rounded-full font-semibold transition-colors ml-1"
+                className="bg-orange-500 hover:bg-orange-400 text-white text-sm px-4 py-1.5 rounded-full font-bold transition-all shadow-md shadow-orange-500/20 hover:shadow-orange-500/30 ml-1"
               >
                 Participar
               </Link>

@@ -12,19 +12,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body className="text-white min-h-screen font-sans antialiased">
 
-        {/* Fondo: imagen de estadio/copa difuminada */}
+        {/* Fondo: estadio de noche */}
         <div
           className="fixed inset-0 -z-20"
           style={{
             backgroundImage: "url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&q=70')",
             backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-            filter: 'blur(18px) brightness(0.22) saturate(0.7)',
+            backgroundPosition: 'center 30%',
+            filter: 'blur(16px) brightness(0.28) saturate(0.65)',
             transform: 'scale(1.08)',
           }}
         />
-        {/* Overlay oscuro encima de la imagen */}
-        <div className="fixed inset-0 -z-10 bg-zinc-950/80" />
+        {/* Overlay: gradiente azul-noche de estadio */}
+        <div
+          className="fixed inset-0 -z-10"
+          style={{
+            background: 'linear-gradient(180deg, rgba(4,6,24,0.88) 0%, rgba(9,9,11,0.86) 35%, rgba(9,9,11,0.96) 100%)',
+          }}
+        />
 
         <Navbar />
         <main className="max-w-5xl mx-auto px-4 py-8">{children}</main>
