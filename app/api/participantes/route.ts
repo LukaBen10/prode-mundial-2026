@@ -43,8 +43,8 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await db.execute({
-      sql: 'INSERT INTO participantes (nombre_completo, nombre_usuario, mail, whatsapp, dni, codigo) VALUES (?, ?, ?, ?, ?, ?)',
-      args: [nombre_completo.trim(), nombre_usuario.trim(), mail.trim(), whatsapp.trim(), dni.trim(), codigo],
+      sql: 'INSERT INTO participantes (nombre, nombre_completo, nombre_usuario, mail, whatsapp, dni, codigo) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      args: [nombre_completo.trim(), nombre_completo.trim(), nombre_usuario.trim(), mail.trim(), whatsapp.trim(), dni.trim(), codigo],
     });
 
     return NextResponse.json({
