@@ -112,16 +112,6 @@ export default function AdminPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Polling cada 20 segundos — actualiza stats, participantes y partidos en vivo
-  useEffect(() => {
-    if (!authMode) return;
-    const interval = setInterval(() => {
-      cargarParticipantes();
-      cargarPartidos();
-    }, 20000);
-    return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authMode]);
 
   function getHeaders(): Record<string, string> {
     return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
