@@ -14,8 +14,10 @@ const MEDALLAS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 export default function RankingPage() {
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [miId, setMiId] = useState<string | null>(null);
 
   useEffect(() => {
+    setMiId(localStorage.getItem('prode_id'));
     fetch('/api/ranking')
       .then((r) => r.json())
       .then((data) => { setRanking(data); setLoading(false); });
@@ -48,23 +50,29 @@ export default function RankingPage() {
               </tr>
             </thead>
             <tbody>
-              {ranking.map((entry) => (
-                <tr
-                  key={entry.id}
-                  className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors"
-                >
-                  <td className="px-6 py-4 text-xl">
-                    {MEDALLAS[entry.posicion] ?? (
-                      <span className="text-zinc-500 text-base font-mono">{entry.posicion}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 font-medium">{entry.nombre_usuario}</td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-green-400 font-bold text-lg">{entry.puntos}</span>
-                    <span className="text-zinc-500 text-sm ml-1">pts</span>
-                  </td>
-                </tr>
-              ))}
+              {ranking.map((entry) => {
+                const soyYo = miId && String(entry.id) === miId;
+                return (
+                  <tr
+                    key={entry.id}
+                    className={`border-b border-zinc-800/50 last:border-0 transition-colors ${soyYo ? 'bg-green-500/10 border-green-500/20' : 'hover:bg-zinc-800/30'}`}
+                  >
+                    <td className="px-6 py-4 text-xl">
+                      {MEDALLAS[entry.posicion] ?? (
+                        <span className="text-zinc-500 text-base font-mono">{entry.posicion}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 font-medium">
+                      {entry.nombre_usuario}
+                      {soyYo && <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">vos</span>}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`font-bold text-lg ${soyYo ? 'text-green-400' : 'text-green-400'}`}>{entry.puntos}</span>
+                      <span className="text-zinc-500 text-sm ml-1">pts</span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

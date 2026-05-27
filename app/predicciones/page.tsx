@@ -48,6 +48,8 @@ function GoalInput({
   );
 }
 
+interface RankingEntry { posicion: number; id: number; nombre_usuario: string; puntos: number; }
+
 function PrediccionesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -60,6 +62,7 @@ function PrediccionesContent() {
   const [saving, setSaving] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [nombre, setNombre] = useState('');
+  const [miRanking, setMiRanking] = useState<{ posicion: number; puntos: number; puntosLider: number; puntosNext: number | null } | null>(null);
 
   useEffect(() => {
     if (!participanteId) { router.push('/unirse'); return; }
@@ -70,13 +73,31 @@ function PrediccionesContent() {
     Promise.all([
       fetch('/api/partidos').then((r) => r.json()),
       fetch(`/api/predicciones?participanteId=${participanteId}`).then((r) => r.json()),
-    ]).then(([partidos, preds]) => {
+      fetch('/api/ranking').then((r) => r.json()),
+    ]).then(([partidos, preds, ranking]) => {
       setPartidos(partidos);
       const map: Record<number, { local: string; visitante: string }> = {};
       for (const p of preds) {
         map[p.partido_id] = { local: String(p.goles_local), visitante: String(p.goles_visitante) };
       }
       setPredicciones(map);
+
+      // Calcular posición
+      const lista = ranking as RankingEntry[];
+      const yo = lista.find((r) => String(r.id) === participanteId);
+      if (yo) {
+        const anterior = yo.posicion > 1 ? lista.find(r => r.posicion === yo.posicion - 1) : null;
+        setMiRanking({
+          posicion: yo.posicion,
+          puntos: yo.puntos,
+          puntosLider: lista[0]?.puntos ?? 0,
+          puntosNext: anterior ? anterior.puntos - yo.puntos : null,
+        });
+      } else if (lista.length > 0) {
+        // Participante registrado pero sin puntos todavía
+        setMiRanking({ posicion: lista.length + 1, puntos: 0, puntosLider: lista[0]?.puntos ?? 0, puntosNext: null });
+      }
+
       setLoading(false);
     });
   }, [participanteId, router]);
@@ -140,6 +161,40 @@ function PrediccionesContent() {
           style={{ width: `${(predCount / totalPartidos) * 100}%` }}
         />
       </div>
+
+      {/* Card de posición */}
+      {miRanking && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center space-y-1">
+            <div className="text-3xl font-bold text-white">
+              {miRanking.posicion === 1 ? '🥇' : miRanking.posicion === 2 ? '🥈' : miRanking.posicion === 3 ? '🥉' : `#${miRanking.posicion}`}
+            </div>
+            <div className="text-zinc-400 text-xs">Tu posición</div>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center space-y-1">
+            <div className="text-3xl font-bold text-green-400">{miRanking.puntos}</div>
+            <div className="text-zinc-400 text-xs">Tus puntos</div>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center space-y-1">
+            {miRanking.puntosNext !== null && miRanking.puntosNext > 0 ? (
+              <>
+                <div className="text-3xl font-bold text-orange-400">+{miRanking.puntosNext}</div>
+                <div className="text-zinc-400 text-xs">Para subir un puesto</div>
+              </>
+            ) : miRanking.posicion === 1 ? (
+              <>
+                <div className="text-3xl">🏆</div>
+                <div className="text-zinc-400 text-xs">Vas primero!</div>
+              </>
+            ) : (
+              <>
+                <div className="text-3xl font-bold text-zinc-500">{miRanking.puntosLider}</div>
+                <div className="text-zinc-400 text-xs">Puntos del líder</div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Tabs de grupos */}
       <div className="flex flex-wrap gap-2">
