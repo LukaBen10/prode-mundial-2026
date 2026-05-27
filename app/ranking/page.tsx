@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface RankingEntry {
@@ -11,16 +12,19 @@ interface RankingEntry {
 }
 
 export default function RankingPage() {
+  const router = useRouter();
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [miId, setMiId] = useState<string | null>(null);
 
   useEffect(() => {
-    setMiId(localStorage.getItem('prode_id'));
+    const id = localStorage.getItem('prode_id');
+    if (!id) { router.push('/login'); return; }
+    setMiId(id);
     fetch('/api/ranking')
       .then((r) => r.json())
       .then((data) => { setRanking(data); setLoading(false); });
-  }, []);
+  }, [router]);
 
   const top3 = ranking.slice(0, 3);
   const resto = ranking.slice(3);
