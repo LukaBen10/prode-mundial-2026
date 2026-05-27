@@ -56,6 +56,9 @@ export default function Navbar() {
           <Link href="/predicciones" className={linkClass('/predicciones')}>
             ⚽ Predicciones
           </Link>
+          <Link href="/resultados" className={linkClass('/resultados')}>
+            📊 Resultados
+          </Link>
           <Link href="/ranking" className={linkClass('/ranking')}>
             🏆 Ranking
           </Link>
