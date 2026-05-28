@@ -416,8 +416,8 @@ export default function AdminPage() {
               {participantes.length === 0 ? 'Todavía no se inscribió nadie.' : 'No hay resultados para ese filtro.'}
             </div>
           ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-x-auto">
+              <table className="w-full text-sm min-w-[860px]">
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-400">
                     <th className="text-left px-3 py-3 font-medium">#</th>
@@ -597,15 +597,15 @@ export default function AdminPage() {
                     <span className="text-xs text-zinc-500 w-16 shrink-0">{formatFecha(partido.fecha)}</span>
                     <span className="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">G {partido.grupo}</span>
                     <div className="flex-1 flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium truncate flex-1 text-right">{partido.equipo_local}</span>
+                      <span className="text-sm font-medium truncate flex-1 text-right min-w-0">{partido.equipo_local}</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
                         onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local: e.target.value } }))}
-                        className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-green-500" />
-                      <span className="text-zinc-500">-</span>
+                        className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-base focus:outline-none focus:border-green-500 shrink-0" />
+                      <span className="text-zinc-500 shrink-0">-</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
                         onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante: e.target.value } }))}
-                        className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-green-500" />
-                      <span className="text-sm font-medium truncate flex-1">{partido.equipo_visitante}</span>
+                        className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-base focus:outline-none focus:border-green-500 shrink-0" />
+                      <span className="text-sm font-medium truncate flex-1 min-w-0">{partido.equipo_visitante}</span>
                     </div>
                     <button onClick={() => cargarResultado(partido.id)}
                       className="bg-green-500 hover:bg-green-400 text-white px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
@@ -697,8 +697,8 @@ export default function AdminPage() {
               <p>Sin actividad registrada todavía.</p>
             </div>
           ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-x-auto">
+              <table className="w-full text-sm min-w-[600px]">
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-400">
                     <th className="text-left px-4 py-3 font-medium">Fecha</th>

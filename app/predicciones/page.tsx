@@ -213,20 +213,20 @@ function PrediccionesContent() {
           const locked = estaLocked(partido);
           return (
             <div key={partido.id} className={`bg-zinc-900 border rounded-xl p-4 space-y-3 ${locked ? 'border-zinc-800 opacity-70' : 'border-zinc-700'}`}>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 text-right">
-                  <span className="font-semibold text-sm">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex-1 min-w-0 text-right">
+                  <span className="font-semibold text-sm block truncate">
                     {BANDERAS[partido.equipo_local] && <FlagIcon code={BANDERAS[partido.equipo_local]} alt={partido.equipo_local} className="mr-1.5" />}
                     {partido.equipo_local}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <GoalInput value={pred?.local ?? ''} onChange={(v) => updatePred(partido.id, 'local', v)} disabled={locked} />
                   <span className="text-zinc-500 font-bold">-</span>
                   <GoalInput value={pred?.visitante ?? ''} onChange={(v) => updatePred(partido.id, 'visitante', v)} disabled={locked} />
                 </div>
-                <div className="flex-1">
-                  <span className="font-semibold text-sm">
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-sm block truncate">
                     {BANDERAS[partido.equipo_visitante] && <FlagIcon code={BANDERAS[partido.equipo_visitante]} alt={partido.equipo_visitante} className="mr-1.5" />}
                     {partido.equipo_visitante}
                   </span>

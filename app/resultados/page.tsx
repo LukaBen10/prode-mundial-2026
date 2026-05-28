@@ -130,16 +130,16 @@ export default function ResultadosPage() {
               return (
                 <div key={partido.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
                   {/* Resultado real */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 text-right font-semibold text-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0 text-right font-semibold text-sm truncate">
                       <Flag equipo={partido.equipo_local} />{partido.equipo_local}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                       <div className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-lg font-black text-white text-lg">{gL}</div>
                       <span className="text-zinc-500 font-bold">-</span>
                       <div className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-lg font-black text-white text-lg">{gV}</div>
                     </div>
-                    <div className="flex-1 font-semibold text-sm">
+                    <div className="flex-1 min-w-0 font-semibold text-sm truncate">
                       <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
                     </div>
                   </div>

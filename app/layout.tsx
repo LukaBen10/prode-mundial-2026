@@ -1,10 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Prode Mundial 2026 | Donut Makers',
   description: '¿Sabés de fútbol? Demostralo. El prode del barrio.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -67,7 +67,7 @@ export default function UnirsePage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-5">
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">Nombre completo</label>

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* ── Inputs numéricos: ocultar flechas ────────────── */
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -7,4 +8,24 @@ input[type='number']::-webkit-outer-spin-button {
 }
 input[type='number'] {
   -moz-appearance: textfield;
+}
+
+/* ── iOS: evitar zoom automático al tocar inputs ──── */
+/* iOS Safari hace zoom cuando el font-size del input es < 16px */
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── iOS: scroll suave y tap highlight ───────────── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Scroll suave en toda la app ──────────────────── */
+html {
+  scroll-behavior: smooth;
 }
