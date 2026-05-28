@@ -729,22 +729,6 @@ export default function AdminPage() {
       {tab === 'admins' && (
         <div className="space-y-6">
 
-          {/* Resumen de roles */}
-          <div className="grid grid-cols-3 gap-3 text-center text-xs">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
-              <div className="font-bold text-zinc-300 mb-1">Admin básico</div>
-              <div className="text-zinc-500 leading-relaxed">Solo consumos<br/>(puntos por visita)</div>
-            </div>
-            <div className="bg-zinc-900 border border-blue-500/20 rounded-xl p-3">
-              <div className="font-bold text-blue-400 mb-1">🛡️ Moderador</div>
-              <div className="text-zinc-500 leading-relaxed">Consumos + ver participantes<br/>+ cargar/sync resultados</div>
-            </div>
-            <div className="bg-zinc-900 border border-amber-400/20 rounded-xl p-3">
-              <div className="font-bold text-amber-400 mb-1">⭐ Superadmin</div>
-              <div className="text-zinc-500 leading-relaxed">Todo + gestión admins<br/>+ auditoría (solo vos)</div>
-            </div>
-          </div>
-
           {/* Admins actuales */}
           <section className="space-y-3">
             <h2 className="font-semibold text-zinc-300">Con rol admin ({adminsActuales.length})</h2>
