@@ -7,14 +7,17 @@ import { useRouter, usePathname } from 'next/navigation';
 export default function Navbar() {
   const [logueado, setLogueado] = useState(false);
   const [nombre, setNombre] = useState('');
+  const [esAdmin, setEsAdmin] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     const id = localStorage.getItem('prode_id');
     const n = localStorage.getItem('prode_nombre');
+    const adminLevel = parseInt(localStorage.getItem('prode_admin') ?? '0');
     setLogueado(!!id);
     setNombre(n ?? '');
+    setEsAdmin(adminLevel >= 1);
   }, [pathname]);
 
   function cerrarSesion() {
@@ -65,6 +68,11 @@ export default function Navbar() {
 
           {logueado ? (
             <>
+              {esAdmin && (
+                <Link href="/admin" className={linkClass('/admin')}>
+                  ⚙️ Admin
+                </Link>
+              )}
               <Link href="/mi-prode" className={linkClass('/mi-prode')}>
                 👤 @{nombre}
               </Link>
