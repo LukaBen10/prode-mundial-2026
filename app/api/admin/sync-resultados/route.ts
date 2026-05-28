@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkSuperAdminAuth } from '@/lib/adminAuth';
+import { checkModeratorAuth } from '@/lib/adminAuth';
+import { audit } from '@/lib/audit';
 import db from '@/lib/db';
 import { fromApiName } from '@/lib/data/equipos-api';
 
@@ -20,7 +21,6 @@ async function calcularPuntos(partido_id: number, gL: number, gV: number) {
   });
   for (const pred of preds.rows) {
     const pL = pred[2] as number, pV = pred[3] as number;
-    const predId = pred[0] as number, partId = pred[1] as number;
     let pts = 0;
     if (pL === gL && pV === gV) pts = 3;
     else {
@@ -28,14 +28,14 @@ async function calcularPuntos(partido_id: number, gL: number, gV: number) {
       const pG = pL > pV ? 'L' : pV > pL ? 'V' : 'E';
       if (rG === pG) pts = 1;
     }
-    await db.execute({ sql: 'UPDATE predicciones SET puntos = ? WHERE id = ?', args: [pts, predId] });
-    if (pts > 0) await db.execute({ sql: 'UPDATE participantes SET puntos = puntos + ? WHERE id = ?', args: [pts, partId] });
+    await db.execute({ sql: 'UPDATE predicciones SET puntos = ? WHERE id = ?', args: [pts, pred[0]] });
+    if (pts > 0) await db.execute({ sql: 'UPDATE participantes SET puntos = puntos + ? WHERE id = ?', args: [pts, pred[1]] });
   }
   return preds.rows.length;
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await checkSuperAdminAuth(req))) {
+  if (!(await checkModeratorAuth(req))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
@@ -49,12 +49,9 @@ export async function POST(req: NextRequest) {
       `${FD_BASE}/competitions/${FD_COMPETITION}/matches?status=FINISHED`,
       { headers: { 'X-Auth-Token': apiKey }, cache: 'no-store' }
     );
-    if (!res.ok) {
-      return NextResponse.json({ error: `API fútbol: ${res.status}` }, { status: 502 });
-    }
+    if (!res.ok) return NextResponse.json({ error: `API fútbol: ${res.status}` }, { status: 502 });
 
     const { matches } = await res.json() as { matches: FDMatch[] };
-
     const dbRes = await db.execute('SELECT id, equipo_local, equipo_visitante FROM partidos WHERE jugado = 0');
     const pendientes = dbRes.rows.map(r => ({ id: r[0] as number, local: r[1] as string, visitante: r[2] as string }));
 
@@ -76,6 +73,9 @@ export async function POST(req: NextRequest) {
       actualizados++;
       log.push(`${esHome} ${gL}-${gV} ${esAway} (${predsN} pred)`);
     }
+
+    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
+    await audit(adminId, 'Sincronizó resultados', actualizados > 0 ? log.join(' | ') : 'Sin cambios');
 
     return NextResponse.json({ ok: true, actualizados, log });
   } catch (err) {

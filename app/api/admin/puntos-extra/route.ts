@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { checkAdminAuth } from '@/lib/adminAuth';
+import { audit } from '@/lib/audit';
 
 export async function POST(req: NextRequest) {
   if (!(await checkAdminAuth(req))) {
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const { nombre_usuario, puntos } = await req.json();
-    if (!nombre_usuario || !puntos) {
+    if (!nombre_usuario || puntos == null) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
     }
 
@@ -28,10 +29,14 @@ export async function POST(req: NextRequest) {
     });
 
     const puntosNuevos = (part.rows[0][2] as number) + puntos;
+
+    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
+    const signo = puntos > 0 ? `+${puntos}` : String(puntos);
+    await audit(adminId, 'Ajustó puntos', `@${nombre_usuario} ${signo} → total ${puntosNuevos}`);
+
     return NextResponse.json({ ok: true, nombre_usuario, puntosNuevos });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }
 

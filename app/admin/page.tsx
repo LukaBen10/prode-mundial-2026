@@ -48,7 +48,16 @@ interface CamposEdicion {
   puntos: string;
 }
 
-type Tab = 'participantes' | 'resultados' | 'consumos' | 'admins';
+type Tab = 'participantes' | 'resultados' | 'consumos' | 'admins' | 'auditoria';
+
+interface AuditEntry {
+  id: number;
+  admin_id: number;
+  admin_nombre: string;
+  accion: string;
+  detalle: string;
+  created_at: string;
+}
 
 function formatFecha(fecha: string) {
   const d = new Date(fecha + 'T12:00:00');
@@ -102,17 +111,23 @@ export default function AdminPage() {
   const [msgAdmin, setMsgAdmin] = useState<Record<number, string>>({});
 
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [adminLevel, setAdminLevel] = useState(0);
+  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
 
   useEffect(() => {
-    const adminLevel = parseInt(localStorage.getItem('prode_admin') ?? '0');
+    const level = parseInt(localStorage.getItem('prode_admin') ?? '0');
     const participanteId = localStorage.getItem('prode_id');
-    if (adminLevel >= 1 && participanteId) {
+    if (level >= 1 && participanteId) {
       setAuthMode('participant');
-      setIsSuperAdmin(adminLevel >= 2);
-      cargarParticipantes(participanteId);
-      if (adminLevel >= 2) cargarPartidos();
-      // Admin regular: forzar tab consumos
-      if (adminLevel < 2) setTab('consumos');
+      setAdminLevel(level);
+      setIsSuperAdmin(level >= 3);
+      if (level >= 2) {
+        cargarParticipantes(participanteId);
+        cargarPartidos();
+      } else {
+        setTab('consumos');
+      }
     } else {
       window.location.href = participanteId ? '/mi-prode' : '/login';
     }
@@ -212,6 +227,14 @@ export default function AdminPage() {
     }
   }
 
+  async function cargarAuditLog() {
+    setLoadingAudit(true);
+    const res = await fetch('/api/admin/audit', { headers: getHeaders() });
+    const data = await res.json();
+    setAuditLog(Array.isArray(data) ? data : []);
+    setLoadingAudit(false);
+  }
+
   async function sincronizarResultados() {
     setSyncing(true);
     setSyncMsg('');
@@ -295,15 +318,16 @@ export default function AdminPage() {
     setResultadosAdmin(Array.isArray(data) ? data : []);
   }
 
-  async function toggleAdmin(id: number, hacerAdmin: boolean) {
+  async function setRol(id: number, nuevoNivel: number) {
     const res = await fetch('/api/admin/participantes', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', ...getHeaders() },
-      body: JSON.stringify({ id, is_admin: hacerAdmin }),
+      body: JSON.stringify({ id, is_admin: nuevoNivel }),
     });
     const data = await res.json();
+    const roles = ['', 'admin', 'moderador', 'superadmin'];
     if (data.ok) {
-      setMsgAdmin(prev => ({ ...prev, [id]: hacerAdmin ? '✓ Ahora es admin' : '✓ Ya no es admin' }));
+      setMsgAdmin(prev => ({ ...prev, [id]: nuevoNivel === 0 ? '✓ Sin rol de admin' : `✓ Rol: ${roles[nuevoNivel]}` }));
       cargarParticipantes();
     } else {
       setMsgAdmin(prev => ({ ...prev, [id]: `Error: ${data.error}` }));
@@ -332,9 +356,9 @@ export default function AdminPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold">Panel Admin</h1>
-          {isSuperAdmin && (
-            <span className="text-xs bg-amber-400/15 border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-full font-bold">⭐ superadmin</span>
-          )}
+          {adminLevel >= 3 && <span className="text-xs bg-amber-400/15 border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-full font-bold">⭐ superadmin</span>}
+          {adminLevel === 2 && <span className="text-xs bg-blue-400/15 border border-blue-400/30 text-blue-400 px-2.5 py-1 rounded-full font-bold">🛡️ moderador</span>}
+          {adminLevel === 1 && <span className="text-xs bg-zinc-700 border border-zinc-600 text-zinc-300 px-2.5 py-1 rounded-full font-bold">admin</span>}
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           {stats && isSuperAdmin && (
@@ -354,17 +378,22 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Tabs — superadmin ve todo, admin regular solo consumos */}
+      {/* Tabs por nivel: 1=consumos, 2=+participantes+resultados, 3=+admins+auditoría */}
       <div className="flex gap-2 border-b border-zinc-800 pb-0 flex-wrap">
         {([
-          { id: 'participantes', label: '👥 Participantes', superOnly: true },
-          { id: 'resultados',    label: '⚽ Resultados',    superOnly: true },
-          { id: 'consumos',      label: '🍩 Consumos',      superOnly: false },
-          { id: 'admins',        label: '🔑 Admins',        superOnly: true },
-        ] as { id: Tab; label: string; superOnly: boolean }[])
-          .filter(t => isSuperAdmin || !t.superOnly)
+          { id: 'participantes', label: '👥 Participantes', minLevel: 2 },
+          { id: 'resultados',    label: '⚽ Resultados',    minLevel: 2 },
+          { id: 'consumos',      label: '🍩 Consumos',      minLevel: 1 },
+          { id: 'admins',        label: '🔑 Admins',        minLevel: 3 },
+          { id: 'auditoria',     label: '📋 Auditoría',     minLevel: 3 },
+        ] as { id: Tab; label: string; minLevel: number }[])
+          .filter(t => adminLevel >= t.minLevel)
           .map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button key={t.id}
+              onClick={() => {
+                setTab(t.id);
+                if (t.id === 'auditoria' && auditLog.length === 0) cargarAuditLog();
+              }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
                 tab === t.id ? 'text-white border-green-500' : 'text-zinc-400 border-transparent hover:text-white'
               }`}>
@@ -476,26 +505,26 @@ export default function AdminPage() {
                         </td>
                         <td className="px-3 py-3 text-zinc-400 break-all">{p.mail}</td>
                         <td className="px-3 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, -1)}
-                              disabled={ajustando === p.id}
-                              className="w-6 h-6 flex items-center justify-center rounded bg-red-500/15 hover:bg-red-500/35 text-red-400 text-sm font-bold transition-colors disabled:opacity-40"
-                            >−</button>
-                            <span className={`font-bold w-7 text-center tabular-nums ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
-                              {ajustando === p.id ? '…' : p.puntos}
-                            </span>
-                            <button
-                              onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, 1)}
-                              disabled={ajustando === p.id}
-                              className="w-6 h-6 flex items-center justify-center rounded bg-green-500/15 hover:bg-green-500/35 text-green-400 text-sm font-bold transition-colors disabled:opacity-40"
-                            >+</button>
-                          </div>
+                          {isSuperAdmin ? (
+                            <div className="flex items-center justify-end gap-1">
+                              <button onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, -1)} disabled={ajustando === p.id}
+                                className="w-6 h-6 flex items-center justify-center rounded bg-red-500/15 hover:bg-red-500/35 text-red-400 text-sm font-bold transition-colors disabled:opacity-40">−</button>
+                              <span className={`font-bold w-7 text-center tabular-nums ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
+                                {ajustando === p.id ? '…' : p.puntos}
+                              </span>
+                              <button onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, 1)} disabled={ajustando === p.id}
+                                className="w-6 h-6 flex items-center justify-center rounded bg-green-500/15 hover:bg-green-500/35 text-green-400 text-sm font-bold transition-colors disabled:opacity-40">+</button>
+                            </div>
+                          ) : (
+                            <span className={`font-bold text-right block pr-2 tabular-nums ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>{p.puntos}</span>
+                          )}
                         </td>
                         <td className="px-3 py-3 text-right text-zinc-500 text-xs whitespace-nowrap">{formatFechaHora(p.created_at)}</td>
                         <td className="px-3 py-3">
                           {esSuperAdmin ? (
                             <span className="text-xs text-amber-400/60 font-semibold pr-2">🔒 protegido</span>
+                          ) : !isSuperAdmin ? (
+                            <span className="text-xs text-zinc-600 pr-2">—</span>
                           ) : isConfirmingDelete ? (
                             <div className="flex items-center justify-end gap-1.5">
                               <span className="text-xs text-red-400 mr-1">¿Eliminar?</span>
@@ -647,61 +676,134 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* ── Tab: Auditoría ────────────────────────────────────── */}
+      {tab === 'auditoria' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-zinc-400">Registro de todas las acciones de los administradores.</p>
+            </div>
+            <button onClick={cargarAuditLog} disabled={loadingAudit}
+              className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+              {loadingAudit ? '⏳' : '🔄 Actualizar'}
+            </button>
+          </div>
+
+          {loadingAudit ? (
+            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+          ) : auditLog.length === 0 ? (
+            <div className="text-center py-12 text-zinc-500">
+              <div className="text-4xl mb-3">📋</div>
+              <p>Sin actividad registrada todavía.</p>
+            </div>
+          ) : (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-zinc-400">
+                    <th className="text-left px-4 py-3 font-medium">Fecha</th>
+                    <th className="text-left px-4 py-3 font-medium">Admin</th>
+                    <th className="text-left px-4 py-3 font-medium">Acción</th>
+                    <th className="text-left px-4 py-3 font-medium">Detalle</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditLog.map(entry => (
+                    <tr key={entry.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/20">
+                      <td className="px-4 py-3 text-zinc-500 text-xs whitespace-nowrap">
+                        {new Date(entry.created_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-amber-400 text-xs">@{entry.admin_nombre}</td>
+                      <td className="px-4 py-3 text-white text-xs">{entry.accion}</td>
+                      <td className="px-4 py-3 text-zinc-400 text-xs">{entry.detalle}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Tab: Admins ────────────────────────────────────────── */}
       {tab === 'admins' && (
         <div className="space-y-6">
+
+          {/* Resumen de roles */}
+          <div className="grid grid-cols-3 gap-3 text-center text-xs">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
+              <div className="font-bold text-zinc-300 mb-1">Admin básico</div>
+              <div className="text-zinc-500 leading-relaxed">Solo consumos<br/>(puntos por visita)</div>
+            </div>
+            <div className="bg-zinc-900 border border-blue-500/20 rounded-xl p-3">
+              <div className="font-bold text-blue-400 mb-1">🛡️ Moderador</div>
+              <div className="text-zinc-500 leading-relaxed">Consumos + ver participantes<br/>+ cargar/sync resultados</div>
+            </div>
+            <div className="bg-zinc-900 border border-amber-400/20 rounded-xl p-3">
+              <div className="font-bold text-amber-400 mb-1">⭐ Superadmin</div>
+              <div className="text-zinc-500 leading-relaxed">Todo + gestión admins<br/>+ auditoría (solo vos)</div>
+            </div>
+          </div>
+
+          {/* Admins actuales */}
           <section className="space-y-3">
-            <h2 className="font-semibold text-zinc-300">Admins actuales ({adminsActuales.length})</h2>
+            <h2 className="font-semibold text-zinc-300">Con rol admin ({adminsActuales.length})</h2>
             {adminsActuales.length === 0 ? (
-              <p className="text-zinc-500 text-sm">No hay admins cargados todavía.</p>
+              <p className="text-zinc-500 text-sm">No hay admins asignados todavía.</p>
             ) : (
               <div className="space-y-2">
-                {adminsActuales.map(p => (
-                  <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
-                    <div>
-                      <span className="font-semibold text-white">@{p.nombre_usuario}</span>
-                      <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
-                      <span className="ml-2 text-amber-400 text-xs">🔑 admin</span>
+                {adminsActuales.map(p => {
+                  const nivel = p.is_admin as number;
+                  const esSA = nivel >= 3;
+                  const rolLabel = nivel >= 3 ? '⭐ superadmin' : nivel === 2 ? '🛡️ moderador' : '🔑 admin';
+                  return (
+                    <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                      <div>
+                        <span className="font-semibold text-white">@{p.nombre_usuario}</span>
+                        <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
+                        <span className={`ml-2 text-xs ${esSA ? 'text-amber-400' : nivel === 2 ? 'text-blue-400' : 'text-zinc-400'}`}>{rolLabel}</span>
+                      </div>
+                      {!esSA && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
+                          {nivel !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">→ Admin</button>}
+                          {nivel !== 2 && <button onClick={() => setRol(p.id, 2)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded text-xs font-semibold">→ Moderador</button>}
+                          <button onClick={() => setRol(p.id, 0)} className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1 rounded text-xs font-semibold">Quitar rol</button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-3">
-                      {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
-                      <button onClick={() => toggleAdmin(p.id, false)}
-                        className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">
-                        Quitar admin
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
 
+          {/* Asignar rol a usuario */}
           <section className="space-y-3">
-            <h2 className="font-semibold text-zinc-300">Dar acceso admin</h2>
-            <p className="text-zinc-500 text-sm">Buscá un participante y hacelo admin. Va a poder entrar al panel con su cuenta.</p>
+            <h2 className="font-semibold text-zinc-300">Asignar rol a un participante</h2>
             <input type="text" value={busquedaAdmin} onChange={e => buscarAdmin(e.target.value)}
               placeholder="Buscar por usuario o nombre..."
               className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500" />
             {resultadosAdmin.length > 0 && (
               <div className="space-y-2">
                 {resultadosAdmin.map(p => {
-                  const yaEsAdmin = adminsActuales.some(a => a.id === p.id);
+                  const nivelActual = (adminsActuales.find(a => a.id === p.id)?.is_admin as number) ?? 0;
+                  const esSA = nivelActual >= 3;
                   return (
                     <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                       <div>
                         <span className="font-semibold text-white">@{p.nombre_usuario}</span>
                         <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
-                        {yaEsAdmin && <span className="ml-2 text-amber-400 text-xs">🔑 ya es admin</span>}
+                        {nivelActual > 0 && !esSA && <span className="ml-2 text-zinc-500 text-xs">actual: {nivelActual === 2 ? 'moderador' : 'admin'}</span>}
                       </div>
-                      <div className="flex items-center gap-3">
-                        {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
-                        {!yaEsAdmin && (
-                          <button onClick={() => toggleAdmin(p.id, true)}
-                            className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">
-                            Hacer admin
-                          </button>
-                        )}
-                      </div>
+                      {!esSA && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
+                          {nivelActual !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 border border-zinc-600 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Admin</button>}
+                          {nivelActual !== 2 && <button onClick={() => setRol(p.id, 2)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Moderador</button>}
+                          {nivelActual > 0 && <button onClick={() => setRol(p.id, 0)} className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Quitar</button>}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

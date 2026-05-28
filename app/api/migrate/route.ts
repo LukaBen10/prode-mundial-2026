@@ -85,13 +85,30 @@ export async function GET() {
     }
   }
 
-  // ── marcar luka como superadmin (is_admin = 2) ────────────────
+  // ── tabla audit_log ───────────────────────────────────────────
+  try {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        admin_id INTEGER NOT NULL,
+        admin_nombre TEXT NOT NULL DEFAULT '',
+        accion TEXT NOT NULL,
+        detalle TEXT DEFAULT '',
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+    results.push({ column: 'audit_log', status: 'tabla lista' });
+  } catch (err) {
+    results.push({ column: 'audit_log', status: `error: ${err instanceof Error ? err.message : String(err)}` });
+  }
+
+  // ── marcar luka como superadmin (is_admin = 3) ────────────────
   try {
     const r = await db.execute({
-      sql: "UPDATE participantes SET is_admin = 2 WHERE nombre_usuario = 'luka'",
+      sql: "UPDATE participantes SET is_admin = 3 WHERE nombre_usuario = 'luka'",
       args: [],
     });
-    results.push({ column: 'luka.is_admin', status: r.rowsAffected ? 'marcado como superadmin (2)' : 'usuario luka no encontrado' });
+    results.push({ column: 'luka.is_admin', status: r.rowsAffected ? 'marcado como superadmin (3)' : 'usuario luka no encontrado' });
   } catch (err) {
     results.push({ column: 'luka.is_admin', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }
