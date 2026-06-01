@@ -107,7 +107,7 @@ export default function Home() {
             <span className="text-4xl">🏆</span>
             <div>
               <h2 className="text-xl font-black text-white">¡Ganá premios, no solo gloria!</h2>
-              <p className="text-amber-400/80 text-sm font-semibold">Los que la rompen en el ranking se llevan premios del local</p>
+              <p className="text-amber-400/80 text-sm font-semibold">Los que la rompen en el ranking se llevan grandes premios</p>
             </div>
           </div>
           <div className="grid sm:grid-cols-3 gap-3 relative z-10">
