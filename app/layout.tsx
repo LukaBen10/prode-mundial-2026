@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Link from 'next/link';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 
@@ -68,8 +69,52 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <main className="max-w-5xl mx-auto px-4 py-8 animate-fadeIn">{children}</main>
         <footer className="border-t border-zinc-800/60 mt-16">
-          <div className="max-w-5xl mx-auto px-4 py-6 text-center text-zinc-500 text-sm">
-            Donut Makers Bakery · Av. La Plata 702, CABA
+          <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
+            <div className="grid sm:grid-cols-3 gap-5 text-sm">
+              {/* Local */}
+              <div className="space-y-1.5">
+                <p className="font-bold text-zinc-300">Donut Makers Caballito</p>
+                <p className="text-zinc-500">Av. La Plata 702, CABA</p>
+                <Link href="/bases" className="text-zinc-500 hover:text-zinc-300 transition-colors inline-block">
+                  Bases y Condiciones
+                </Link>
+              </div>
+
+              {/* Contacto */}
+              <div className="space-y-1.5 text-zinc-500">
+                <p className="font-semibold text-zinc-400">Contacto</p>
+                <p>
+                  <a href="https://wa.me/5491172421226" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-300 transition-colors">
+                    📱 WhatsApp 11 7242-1226
+                  </a>
+                </p>
+                <p>
+                  <a href="mailto:donutmakers.caballito@gmail.com" className="hover:text-zinc-300 transition-colors break-all">
+                    ✉️ donutmakers.caballito@gmail.com
+                  </a>
+                </p>
+                <p>
+                  <a href="https://www.instagram.com/donut.makers.caballito" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-300 transition-colors">
+                    📷 @donut.makers.caballito
+                  </a>
+                </p>
+              </div>
+
+              {/* Creador */}
+              <div className="space-y-1.5 text-zinc-500 sm:text-right">
+                <p className="font-semibold text-zinc-400">Creado por</p>
+                <p>Luka Benincasa</p>
+                <p>
+                  <a href="mailto:lukabenincasa@gmail.com" className="hover:text-zinc-300 transition-colors break-all">
+                    lukabenincasa@gmail.com
+                  </a>
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-zinc-800/40 pt-4 text-center text-xs text-zinc-600">
+              © 2026 Donut Makers Caballito · El Prode del Mundial 2026
+            </div>
           </div>
         </footer>
       </body>
