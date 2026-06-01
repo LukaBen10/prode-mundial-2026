@@ -164,8 +164,8 @@ export default function Home() {
               <span className="font-black text-xl text-white">puntos EXTRA</span>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              Sumá al ranking sin predecir: <strong className="text-white">+1 punto</strong> por venir a ver un
-              partido del Mundial a <strong className="text-white">Donut Makers</strong> con consumo, y{' '}
+              Sumá puntos al ranking sin predecir: <strong className="text-white">+1 punto por cada partido</strong> del
+              Mundial que vengas a ver a <strong className="text-white">Donut Makers</strong> con consumo, y{' '}
               <strong className="text-white">+1 punto</strong> más por cada 4 donas especiales del Mundial que compres.
               Donut + fútbol = imbatible.
             </p>
