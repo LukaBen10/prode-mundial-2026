@@ -74,7 +74,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Local */}
               <div className="space-y-1.5">
                 <p className="font-bold text-zinc-300">Donut Makers Caballito</p>
-                <p className="text-zinc-500">Av. La Plata 702, CABA</p>
+                <p>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Av.+La+Plata+702,+Caballito,+CABA"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    📍 Av. La Plata 702, CABA
+                  </a>
+                </p>
                 <Link href="/bases" className="text-zinc-500 hover:text-zinc-300 transition-colors inline-block">
                   Bases y Condiciones
                 </Link>
@@ -103,7 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Creador */}
               <div className="space-y-1.5 text-zinc-500 sm:text-right">
                 <p className="font-semibold text-zinc-400">Creado por</p>
-                <p>Luka Benincasa</p>
+                <p>Luka</p>
                 <p>
                   <Link href="/contacto" className="text-orange-400/80 hover:text-orange-300 transition-colors font-medium">
                     ¿Querés una web o app? Escribime →
