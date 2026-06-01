@@ -260,3 +260,6 @@ export const FASES_ELIM: { fase: FaseElim; label: string; corto: string }[] = [
 
 export const NOMBRES_GRUPOS = Object.keys(GRUPOS);
 export { GRUPOS };
+
+// Lista plana de los 48 equipos, ordenada — para selects del admin
+export const TODOS_LOS_EQUIPOS = Object.values(GRUPOS).flat().sort((a, b) => a.localeCompare(b, 'es'));

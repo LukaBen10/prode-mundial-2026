@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { TODOS_LOS_EQUIPOS, FASES_ELIM } from '@/lib/data/partidos';
 
 interface ParticipanteCompleto {
   id: number;
@@ -32,6 +33,8 @@ interface Partido {
   goles_local: number | null;
   goles_visitante: number | null;
   jugado: number;
+  num_partido?: number;
+  estadio?: string;
 }
 
 interface Stats {
@@ -101,6 +104,8 @@ export default function AdminPage() {
   const [mensajes, setMensajes] = useState<Record<number, string>>({});
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
+  const [crucesEdit, setCrucesEdit] = useState<Record<number, { local: string; visitante: string }>>({});
+  const [cruceMsg, setCruceMsg] = useState<Record<number, string>>({});
 
   // Consumos
   const [busqueda, setBusqueda] = useState('');
@@ -287,6 +292,25 @@ export default function AdminPage() {
     }
   }
 
+  async function guardarCruce(partidoId: number, actualLocal: string, actualVisitante: string) {
+    const edit = crucesEdit[partidoId];
+    const local = edit?.local ?? actualLocal;
+    const visitante = edit?.visitante ?? actualVisitante;
+    const res = await fetch('/api/admin/partido', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ partido_id: partidoId, equipo_local: local, equipo_visitante: visitante }),
+    });
+    if (res.status === 401) { window.location.href = '/login'; return; }
+    const data = await res.json();
+    if (data.ok) {
+      setCruceMsg(prev => ({ ...prev, [partidoId]: '✓ Guardado' }));
+      cargarPartidos();
+    } else {
+      setCruceMsg(prev => ({ ...prev, [partidoId]: `Error: ${data.error}` }));
+    }
+  }
+
   async function cargarResultado(partidoId: number) {
     const res = resultados[partidoId];
     if (!res) return;
@@ -384,8 +408,11 @@ export default function AdminPage() {
     return <div className="text-center py-20 text-zinc-500">Verificando acceso...</div>;
   }
 
-  const pendientes = partidos.filter(p => !p.jugado);
+  // Pendientes de cargar resultado: no jugados y con equipos ya definidos
+  const pendientes = partidos.filter(p => !p.jugado && p.equipo_local && p.equipo_visitante);
   const jugados = partidos.filter(p => p.jugado);
+  // Partidos de eliminatoria (num 73-104) para definir cruces a mano
+  const eliminatorias = partidos.filter(p => (p.num_partido ?? 0) >= 73);
   const participantesFiltrados = participantes.filter(p =>
     !filtroBusqueda ||
     p.nombre_completo.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
@@ -653,6 +680,51 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
+
+          {/* Definir cruces de eliminatoria (a mano, respaldo del auto-sync) */}
+          {eliminatorias.length > 0 && (
+            <details className="bg-zinc-900 border border-amber-500/20 rounded-xl overflow-hidden">
+              <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-white flex items-center justify-between gap-2">
+                <span>🏆 Definir cruces de eliminatoria</span>
+                <span className="text-xs text-zinc-500">{eliminatorias.filter(p => p.equipo_local && p.equipo_visitante).length}/{eliminatorias.length} definidos</span>
+              </summary>
+              <div className="px-4 pb-4 space-y-4 border-t border-zinc-800 pt-3">
+                <p className="text-xs text-zinc-500">Normalmente se completan solos con la API. Acá podés definir o corregir quién juega cada partido a mano.</p>
+                {FASES_ELIM.map(f => {
+                  const pF = eliminatorias.filter(p => p.fase === f.fase);
+                  if (pF.length === 0) return null;
+                  return (
+                    <div key={f.fase} className="space-y-2">
+                      <h3 className="text-xs font-bold text-amber-400/80 uppercase tracking-wide">{f.label}</h3>
+                      {pF.map(p => {
+                        const edit = crucesEdit[p.id];
+                        const localVal = edit?.local ?? p.equipo_local;
+                        const visitanteVal = edit?.visitante ?? p.equipo_visitante;
+                        const selCls = "bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-amber-500 flex-1 min-w-[110px]";
+                        return (
+                          <div key={p.id} className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs text-zinc-500 w-32 shrink-0">{formatFecha(p.fecha)} · {p.estadio}</span>
+                            <select value={localVal} onChange={e => setCrucesEdit(prev => ({ ...prev, [p.id]: { local: e.target.value, visitante: visitanteVal } }))} className={selCls}>
+                              <option value="">Por definir</option>
+                              {TODOS_LOS_EQUIPOS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                            </select>
+                            <span className="text-zinc-500 text-xs">vs</span>
+                            <select value={visitanteVal} onChange={e => setCrucesEdit(prev => ({ ...prev, [p.id]: { local: localVal, visitante: e.target.value } }))} className={selCls}>
+                              <option value="">Por definir</option>
+                              {TODOS_LOS_EQUIPOS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                            </select>
+                            <button onClick={() => guardarCruce(p.id, p.equipo_local, p.equipo_visitante)}
+                              className="bg-amber-500 hover:bg-amber-400 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0">Guardar</button>
+                            {cruceMsg[p.id] && <span className="text-xs text-green-400">{cruceMsg[p.id]}</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          )}
 
           <section className="space-y-3">
             <h2 className="font-semibold text-zinc-300">Partidos pendientes ({pendientes.length})</h2>
