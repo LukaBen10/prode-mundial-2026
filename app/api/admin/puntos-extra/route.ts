@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { checkAdminAuth } from '@/lib/adminAuth';
 import { audit } from '@/lib/audit';
+import { errJson, getAdminId } from '@/lib/apiHelpers';
 
 export async function POST(req: NextRequest) {
   if (!(await checkAdminAuth(req))) {
@@ -29,14 +30,12 @@ export async function POST(req: NextRequest) {
     });
 
     const puntosNuevos = (part.rows[0][2] as number) + puntos;
-
-    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
     const signo = puntos > 0 ? `+${puntos}` : String(puntos);
-    await audit(adminId, 'Ajustó puntos', `@${nombre_usuario} ${signo} → total ${puntosNuevos}`);
+    await audit(getAdminId(req), 'Ajustó puntos', `@${nombre_usuario} ${signo} → total ${puntosNuevos}`);
 
     return NextResponse.json({ ok: true, nombre_usuario, puntosNuevos });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return errJson(err);
   }
 }
 

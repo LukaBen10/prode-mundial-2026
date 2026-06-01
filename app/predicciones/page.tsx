@@ -4,21 +4,8 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { BANDERAS } from '@/lib/data/banderas';
 import FlagIcon from '@/components/FlagIcon';
-
-interface Partido {
-  id: number;
-  fase: string;
-  grupo: string;
-  equipo_local: string;
-  equipo_visitante: string;
-  fecha: string;
-  hora: string;
-  estadio: string;
-  ciudad: string;
-  jugado: number;
-  goles_local: number | null;
-  goles_visitante: number | null;
-}
+import LoadingState from '@/components/LoadingState';
+import type { Partido, RankingEntry } from '@/lib/types';
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
@@ -73,8 +60,6 @@ function GoalInput({ value, onChange, disabled }: { value: string; onChange: (v:
       className="w-12 h-10 text-center bg-zinc-800 border border-zinc-700 rounded-lg text-white font-bold focus:outline-none focus:border-green-500 disabled:opacity-40 transition-colors" />
   );
 }
-
-interface RankingEntry { posicion: number; id: number; nombre_usuario: string; puntos: number; }
 
 function PrediccionesContent() {
   const searchParams = useSearchParams();
@@ -148,7 +133,7 @@ function PrediccionesContent() {
   const predCount = Object.keys(predicciones).length;
   const totalPartidos = partidos.length;
 
-  if (loading) return <div className="text-center py-20 text-zinc-400">Cargando partidos...</div>;
+  if (loading) return <LoadingState texto="Cargando partidos..." />;
 
   return (
     <div className="space-y-6">
@@ -255,7 +240,7 @@ function PrediccionesContent() {
 
 export default function PrediccionesPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-zinc-400">Cargando...</div>}>
+    <Suspense fallback={<LoadingState />}>
       <PrediccionesContent />
     </Suspense>
   );

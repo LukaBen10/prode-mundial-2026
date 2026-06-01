@@ -1,30 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-interface RankingEntry {
-  posicion: number;
-  id: number;
-  nombre_usuario: string;
-  puntos: number;
-}
+import LoadingState from '@/components/LoadingState';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import type { RankingEntry } from '@/lib/types';
 
 export default function RankingPage() {
-  const router = useRouter();
+  const miId = useAuthRedirect();
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [miId, setMiId] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = localStorage.getItem('prode_id');
-    if (!id) { router.push('/login'); return; }
-    setMiId(id);
+    if (!miId) return;
     fetch('/api/ranking')
       .then((r) => r.json())
       .then((data) => { setRanking(data); setLoading(false); });
-  }, [router]);
+  }, [miId]);
 
   const top3 = ranking.slice(0, 3);
   const resto = ranking.slice(3);
@@ -39,8 +31,8 @@ export default function RankingPage() {
         <p className="text-zinc-500 text-sm">Se actualiza después de cada partido</p>
       </div>
 
-      {loading ? (
-        <div className="py-20 text-center text-zinc-500">Cargando...</div>
+      {!miId || loading ? (
+        <LoadingState />
       ) : ranking.length === 0 ? (
         <div className="py-20 text-center space-y-4">
           <div className="text-5xl">👀</div>

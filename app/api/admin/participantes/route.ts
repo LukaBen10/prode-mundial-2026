@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { checkModeratorAuth, checkSuperAdminAuth } from '@/lib/adminAuth';
 import { audit } from '@/lib/audit';
+import { errJson, getAdminId } from '@/lib/apiHelpers';
 
 /** GET — moderador+ puede ver la lista */
 export async function GET(req: NextRequest) {
@@ -44,11 +45,10 @@ export async function PUT(req: NextRequest) {
       args: [nombre_completo, nombre_usuario, mail, whatsapp, dni, puntos ?? 0, id],
     });
 
-    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
-    await audit(adminId, 'Editó participante', `@${nombre_usuario} (id ${id})`);
+    await audit(getAdminId(req), 'Editó participante', `@${nombre_usuario} (id ${id})`);
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return errJson(err);
   }
 }
 
@@ -66,11 +66,10 @@ export async function DELETE(req: NextRequest) {
     await db.execute({ sql: 'DELETE FROM predicciones WHERE participante_id = ?', args: [id] });
     await db.execute({ sql: 'DELETE FROM participantes WHERE id = ?', args: [id] });
 
-    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
-    await audit(adminId, 'Eliminó participante', `@${nombre} (id ${id})`);
+    await audit(getAdminId(req), 'Eliminó participante', `@${nombre} (id ${id})`);
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return errJson(err);
   }
 }
 
@@ -88,11 +87,10 @@ export async function PATCH(req: NextRequest) {
     const nuevoNivel = typeof is_admin === 'number' ? is_admin : (is_admin ? 1 : 0);
     await db.execute({ sql: 'UPDATE participantes SET is_admin = ? WHERE id = ?', args: [nuevoNivel, id] });
 
-    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
     const roles = ['usuario', 'admin', 'moderador', 'superadmin'];
-    await audit(adminId, 'Cambió rol', `@${nombre} → ${roles[nuevoNivel] ?? nuevoNivel}`);
+    await audit(getAdminId(req), 'Cambió rol', `@${nombre} → ${roles[nuevoNivel] ?? nuevoNivel}`);
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return errJson(err);
   }
 }

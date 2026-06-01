@@ -1,15 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-interface RankingEntry { posicion: number; id: number; nombre_usuario: string; puntos: number; }
+import LoadingState from '@/components/LoadingState';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import type { RankingEntry } from '@/lib/types';
 
 export default function MiProdePage() {
-  const router = useRouter();
+  const participanteId = useAuthRedirect();
   const [nombre, setNombre] = useState('');
-  const [participanteId, setParticipanteId] = useState<string | null>(null);
   const [posicion, setPosicion] = useState<number | null>(null);
   const [puntos, setPuntos] = useState(0);
   const [puntosNext, setPuntosNext] = useState<number | null>(null);
@@ -19,20 +18,15 @@ export default function MiProdePage() {
   const [esAdmin, setEsAdmin] = useState(false);
 
   useEffect(() => {
-    const id = localStorage.getItem('prode_id');
-    const n = localStorage.getItem('prode_nombre');
-
-    if (!id) { router.push('/login'); return; }
-
-    setParticipanteId(id);
-    setNombre(n ?? '');
-    setEsAdmin(localStorage.getItem('prode_admin') === '1');
+    if (!participanteId) return;
+    setNombre(localStorage.getItem('prode_nombre') ?? '');
+    setEsAdmin(parseInt(localStorage.getItem('prode_admin') ?? '0') >= 1);
 
     fetch('/api/ranking')
       .then(r => r.json())
       .then((ranking: RankingEntry[]) => {
         setTotalParticipantes(ranking.length);
-        const yo = ranking.find(r => String(r.id) === id);
+        const yo = ranking.find(r => String(r.id) === participanteId);
         if (yo) {
           setPosicion(yo.posicion);
           setPuntos(yo.puntos);
@@ -45,9 +39,9 @@ export default function MiProdePage() {
         }
         setLoading(false);
       });
-  }, [router]);
+  }, [participanteId]);
 
-  if (loading) return <div className="text-center py-20 text-zinc-400">Cargando...</div>;
+  if (!participanteId || loading) return <LoadingState />;
 
   const medalla = posicion === 1 ? '🥇' : posicion === 2 ? '🥈' : posicion === 3 ? '🥉' : null;
 
@@ -105,7 +99,7 @@ export default function MiProdePage() {
       {/* Acciones */}
       <div className="space-y-3">
         <Link
-          href={`/predicciones?participanteId=${participanteId}`}
+          href={`/predicciones?participanteId=${participanteId ?? ''}`}
           className="flex items-center justify-between w-full bg-zinc-900 border border-zinc-800 hover:border-orange-500/40 rounded-2xl p-5 transition-colors group"
         >
           <div className="space-y-0.5">

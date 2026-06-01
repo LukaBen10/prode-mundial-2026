@@ -1,21 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { BANDERAS } from '@/lib/data/banderas';
 import FlagIcon from '@/components/FlagIcon';
-
-interface Partido {
-  id: number;
-  grupo: string;
-  equipo_local: string;
-  equipo_visitante: string;
-  fecha: string;
-  hora: string;
-  jugado: number;
-  goles_local: number | null;
-  goles_visitante: number | null;
-}
+import LoadingState from '@/components/LoadingState';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { calcularPuntos } from '@/lib/scoring';
+import type { Partido } from '@/lib/types';
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
@@ -24,14 +15,7 @@ function formatFecha(fecha: string) {
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
 }
 
-function calcularPuntos(gL: number, gV: number, pL: number, pV: number): 0 | 1 | 3 {
-  if (gL === pL && gV === pV) return 3;
-  const ganR = gL > gV ? 'L' : gL < gV ? 'V' : 'E';
-  const ganP = pL > pV ? 'L' : pL < pV ? 'V' : 'E';
-  return ganR === ganP ? 1 : 0;
-}
-
-function PtsBadge({ pts }: { pts: 0 | 1 | 3 }) {
+function PtsBadge({ pts }: { pts: number }) {
   if (pts === 3) return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">✓ 3 pts</span>;
   if (pts === 1) return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">~ 1 pt</span>;
   return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-500/15 text-red-400 border border-red-500/20">✗ 0 pts</span>;
@@ -44,15 +28,14 @@ function Flag({ equipo }: { equipo: string }) {
 }
 
 export default function ResultadosPage() {
-  const router = useRouter();
+  const participanteId = useAuthRedirect();
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [predicciones, setPredicciones] = useState<Record<number, { local: string; visitante: string }>>({});
   const [grupoActivo, setGrupoActivo] = useState('A');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const participanteId = localStorage.getItem('prode_id');
-    if (!participanteId) { router.push('/login'); return; }
+    if (!participanteId) return;
 
     Promise.all([
       fetch('/api/partidos').then(r => r.json()),
@@ -63,18 +46,17 @@ export default function ResultadosPage() {
       for (const p of preds) map[p.partido_id] = { local: String(p.goles_local), visitante: String(p.goles_visitante) };
       setPredicciones(map);
 
-      // Ir al primer grupo que tenga jugados
       const primerConJugados = GRUPOS.find(g => (partidos as Partido[]).some(p => p.grupo === g && p.jugado));
       if (primerConJugados) setGrupoActivo(primerConJugados);
 
       setLoading(false);
     });
-  }, [router]);
+  }, [participanteId]);
 
   const jugados = partidos.filter(p => p.jugado);
   const gruposConJugados = GRUPOS.filter(g => partidos.some(p => p.grupo === g && p.jugado));
 
-  if (loading) return <div className="text-center py-20 text-zinc-400">Cargando...</div>;
+  if (!participanteId || loading) return <LoadingState />;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -125,7 +107,7 @@ export default function ResultadosPage() {
               const pred = predicciones[partido.id];
               const gL = partido.goles_local ?? 0;
               const gV = partido.goles_visitante ?? 0;
-              const pts = pred ? calcularPuntos(gL, gV, parseInt(pred.local) || 0, parseInt(pred.visitante) || 0) : null;
+              const pts = pred ? calcularPuntos(parseInt(pred.local) || 0, parseInt(pred.visitante) || 0, gL, gV) : null;
 
               return (
                 <div key={partido.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">

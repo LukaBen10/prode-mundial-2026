@@ -3,6 +3,8 @@ import { checkModeratorAuth } from '@/lib/adminAuth';
 import { audit } from '@/lib/audit';
 import db from '@/lib/db';
 import { fromApiName } from '@/lib/data/equipos-api';
+import { calcularYGuardarPuntos } from '@/lib/scoringDb';
+import { errJson, getAdminId } from '@/lib/apiHelpers';
 
 const FD_BASE = 'https://api.football-data.org/v4';
 const FD_COMPETITION = 'WC';
@@ -12,26 +14,6 @@ interface FDMatch {
   homeTeam: { name: string };
   awayTeam: { name: string };
   score: { fullTime: { home: number | null; away: number | null } };
-}
-
-async function calcularPuntos(partido_id: number, gL: number, gV: number) {
-  const preds = await db.execute({
-    sql: 'SELECT id, participante_id, goles_local, goles_visitante FROM predicciones WHERE partido_id = ?',
-    args: [partido_id],
-  });
-  for (const pred of preds.rows) {
-    const pL = pred[2] as number, pV = pred[3] as number;
-    let pts = 0;
-    if (pL === gL && pV === gV) pts = 3;
-    else {
-      const rG = gL > gV ? 'L' : gV > gL ? 'V' : 'E';
-      const pG = pL > pV ? 'L' : pV > pL ? 'V' : 'E';
-      if (rG === pG) pts = 1;
-    }
-    await db.execute({ sql: 'UPDATE predicciones SET puntos = ? WHERE id = ?', args: [pts, pred[0]] });
-    if (pts > 0) await db.execute({ sql: 'UPDATE participantes SET puntos = puntos + ? WHERE id = ?', args: [pts, pred[1]] });
-  }
-  return preds.rows.length;
 }
 
 export async function POST(req: NextRequest) {
@@ -69,16 +51,15 @@ export async function POST(req: NextRequest) {
       );
       if (!found) continue;
       await db.execute({ sql: 'UPDATE partidos SET goles_local=?, goles_visitante=?, jugado=1 WHERE id=?', args: [gL, gV, found.id] });
-      const predsN = await calcularPuntos(found.id, gL, gV);
+      const predsN = await calcularYGuardarPuntos(found.id, gL, gV);
       actualizados++;
       log.push(`${esHome} ${gL}-${gV} ${esAway} (${predsN} pred)`);
     }
 
-    const adminId = req.headers.get('x-admin-participante-id') ?? '?';
-    await audit(adminId, 'Sincronizó resultados', actualizados > 0 ? log.join(' | ') : 'Sin cambios');
+    await audit(getAdminId(req), 'Sincronizó resultados', actualizados > 0 ? log.join(' | ') : 'Sin cambios');
 
     return NextResponse.json({ ok: true, actualizados, log });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return errJson(err);
   }
 }
