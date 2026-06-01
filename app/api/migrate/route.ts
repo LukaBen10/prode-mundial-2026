@@ -18,6 +18,9 @@ export async function GET() {
     { name: 'autoriza_imagen', sql: 'ALTER TABLE participantes ADD COLUMN autoriza_imagen INTEGER NOT NULL DEFAULT 0' },
     { name: 'acepta_bases',    sql: 'ALTER TABLE participantes ADD COLUMN acepta_bases INTEGER NOT NULL DEFAULT 0' },
     { name: 'sigue_ig',        sql: 'ALTER TABLE participantes ADD COLUMN sigue_ig INTEGER NOT NULL DEFAULT 0' },
+    // Avisos por email — opt-in explícito. acepta_avisos: 1 si quiere recibir. avisos_definido: 1 si ya eligió (sí o no)
+    { name: 'acepta_avisos',   sql: 'ALTER TABLE participantes ADD COLUMN acepta_avisos INTEGER NOT NULL DEFAULT 0' },
+    { name: 'avisos_definido', sql: 'ALTER TABLE participantes ADD COLUMN avisos_definido INTEGER NOT NULL DEFAULT 0' },
   ];
   for (const col of colsParticipantes) {
     try {

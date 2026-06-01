@@ -17,6 +17,7 @@ export default function UnirsePage() {
   const [mayorEdad, setMayorEdad] = useState(false);
   const [aceptaBases, setAceptaBases] = useState(false);
   const [autorizaImagen, setAutorizaImagen] = useState(false);
+  const [aceptaAvisos, setAceptaAvisos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -39,7 +40,7 @@ export default function UnirsePage() {
       const res = await fetch('/api/participantes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni, password, mayor_edad: mayorEdad, sigue_ig: sigueIG, acepta_bases: aceptaBases, autoriza_imagen: autorizaImagen }),
+        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni, password, mayor_edad: mayorEdad, sigue_ig: sigueIG, acepta_bases: aceptaBases, autoriza_imagen: autorizaImagen, acepta_avisos: aceptaAvisos }),
       });
 
       const data = await res.json();
@@ -178,6 +179,20 @@ export default function UnirsePage() {
           <span className="text-sm text-zinc-300 leading-relaxed">
             Autorizo que, si gano, se publique mi nombre y foto en las redes de Donut Makers.{' '}
             <span className="text-zinc-500">(Opcional)</span>
+          </span>
+        </label>
+
+        {/* Checkbox avisos por mail (opcional) */}
+        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+          <input
+            type="checkbox"
+            checked={aceptaAvisos}
+            onChange={(e) => setAceptaAvisos(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+          />
+          <span className="text-sm text-zinc-300 leading-relaxed">
+            📧 Avisame por mail los días que juego, así no me olvido de cargar mis predicciones.{' '}
+            <span className="text-zinc-500">(Opcional · te podés dar de baja cuando quieras)</span>
           </span>
         </label>
 

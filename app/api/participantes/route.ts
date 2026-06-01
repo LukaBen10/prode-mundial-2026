@@ -8,7 +8,7 @@ function generarCodigo() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { nombre_completo, nombre_usuario, mail, whatsapp, dni, password, mayor_edad, acepta_bases, sigue_ig, autoriza_imagen } = await req.json();
+    const { nombre_completo, nombre_usuario, mail, whatsapp, dni, password, mayor_edad, acepta_bases, sigue_ig, autoriza_imagen, acepta_avisos } = await req.json();
 
     if (!nombre_completo?.trim()) return NextResponse.json({ error: 'El nombre completo es obligatorio' }, { status: 400 });
     if (!nombre_usuario?.trim()) return NextResponse.json({ error: 'El nombre de usuario es obligatorio' }, { status: 400 });
@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
 
     const result = await db.execute({
       sql: `INSERT INTO participantes
-            (nombre, nombre_completo, nombre_usuario, mail, whatsapp, dni, password_hash, codigo, mayor_edad, sigue_ig, acepta_bases, autoriza_imagen)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 1, ?)`,
-      args: [nombre_completo.trim(), nombre_completo.trim(), nombre_usuario.trim(), mail.trim(), whatsapp.trim(), dni.trim(), hashPassword(password), codigo, autoriza_imagen ? 1 : 0],
+            (nombre, nombre_completo, nombre_usuario, mail, whatsapp, dni, password_hash, codigo, mayor_edad, sigue_ig, acepta_bases, autoriza_imagen, acepta_avisos, avisos_definido)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 1, ?, ?, 1)`,
+      args: [nombre_completo.trim(), nombre_completo.trim(), nombre_usuario.trim(), mail.trim(), whatsapp.trim(), dni.trim(), hashPassword(password), codigo, autoriza_imagen ? 1 : 0, acepta_avisos ? 1 : 0],
     });
 
     return NextResponse.json({ id: Number(result.lastInsertRowid), nombre_completo: nombre_completo.trim(), nombre_usuario: nombre_usuario.trim(), codigo });
