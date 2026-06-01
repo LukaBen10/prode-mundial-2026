@@ -14,6 +14,9 @@ export default function UnirsePage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [sigueIG, setSigueIG] = useState(false);
+  const [mayorEdad, setMayorEdad] = useState(false);
+  const [aceptaBases, setAceptaBases] = useState(false);
+  const [autorizaImagen, setAutorizaImagen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,7 +39,7 @@ export default function UnirsePage() {
       const res = await fetch('/api/participantes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni, password }),
+        body: JSON.stringify({ nombre_completo: nombreCompleto, nombre_usuario: nombreUsuario, mail, whatsapp, dni, password, mayor_edad: mayorEdad, sigue_ig: sigueIG, acepta_bases: aceptaBases, autoriza_imagen: autorizaImagen }),
       });
 
       const data = await res.json();
@@ -133,6 +136,51 @@ export default function UnirsePage() {
           </span>
         </label>
 
+        {/* Checkbox mayor de edad */}
+        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+          <input
+            type="checkbox"
+            checked={mayorEdad}
+            onChange={(e) => setMayorEdad(e.target.checked)}
+            required
+            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+          />
+          <span className="text-sm text-zinc-300 leading-relaxed">
+            Confirmo que soy <strong className="text-white">mayor de 18 años</strong>.
+          </span>
+        </label>
+
+        {/* Checkbox bases y condiciones */}
+        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+          <input
+            type="checkbox"
+            checked={aceptaBases}
+            onChange={(e) => setAceptaBases(e.target.checked)}
+            required
+            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+          />
+          <span className="text-sm text-zinc-300 leading-relaxed">
+            Leí y acepto las{' '}
+            <Link href="/bases" target="_blank" className="text-orange-400 hover:text-orange-300 underline font-semibold">
+              Bases y Condiciones
+            </Link>.
+          </span>
+        </label>
+
+        {/* Checkbox uso de imagen (opcional) */}
+        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+          <input
+            type="checkbox"
+            checked={autorizaImagen}
+            onChange={(e) => setAutorizaImagen(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+          />
+          <span className="text-sm text-zinc-300 leading-relaxed">
+            Autorizo que, si gano, se publique mi nombre y foto en las redes de Donut Makers.{' '}
+            <span className="text-zinc-500">(Opcional)</span>
+          </span>
+        </label>
+
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3">
             {error}
@@ -141,7 +189,7 @@ export default function UnirsePage() {
 
         <button
           type="submit"
-          disabled={loading || !sigueIG}
+          disabled={loading || !sigueIG || !mayorEdad || !aceptaBases}
           className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-orange-500/20"
         >
           {loading ? 'Registrando...' : 'Entrar al prode ⚽'}

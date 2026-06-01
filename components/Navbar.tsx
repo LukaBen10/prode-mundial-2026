@@ -69,6 +69,7 @@ export default function Navbar() {
           <Link href="/predicciones" className={linkClass('/predicciones')}>⚽ Predicciones</Link>
           <Link href="/resultados" className={linkClass('/resultados')}>📊 Resultados</Link>
           <Link href="/ranking" className={linkClass('/ranking')}>🏆 Ranking</Link>
+          <Link href="/bases" className={linkClass('/bases')}>📋 Bases</Link>
           {logueado ? (
             <>
               {esAdmin && <Link href="/admin" className={linkClass('/admin')}>⚙️ Admin</Link>}
@@ -130,6 +131,9 @@ export default function Navbar() {
           </Link>
           <Link href="/ranking" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/ranking')}>
             🏆 Ranking
+          </Link>
+          <Link href="/bases" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/bases')}>
+            📋 Bases y Condiciones
           </Link>
 
           <div className="h-px bg-zinc-800/60 mx-4 my-1" />

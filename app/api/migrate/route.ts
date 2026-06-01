@@ -14,6 +14,10 @@ export async function GET() {
     { name: 'password_hash',   sql: 'ALTER TABLE participantes ADD COLUMN password_hash TEXT NOT NULL DEFAULT ""' },
     { name: 'is_admin',        sql: 'ALTER TABLE participantes ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0' },
     { name: 'fuera_premios',   sql: 'ALTER TABLE participantes ADD COLUMN fuera_premios INTEGER NOT NULL DEFAULT 0' },
+    { name: 'mayor_edad',      sql: 'ALTER TABLE participantes ADD COLUMN mayor_edad INTEGER NOT NULL DEFAULT 0' },
+    { name: 'autoriza_imagen', sql: 'ALTER TABLE participantes ADD COLUMN autoriza_imagen INTEGER NOT NULL DEFAULT 0' },
+    { name: 'acepta_bases',    sql: 'ALTER TABLE participantes ADD COLUMN acepta_bases INTEGER NOT NULL DEFAULT 0' },
+    { name: 'sigue_ig',        sql: 'ALTER TABLE participantes ADD COLUMN sigue_ig INTEGER NOT NULL DEFAULT 0' },
   ];
   for (const col of colsParticipantes) {
     try {
