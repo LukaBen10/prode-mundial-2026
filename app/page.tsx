@@ -124,7 +124,16 @@ export default function Home() {
             ))}
           </div>
           <p className="text-zinc-400 text-xs text-center relative z-10">
-            Los premios se anuncian antes de que arranque el Mundial. ¡Seguinos en IG para enterarte!
+            Los premios se anuncian antes de que arranque el Mundial. ¡Seguinos en{' '}
+            <a
+              href="https://www.instagram.com/donut.makers.caballito"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 font-semibold underline underline-offset-2"
+            >
+              @donut.makers.caballito
+            </a>{' '}
+            para enterarte!
           </p>
         </div>
       </section>
