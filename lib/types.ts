@@ -18,4 +18,5 @@ export interface RankingEntry {
   id: number;
   nombre_usuario: string;
   puntos: number;
+  fuera_premios?: number;
 }

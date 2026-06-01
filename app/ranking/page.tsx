@@ -18,8 +18,12 @@ export default function RankingPage() {
       .then((data) => { setRanking(data); setLoading(false); });
   }, [miId]);
 
-  const top3 = ranking.slice(0, 3);
-  const resto = ranking.slice(3);
+  // El podio de PREMIOS solo cuenta a quienes compiten (excluye staff/organizadores)
+  const competidores = ranking.filter((r) => !r.fuera_premios);
+  const top3 = competidores.slice(0, 3);
+  const top3Ids = new Set(top3.map((e) => e.id));
+  const resto = ranking.filter((e) => !top3Ids.has(e.id));
+  const hayExcluidos = ranking.some((r) => r.fuera_premios);
 
   return (
     <div className="max-w-2xl mx-auto space-y-10">
@@ -118,6 +122,13 @@ export default function RankingPage() {
             </div>
           )}
 
+          {/* Aclaración sobre el podio de premios */}
+          {top3.length > 0 && (
+            <p className="text-center text-amber-400/70 text-xs -mt-4">
+              🏆 El podio define los <strong>ganadores de premios</strong>
+            </p>
+          )}
+
           {/* Línea divisora */}
           {resto.length > 0 && (
             <div className="flex items-center gap-3">
@@ -147,6 +158,9 @@ export default function RankingPage() {
                           {soyYo && (
                             <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">vos</span>
                           )}
+                          {entry.fuera_premios ? (
+                            <span className="ml-2 text-xs bg-amber-500/15 text-amber-400/80 px-2 py-0.5 rounded-full" title="Juega pero no compite por premios">🏠 no compite</span>
+                          ) : null}
                         </td>
                         <td className="px-5 py-3.5 text-right">
                           <span className="font-bold text-green-400">{entry.puntos}</span>

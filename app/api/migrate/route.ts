@@ -13,6 +13,7 @@ export async function GET() {
     { name: 'dni',             sql: 'ALTER TABLE participantes ADD COLUMN dni TEXT NOT NULL DEFAULT ""' },
     { name: 'password_hash',   sql: 'ALTER TABLE participantes ADD COLUMN password_hash TEXT NOT NULL DEFAULT ""' },
     { name: 'is_admin',        sql: 'ALTER TABLE participantes ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0' },
+    { name: 'fuera_premios',   sql: 'ALTER TABLE participantes ADD COLUMN fuera_premios INTEGER NOT NULL DEFAULT 0' },
   ];
   for (const col of colsParticipantes) {
     try {

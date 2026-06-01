@@ -3,7 +3,7 @@ import db from '@/lib/db';
 
 export async function GET() {
   const result = await db.execute(
-    'SELECT id, nombre_usuario, puntos FROM participantes ORDER BY puntos DESC, nombre_usuario ASC LIMIT 50'
+    'SELECT id, nombre_usuario, puntos, fuera_premios FROM participantes ORDER BY puntos DESC, nombre_usuario ASC LIMIT 50'
   );
 
   const ranking = result.rows.map((r, i) => ({
@@ -11,6 +11,7 @@ export async function GET() {
     id: r[0],
     nombre_usuario: r[1],
     puntos: r[2],
+    fuera_premios: r[3] ?? 0,
   }));
 
   return NextResponse.json(ranking);

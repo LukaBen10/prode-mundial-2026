@@ -12,6 +12,7 @@ interface ParticipanteCompleto {
   puntos: number;
   created_at: string;
   is_admin: number;
+  fuera_premios: number;
 }
 
 interface ParticipanteBusqueda {
@@ -91,6 +92,7 @@ export default function AdminPage() {
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [ajustando, setAjustando] = useState<number | null>(null);
+  const [togglingPremios, setTogglingPremios] = useState<number | null>(null);
 
   // Resultados
   const [partidos, setPartidos] = useState<Partido[]>([]);
@@ -116,21 +118,46 @@ export default function AdminPage() {
   const [loadingAudit, setLoadingAudit] = useState(false);
 
   useEffect(() => {
-    const level = parseInt(localStorage.getItem('prode_admin') ?? '0');
     const participanteId = localStorage.getItem('prode_id');
-    if (level >= 1 && participanteId) {
-      setAuthMode('participant');
-      setAdminLevel(level);
-      setIsSuperAdmin(level >= 3);
-      if (level >= 2) {
-        cargarParticipantes(participanteId);
-        cargarPartidos();
-      } else {
-        setTab('consumos');
-      }
-    } else {
-      window.location.href = participanteId ? '/mi-prode' : '/login';
+    const token = localStorage.getItem('prode_token');
+
+    // Sin sesión → login
+    if (!participanteId || !token) {
+      window.location.href = '/login';
+      return;
     }
+
+    // Validar nivel REAL contra el servidor (no confiar en localStorage)
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/me', {
+          headers: { 'x-admin-participante-id': participanteId, 'x-session-token': token },
+        });
+        const data = await res.json();
+        const level = data.level ?? 0;
+
+        if (level < 1) {
+          // Sesión inválida o sin permisos de admin
+          window.location.href = '/mi-prode';
+          return;
+        }
+
+        // Sincronizar localStorage con el nivel real
+        localStorage.setItem('prode_admin', String(level));
+        setAuthMode('participant');
+        setAdminLevel(level);
+        setIsSuperAdmin(level >= 3);
+
+        if (level >= 2) {
+          cargarParticipantes(participanteId);
+          cargarPartidos();
+        } else {
+          setTab('consumos');
+        }
+      } catch {
+        window.location.href = '/mi-prode';
+      }
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -146,8 +173,9 @@ export default function AdminPage() {
     setLoadingParts(true);
     const id = pid ?? localStorage.getItem('prode_id') ?? '';
     const res = await fetch('/api/admin/participantes', {
-      headers: { 'x-admin-participante-id': id },
+      headers: { 'x-admin-participante-id': id, 'x-session-token': localStorage.getItem('prode_token') ?? '' },
     });
+    if (res.status === 401) { window.location.href = '/login'; return; }
     const data = await res.json();
     setParticipantes(data.participantes ?? []);
     setStats(data.stats ?? null);
@@ -337,6 +365,20 @@ export default function AdminPage() {
     }
   }
 
+  async function setFueraPremios(id: number, fuera: boolean) {
+    setTogglingPremios(id);
+    const res = await fetch('/api/admin/participantes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id, fuera_premios: fuera ? 1 : 0 }),
+    });
+    setTogglingPremios(null);
+    if ((await res.json()).ok) {
+      // Optimista: actualizar la fila localmente sin recargar todo
+      setParticipantes(prev => prev.map(p => p.id === id ? { ...p, fuera_premios: fuera ? 1 : 0 } : p));
+    }
+  }
+
   if (!authMode) {
     return <div className="text-center py-20 text-zinc-500">Verificando acceso...</div>;
   }
@@ -408,6 +450,12 @@ export default function AdminPage() {
       {/* ── Tab: Participantes ─────────────────────────────────── */}
       {tab === 'participantes' && (
         <div className="space-y-4">
+          {isSuperAdmin && (
+            <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-2.5 text-xs text-amber-200/90 flex items-center gap-2">
+              <span>🏠</span>
+              <span>Tocá <strong>&quot;🏆 compite&quot;</strong> en cualquier persona para marcarla como <strong>fuera de premios</strong> (vos, tu familia, el staff). Siguen jugando y aparecen en la tabla, pero no ganan premios.</span>
+            </div>
+          )}
           <input type="text" value={filtroBusqueda} onChange={e => setFiltroBusqueda(e.target.value)}
             placeholder="Filtrar por nombre, usuario, DNI o mail..."
             className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
@@ -493,10 +541,26 @@ export default function AdminPage() {
                       <tr key={p.id} className={`border-b border-zinc-800/50 last:border-0 transition-colors ${esSuperAdmin ? 'bg-amber-400/5' : 'hover:bg-zinc-800/20'}`}>
                         <td className="px-3 py-3 text-zinc-500 font-mono">{i + 1}</td>
                         <td className="px-3 py-3 font-semibold text-white">
-                          @{p.nombre_usuario}
-                          {esSuperAdmin
-                            ? <span className="ml-1 text-xs text-amber-400">⭐</span>
-                            : p.is_admin ? <span className="ml-1 text-xs text-amber-400">🔑</span> : null}
+                          <div className="flex items-center gap-1">
+                            @{p.nombre_usuario}
+                            {esSuperAdmin
+                              ? <span className="text-xs text-amber-400">⭐</span>
+                              : p.is_admin ? <span className="text-xs text-amber-400">🔑</span> : null}
+                          </div>
+                          {isSuperAdmin && (
+                            <button
+                              onClick={() => setFueraPremios(p.id, !p.fuera_premios)}
+                              disabled={togglingPremios === p.id}
+                              title={p.fuera_premios ? 'No compite por premios — click para que compita' : 'Compite por premios — click para excluir'}
+                              className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold transition-colors disabled:opacity-50 ${
+                                p.fuera_premios
+                                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+                                  : 'bg-zinc-800 text-zinc-500 border border-zinc-700 hover:text-zinc-300'
+                              }`}
+                            >
+                              {togglingPremios === p.id ? '…' : p.fuera_premios ? '🏠 sin premios' : '🏆 compite'}
+                            </button>
+                          )}
                         </td>
                         <td className="px-3 py-3 text-zinc-300">{p.nombre_completo}</td>
                         <td className="px-3 py-3 text-zinc-400 font-mono">{p.dni}</td>

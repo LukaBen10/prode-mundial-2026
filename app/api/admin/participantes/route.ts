@@ -11,13 +11,14 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await db.execute(
-    `SELECT id, nombre_completo, nombre_usuario, mail, whatsapp, dni, puntos, created_at, is_admin
+    `SELECT id, nombre_completo, nombre_usuario, mail, whatsapp, dni, puntos, created_at, is_admin, fuera_premios
      FROM participantes ORDER BY puntos DESC, nombre_usuario ASC`
   );
 
   const participantes = result.rows.map((r) => ({
     id: r[0], nombre_completo: r[1], nombre_usuario: r[2], mail: r[3],
     whatsapp: r[4], dni: r[5], puntos: r[6], created_at: r[7], is_admin: r[8] ?? 0,
+    fuera_premios: r[9] ?? 0,
   }));
 
   const total = participantes.length;
@@ -73,23 +74,38 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-/** PATCH — toggle is_admin, solo superadmin */
+/** PATCH — solo superadmin. Cambia is_admin (rol) o fuera_premios (elegibilidad) */
 export async function PATCH(req: NextRequest) {
   if (!(await checkSuperAdminAuth(req))) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   try {
-    const { id, is_admin } = await req.json();
-    if (id == null || is_admin == null) return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
+    const body = await req.json();
+    const { id } = body;
+    if (id == null) return NextResponse.json({ error: 'Falta id' }, { status: 400 });
 
     const check = await db.execute({ sql: 'SELECT is_admin, nombre_usuario FROM participantes WHERE id = ?', args: [id] });
-    if ((check.rows[0]?.[0] as number) >= 3) return NextResponse.json({ error: 'No se puede modificar el superadmin' }, { status: 403 });
-
+    if (check.rows.length === 0) return NextResponse.json({ error: 'Participante no encontrado' }, { status: 404 });
     const nombre = check.rows[0]?.[1] as string ?? '?';
-    const nuevoNivel = typeof is_admin === 'number' ? is_admin : (is_admin ? 1 : 0);
-    await db.execute({ sql: 'UPDATE participantes SET is_admin = ? WHERE id = ?', args: [nuevoNivel, id] });
 
-    const roles = ['usuario', 'admin', 'moderador', 'superadmin'];
-    await audit(getAdminId(req), 'Cambió rol', `@${nombre} → ${roles[nuevoNivel] ?? nuevoNivel}`);
-    return NextResponse.json({ ok: true });
+    // ── Cambio de rol (is_admin) ──
+    if (body.is_admin != null) {
+      // No se puede degradar/modificar el rol del superadmin
+      if ((check.rows[0]?.[0] as number) >= 3) return NextResponse.json({ error: 'No se puede modificar el rol del superadmin' }, { status: 403 });
+      const nuevoNivel = typeof body.is_admin === 'number' ? body.is_admin : (body.is_admin ? 1 : 0);
+      await db.execute({ sql: 'UPDATE participantes SET is_admin = ? WHERE id = ?', args: [nuevoNivel, id] });
+      const roles = ['usuario', 'admin', 'moderador', 'superadmin'];
+      await audit(getAdminId(req), 'Cambió rol', `@${nombre} → ${roles[nuevoNivel] ?? nuevoNivel}`);
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── Toggle elegibilidad a premios (se permite incluso para el superadmin) ──
+    if (body.fuera_premios != null) {
+      const nuevoEstado = body.fuera_premios ? 1 : 0;
+      await db.execute({ sql: 'UPDATE participantes SET fuera_premios = ? WHERE id = ?', args: [nuevoEstado, id] });
+      await audit(getAdminId(req), 'Elegibilidad premios', `@${nombre} → ${nuevoEstado ? 'FUERA de premios' : 'compite por premios'}`);
+      return NextResponse.json({ ok: true });
+    }
+
+    return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
   } catch (err) {
     return errJson(err);
   }
