@@ -6,6 +6,7 @@ import FlagIcon from '@/components/FlagIcon';
 import LoadingState from '@/components/LoadingState';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { calcularPuntos } from '@/lib/scoring';
+import { FASES_ELIM } from '@/lib/data/partidos';
 import type { Partido } from '@/lib/types';
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
@@ -31,7 +32,7 @@ export default function ResultadosPage() {
   const participanteId = useAuthRedirect();
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [predicciones, setPredicciones] = useState<Record<number, { local: string; visitante: string }>>({});
-  const [grupoActivo, setGrupoActivo] = useState('A');
+  const [vista, setVista] = useState('A');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function ResultadosPage() {
       setPredicciones(map);
 
       const primerConJugados = GRUPOS.find(g => (partidos as Partido[]).some(p => p.grupo === g && p.jugado));
-      if (primerConJugados) setGrupoActivo(primerConJugados);
+      if (primerConJugados) setVista(primerConJugados);
 
       setLoading(false);
     });
@@ -55,6 +56,10 @@ export default function ResultadosPage() {
 
   const jugados = partidos.filter(p => p.jugado);
   const gruposConJugados = GRUPOS.filter(g => partidos.some(p => p.grupo === g && p.jugado));
+  const fasesConJugados = FASES_ELIM.filter(f => partidos.some(p => p.fase === f.fase && p.jugado));
+  const esGrupo = GRUPOS.includes(vista);
+  const partidosVista = esGrupo ? partidos.filter(p => p.grupo === vista) : partidos.filter(p => p.fase === vista);
+  const tituloVista = esGrupo ? `Grupo ${vista}` : FASES_ELIM.find(f => f.fase === vista)?.label ?? vista;
 
   if (!participanteId || loading) return <LoadingState />;
 
@@ -77,27 +82,44 @@ export default function ResultadosPage() {
         </div>
       ) : (
         <>
-          {/* Tabs de grupos con jugados */}
-          <div className="flex flex-wrap gap-2">
-            {gruposConJugados.map((g) => (
-              <button key={g} onClick={() => setGrupoActivo(g)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${grupoActivo === g ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
-                Grupo {g}
-              </button>
-            ))}
+          {/* Tabs de grupos y fases con jugados */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {gruposConJugados.map((g) => (
+                <button key={g} onClick={() => setVista(g)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
+                  Grupo {g}
+                </button>
+              ))}
+            </div>
+            {fasesConJugados.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {fasesConJugados.map((f) => (
+                  <button key={f.fase} onClick={() => setVista(f.fase)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === f.fase ? 'bg-amber-500 text-white' : 'bg-zinc-800 text-amber-400/70 hover:text-amber-300 hover:bg-zinc-700'}`}>
+                    {f.corto}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
-            <h2 className="font-bold text-lg text-zinc-300">Grupo {grupoActivo}</h2>
+            <h2 className="font-bold text-lg text-zinc-300">{tituloVista}</h2>
 
-            {partidos.filter(p => p.grupo === grupoActivo).map((partido) => {
+            {partidosVista.map((partido) => {
               if (!partido.jugado) {
+                const definido = !!partido.equipo_local && !!partido.equipo_visitante;
                 return (
                   <div key={partido.id} className="bg-zinc-900/50 border border-zinc-800/40 rounded-xl px-4 py-3 flex items-center justify-between text-sm opacity-50">
                     <span className="text-zinc-400">
-                      <Flag equipo={partido.equipo_local} />{partido.equipo_local}
-                      <span className="text-zinc-600 mx-2">vs</span>
-                      <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
+                      {definido ? (
+                        <>
+                          <Flag equipo={partido.equipo_local} />{partido.equipo_local}
+                          <span className="text-zinc-600 mx-2">vs</span>
+                          <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
+                        </>
+                      ) : <span className="text-zinc-600 italic">Por definir</span>}
                     </span>
                     <span className="text-zinc-600 text-xs">⏳ {formatFecha(partido.fecha)}</span>
                   </div>

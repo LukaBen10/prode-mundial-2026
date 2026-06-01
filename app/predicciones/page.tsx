@@ -5,9 +5,14 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { BANDERAS } from '@/lib/data/banderas';
 import FlagIcon from '@/components/FlagIcon';
 import LoadingState from '@/components/LoadingState';
+import { FASES_ELIM } from '@/lib/data/partidos';
 import type { Partido, RankingEntry } from '@/lib/types';
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+
+function tieneEquipos(p: Partido): boolean {
+  return !!p.equipo_local && !!p.equipo_visitante;
+}
 
 function formatFecha(fecha: string) {
   const d = new Date(fecha + 'T12:00:00');
@@ -69,7 +74,7 @@ function PrediccionesContent() {
 
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [predicciones, setPredicciones] = useState<Record<number, { local: string; visitante: string }>>({});
-  const [grupoActivo, setGrupoActivo] = useState('A');
+  const [vista, setVista] = useState('A'); // grupo (A-L) o fase eliminatoria
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -104,7 +109,11 @@ function PrediccionesContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participanteId, router]);
 
-  const partidosGrupo = partidos.filter((p) => p.grupo === grupoActivo);
+  const esGrupo = GRUPOS.includes(vista);
+  const partidosVista = esGrupo
+    ? partidos.filter((p) => p.grupo === vista)
+    : partidos.filter((p) => p.fase === vista);
+  const tituloVista = esGrupo ? `Grupo ${vista}` : FASES_ELIM.find((f) => f.fase === vista)?.label ?? vista;
 
   function updatePred(partidoId: number, side: 'local' | 'visitante', value: string) {
     setPredicciones((prev) => ({
@@ -131,7 +140,7 @@ function PrediccionesContent() {
   }
 
   const predCount = Object.keys(predicciones).length;
-  const totalPartidos = partidos.length;
+  const totalPartidos = partidos.filter(tieneEquipos).length || 1;
 
   if (loading) return <LoadingState texto="Cargando partidos..." />;
 
@@ -178,33 +187,61 @@ function PrediccionesContent() {
         <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${(predCount / totalPartidos) * 100}%` }} />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {GRUPOS.map((g) => {
-          const pG = partidos.filter((p) => p.grupo === g);
-          const cargados = pG.filter((p) => predicciones[p.id]).length;
-          const total = pG.length;
-          const completo = cargados === total && total > 0;
-          return (
-            <button key={g} onClick={() => setGrupoActivo(g)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${grupoActivo === g ? 'bg-green-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
-              {completo ? `Grupo ${g} ✓` : `Grupo ${g} ${cargados > 0 ? `${cargados}/${total}` : ''}`}
-            </button>
-          );
-        })}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {GRUPOS.map((g) => {
+            const pG = partidos.filter((p) => p.grupo === g);
+            const cargados = pG.filter((p) => predicciones[p.id]).length;
+            const total = pG.length;
+            const completo = cargados === total && total > 0;
+            return (
+              <button key={g} onClick={() => setVista(g)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-green-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
+                {completo ? `Grupo ${g} ✓` : `Grupo ${g} ${cargados > 0 ? `${cargados}/${total}` : ''}`}
+              </button>
+            );
+          })}
+        </div>
+        {/* Fases eliminatorias */}
+        <div className="flex flex-wrap gap-2">
+          {FASES_ELIM.map((f) => {
+            const pF = partidos.filter((p) => p.fase === f.fase);
+            if (pF.length === 0) return null;
+            const definidos = pF.filter(tieneEquipos).length;
+            return (
+              <button key={f.fase} onClick={() => setVista(f.fase)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  vista === f.fase ? 'bg-amber-500 text-white' : 'bg-zinc-800 text-amber-400/70 hover:text-amber-300 hover:bg-zinc-700'
+                }`}>
+                {f.corto}{definidos === 0 ? ' 🔒' : ''}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-3">
-        <h2 className="font-bold text-lg text-zinc-300">Grupo {grupoActivo}</h2>
-        {partidosGrupo.map((partido) => {
+        <h2 className="font-bold text-lg text-zinc-300">{tituloVista}</h2>
+        {!esGrupo && partidosVista.every((p) => !tieneEquipos(p)) && (
+          <p className="text-zinc-500 text-sm bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3">
+            🔒 Todavía no se sabe quiénes juegan esta fase. Los cruces y la predicción se habilitan a medida que avanzan los grupos.
+          </p>
+        )}
+        {partidosVista.map((partido) => {
           const pred = predicciones[partido.id];
-          const locked = estaLocked(partido);
+          const definido = tieneEquipos(partido);
+          const locked = !definido || estaLocked(partido);
           return (
             <div key={partido.id} className={`bg-zinc-900 border rounded-xl p-4 space-y-3 ${locked ? 'border-zinc-800 opacity-70' : 'border-zinc-700'}`}>
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex-1 min-w-0 text-right">
                   <span className="font-semibold text-sm block truncate">
-                    {BANDERAS[partido.equipo_local] && <FlagIcon code={BANDERAS[partido.equipo_local]} alt={partido.equipo_local} className="mr-1.5" />}
-                    {partido.equipo_local}
+                    {definido ? (
+                      <>
+                        {BANDERAS[partido.equipo_local] && <FlagIcon code={BANDERAS[partido.equipo_local]} alt={partido.equipo_local} className="mr-1.5" />}
+                        {partido.equipo_local}
+                      </>
+                    ) : <span className="text-zinc-600 italic">Por definir</span>}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -214,8 +251,12 @@ function PrediccionesContent() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-semibold text-sm block truncate">
-                    {BANDERAS[partido.equipo_visitante] && <FlagIcon code={BANDERAS[partido.equipo_visitante]} alt={partido.equipo_visitante} className="mr-1.5" />}
-                    {partido.equipo_visitante}
+                    {definido ? (
+                      <>
+                        {BANDERAS[partido.equipo_visitante] && <FlagIcon code={BANDERAS[partido.equipo_visitante]} alt={partido.equipo_visitante} className="mr-1.5" />}
+                        {partido.equipo_visitante}
+                      </>
+                    ) : <span className="text-zinc-600 italic">Por definir</span>}
                   </span>
                 </div>
               </div>
@@ -223,7 +264,7 @@ function PrediccionesContent() {
                 <span>📅 {formatFecha(partido.fecha)}</span>
                 <span>🕐 {partido.hora}hs AR</span>
                 {partido.estadio && <span>🏟️ {partido.estadio}, {partido.ciudad}</span>}
-                <span className="ml-auto"><DeadlineBadge partido={partido} /></span>
+                <span className="ml-auto">{definido ? <DeadlineBadge partido={partido} /> : <span className="text-zinc-600">A definir</span>}</span>
               </div>
             </div>
           );

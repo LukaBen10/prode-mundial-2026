@@ -177,5 +177,86 @@ export function generarPartidosGrupos() {
   return partidos;
 }
 
+// ── FASE ELIMINATORIA ─────────────────────────────────────────
+// 32 partidos (num 73-104). Equipos "" = por definir (se completan
+// automáticamente vía la API o manualmente a medida que avanza el torneo).
+// Horarios en ART (UTC-3). Fuentes: Wikipedia, NBC Sports, Al Jazeera.
+
+export type FaseElim = 'dieciseisavos' | 'octavos' | 'cuartos' | 'semifinal' | 'tercer_puesto' | 'final';
+
+interface PartidoElim {
+  num: number;
+  fase: FaseElim;
+  fecha: string;
+  hora: string;
+  estadio: string;
+  ciudad: string;
+}
+
+const ELIMINATORIAS: PartidoElim[] = [
+  // Dieciseisavos (Ronda de 32) — 73-88
+  { num: 73, fase: 'dieciseisavos', fecha: '2026-06-28', hora: '16:00', estadio: 'SoFi Stadium',            ciudad: 'Los Ángeles'       },
+  { num: 74, fase: 'dieciseisavos', fecha: '2026-06-29', hora: '17:30', estadio: 'Gillette Stadium',        ciudad: 'Boston'            },
+  { num: 75, fase: 'dieciseisavos', fecha: '2026-06-29', hora: '22:00', estadio: 'Estadio BBVA',            ciudad: 'Monterrey'         },
+  { num: 76, fase: 'dieciseisavos', fecha: '2026-06-29', hora: '14:00', estadio: 'NRG Stadium',             ciudad: 'Houston'           },
+  { num: 77, fase: 'dieciseisavos', fecha: '2026-06-30', hora: '18:00', estadio: 'MetLife Stadium',         ciudad: 'Nueva York'        },
+  { num: 78, fase: 'dieciseisavos', fecha: '2026-06-30', hora: '14:00', estadio: 'AT&T Stadium',            ciudad: 'Dallas'            },
+  { num: 79, fase: 'dieciseisavos', fecha: '2026-06-30', hora: '22:00', estadio: 'Estadio Azteca',          ciudad: 'Ciudad de México'  },
+  { num: 80, fase: 'dieciseisavos', fecha: '2026-07-01', hora: '13:00', estadio: 'Mercedes-Benz Stadium',   ciudad: 'Atlanta'           },
+  { num: 81, fase: 'dieciseisavos', fecha: '2026-07-01', hora: '21:00', estadio: "Levi's Stadium",          ciudad: 'San Francisco'     },
+  { num: 82, fase: 'dieciseisavos', fecha: '2026-07-01', hora: '17:00', estadio: 'Lumen Field',             ciudad: 'Seattle'           },
+  { num: 83, fase: 'dieciseisavos', fecha: '2026-07-02', hora: '20:00', estadio: 'BMO Field',               ciudad: 'Toronto'           },
+  { num: 84, fase: 'dieciseisavos', fecha: '2026-07-02', hora: '16:00', estadio: 'SoFi Stadium',            ciudad: 'Los Ángeles'       },
+  { num: 85, fase: 'dieciseisavos', fecha: '2026-07-03', hora: '00:00', estadio: 'BC Place',                ciudad: 'Vancouver'         },
+  { num: 86, fase: 'dieciseisavos', fecha: '2026-07-03', hora: '19:00', estadio: 'Hard Rock Stadium',       ciudad: 'Miami'             },
+  { num: 87, fase: 'dieciseisavos', fecha: '2026-07-03', hora: '22:30', estadio: 'Arrowhead Stadium',       ciudad: 'Kansas City'       },
+  { num: 88, fase: 'dieciseisavos', fecha: '2026-07-03', hora: '15:00', estadio: 'AT&T Stadium',            ciudad: 'Dallas'            },
+  // Octavos — 89-96
+  { num: 89, fase: 'octavos', fecha: '2026-07-04', hora: '18:00', estadio: 'Lincoln Financial Field', ciudad: 'Filadelfia'       },
+  { num: 90, fase: 'octavos', fecha: '2026-07-04', hora: '14:00', estadio: 'NRG Stadium',             ciudad: 'Houston'          },
+  { num: 91, fase: 'octavos', fecha: '2026-07-05', hora: '17:00', estadio: 'MetLife Stadium',         ciudad: 'Nueva York'       },
+  { num: 92, fase: 'octavos', fecha: '2026-07-05', hora: '21:00', estadio: 'Estadio Azteca',          ciudad: 'Ciudad de México' },
+  { num: 93, fase: 'octavos', fecha: '2026-07-06', hora: '16:00', estadio: 'AT&T Stadium',            ciudad: 'Dallas'           },
+  { num: 94, fase: 'octavos', fecha: '2026-07-06', hora: '21:00', estadio: 'Lumen Field',             ciudad: 'Seattle'          },
+  { num: 95, fase: 'octavos', fecha: '2026-07-07', hora: '13:00', estadio: 'Mercedes-Benz Stadium',   ciudad: 'Atlanta'          },
+  { num: 96, fase: 'octavos', fecha: '2026-07-07', hora: '17:00', estadio: 'BC Place',                ciudad: 'Vancouver'        },
+  // Cuartos — 97-100
+  { num: 97,  fase: 'cuartos', fecha: '2026-07-09', hora: '17:00', estadio: 'Gillette Stadium',  ciudad: 'Boston'      },
+  { num: 98,  fase: 'cuartos', fecha: '2026-07-10', hora: '16:00', estadio: 'SoFi Stadium',      ciudad: 'Los Ángeles' },
+  { num: 99,  fase: 'cuartos', fecha: '2026-07-11', hora: '18:00', estadio: 'Hard Rock Stadium', ciudad: 'Miami'       },
+  { num: 100, fase: 'cuartos', fecha: '2026-07-11', hora: '22:00', estadio: 'Arrowhead Stadium', ciudad: 'Kansas City' },
+  // Semifinales — 101-102
+  { num: 101, fase: 'semifinal', fecha: '2026-07-14', hora: '16:00', estadio: 'AT&T Stadium',          ciudad: 'Dallas'  },
+  { num: 102, fase: 'semifinal', fecha: '2026-07-15', hora: '16:00', estadio: 'Mercedes-Benz Stadium', ciudad: 'Atlanta' },
+  // Tercer puesto — 103
+  { num: 103, fase: 'tercer_puesto', fecha: '2026-07-18', hora: '18:00', estadio: 'Hard Rock Stadium', ciudad: 'Miami' },
+  // Final — 104
+  { num: 104, fase: 'final', fecha: '2026-07-19', hora: '16:00', estadio: 'MetLife Stadium', ciudad: 'Nueva York' },
+];
+
+export function generarEliminatorias() {
+  return ELIMINATORIAS.map((p) => ({
+    num_partido: p.num,
+    fase: p.fase,
+    grupo: '',
+    equipo_local: '',      // por definir
+    equipo_visitante: '',  // por definir
+    fecha: p.fecha,
+    hora: p.hora,
+    estadio: p.estadio,
+    ciudad: p.ciudad,
+  }));
+}
+
+// Orden y etiquetas de las fases eliminatorias para la UI
+export const FASES_ELIM: { fase: FaseElim; label: string; corto: string }[] = [
+  { fase: 'dieciseisavos', label: 'Dieciseisavos', corto: '16avos' },
+  { fase: 'octavos',       label: 'Octavos',       corto: '8vos'   },
+  { fase: 'cuartos',       label: 'Cuartos',       corto: '4tos'   },
+  { fase: 'semifinal',     label: 'Semifinales',   corto: 'Semis'  },
+  { fase: 'tercer_puesto', label: 'Tercer puesto', corto: '3er'    },
+  { fase: 'final',         label: 'Final',         corto: 'Final'  },
+];
+
 export const NOMBRES_GRUPOS = Object.keys(GRUPOS);
 export { GRUPOS };

@@ -11,6 +11,7 @@ export interface Partido {
   jugado: number;
   goles_local: number | null;
   goles_visitante: number | null;
+  num_partido?: number;
 }
 
 export interface RankingEntry {

@@ -4,6 +4,7 @@ import { audit } from '@/lib/audit';
 import db from '@/lib/db';
 import { fromApiName } from '@/lib/data/equipos-api';
 import { calcularYGuardarPuntos } from '@/lib/scoringDb';
+import { sincronizarEliminatorias } from '@/lib/syncEliminatorias';
 import { errJson, getAdminId } from '@/lib/apiHelpers';
 
 const FD_BASE = 'https://api.football-data.org/v4';
@@ -55,6 +56,13 @@ export async function POST(req: NextRequest) {
       actualizados++;
       log.push(`${esHome} ${gL}-${gV} ${esAway} (${predsN} pred)`);
     }
+
+    // Eliminatorias (aislado: si falla, no afecta a los grupos)
+    try {
+      const elimLog = await sincronizarEliminatorias(apiKey);
+      log.push(...elimLog);
+      actualizados += elimLog.length;
+    } catch { /* silencioso */ }
 
     await audit(getAdminId(req), 'Sincronizó resultados', actualizados > 0 ? log.join(' | ') : 'Sin cambios');
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { generarPartidosGrupos } from '@/lib/data/partidos';
+import { generarPartidosGrupos, generarEliminatorias } from '@/lib/data/partidos';
 
 export async function GET() {
   const results: { column: string; status: string }[] = [];
@@ -39,12 +39,31 @@ export async function GET() {
 
   // ── partidos: nuevas columnas ──────────────────────────────────
   for (const col of [
-    { name: 'partidos.hora',    sql: 'ALTER TABLE partidos ADD COLUMN hora TEXT NOT NULL DEFAULT "19:00"' },
-    { name: 'partidos.estadio', sql: 'ALTER TABLE partidos ADD COLUMN estadio TEXT NOT NULL DEFAULT ""' },
-    { name: 'partidos.ciudad',  sql: 'ALTER TABLE partidos ADD COLUMN ciudad TEXT NOT NULL DEFAULT ""' },
+    { name: 'partidos.hora',        sql: 'ALTER TABLE partidos ADD COLUMN hora TEXT NOT NULL DEFAULT "19:00"' },
+    { name: 'partidos.estadio',     sql: 'ALTER TABLE partidos ADD COLUMN estadio TEXT NOT NULL DEFAULT ""' },
+    { name: 'partidos.ciudad',      sql: 'ALTER TABLE partidos ADD COLUMN ciudad TEXT NOT NULL DEFAULT ""' },
+    { name: 'partidos.num_partido', sql: 'ALTER TABLE partidos ADD COLUMN num_partido INTEGER NOT NULL DEFAULT 0' },
   ]) {
     try { await db.execute(col.sql); results.push({ column: col.name, status: 'agregada' }); }
     catch { results.push({ column: col.name, status: 'ya existía (ignorado)' }); }
+  }
+
+  // ── insertar partidos de eliminatoria (num 73-104) si no existen ──
+  let elimInsertados = 0;
+  try {
+    for (const p of generarEliminatorias()) {
+      const ex = await db.execute({ sql: 'SELECT id FROM partidos WHERE num_partido = ?', args: [p.num_partido] });
+      if (ex.rows.length > 0) continue;
+      await db.execute({
+        sql: `INSERT INTO partidos (fase, grupo, equipo_local, equipo_visitante, fecha, hora, estadio, ciudad, jugado, num_partido)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
+        args: [p.fase, p.grupo, p.equipo_local, p.equipo_visitante, p.fecha, p.hora, p.estadio, p.ciudad, p.num_partido],
+      });
+      elimInsertados++;
+    }
+    results.push({ column: 'eliminatorias', status: `${elimInsertados} partidos de eliminatoria insertados (32 en total)` });
+  } catch (err) {
+    results.push({ column: 'eliminatorias', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }
 
   // ── tabla sessions ────────────────────────────────────────────
