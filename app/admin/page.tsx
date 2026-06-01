@@ -355,6 +355,7 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json', ...getHeaders() },
       body: JSON.stringify({ id, is_admin: nuevoNivel }),
     });
+    if (res.status === 401) { window.location.href = '/login'; return; }
     const data = await res.json();
     const roles = ['', 'admin', 'moderador', 'superadmin'];
     if (data.ok) {

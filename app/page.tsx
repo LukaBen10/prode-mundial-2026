@@ -55,7 +55,11 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-zinc-200 text-lg sm:text-xl font-semibold pt-3">
-            72 partidos · 48 equipos · una sola copa
+            104 partidos · 48 equipos · una sola copa
+          </p>
+          <p className="text-zinc-300 max-w-md mx-auto text-sm sm:text-base leading-relaxed pt-3">
+            Los clientes de <span className="text-white font-bold">Donut Makers</span> predicen
+            el Mundial. Cargá tus resultados antes de cada partido y demostrá que sos el que más sabe.
           </p>
         </div>
 
@@ -64,12 +68,6 @@ export default function Home() {
           <Countdown />
           <p className="text-orange-400 font-bold text-sm tracking-wide">🍩 Donut Makers · Caballito</p>
         </div>
-
-        {/* Descripción */}
-        <p className="text-zinc-300 max-w-sm mx-auto text-sm sm:text-base leading-relaxed">
-          Los clientes de <span className="text-white font-bold">Donut Makers</span> predicen
-          el Mundial. Cargá tus resultados antes de cada partido y demostrá que sabés de fútbol.
-        </p>
 
         {/* Social proof */}
         <div className="flex justify-center">
@@ -108,8 +106,8 @@ export default function Home() {
           <div className="flex items-center gap-3 relative z-10">
             <span className="text-4xl">🏆</span>
             <div>
-              <h2 className="text-xl font-black text-white">¡Hay premios!</h2>
-              <p className="text-amber-400/80 text-sm font-semibold">Para los mejores pronosticadores del Mundial</p>
+              <h2 className="text-xl font-black text-white">¡Ganá premios, no solo gloria!</h2>
+              <p className="text-amber-400/80 text-sm font-semibold">Los que la rompen en el ranking se llevan premios del local</p>
             </div>
           </div>
           <div className="grid sm:grid-cols-3 gap-3 relative z-10">
@@ -154,11 +152,13 @@ export default function Home() {
               >
                 +1
               </span>
-              <span className="font-black text-xl text-white">punto por venir al local</span>
+              <span className="font-black text-xl text-white">puntos EXTRA</span>
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
-              Cada vez que venís a <strong className="text-white">Donut Makers</strong> a ver un partido
-              del Mundial, te sumamos un punto extra al ranking. Donut + fútbol = imbatible.
+              Sumá al ranking sin predecir: <strong className="text-white">+1 punto</strong> por venir a ver un
+              partido del Mundial a <strong className="text-white">Donut Makers</strong> con consumo, y{' '}
+              <strong className="text-white">+1 punto</strong> más por cada 4 donas especiales del Mundial que compres.
+              Donut + fútbol = imbatible.
             </p>
             <a
               href="https://www.google.com/maps/search/?api=1&query=Av.+La+Plata+702+Caballito+CABA"
@@ -187,13 +187,13 @@ export default function Home() {
               glow: 'rgba(22,163,74,0.12)', numColor: '#4ade80',
             },
             {
-              n: '02', icon: '⚽', titulo: 'Cargás predicciones',
+              n: '02', icon: '⚽', titulo: 'Armás tu prode',
               desc: 'Elegís el resultado de cada partido antes de que arranque. Cuando empieza, se cierra.',
               bg: 'rgba(249,115,22,0.18)', border: 'rgba(249,115,22,0.45)',
               glow: 'rgba(249,115,22,0.10)', numColor: '#fb923c',
             },
             {
-              n: '03', icon: '🏆', titulo: 'Sumás puntos',
+              n: '03', icon: '🏆', titulo: 'Comienza el juego',
               desc: 'Resultado exacto = 3 pts. Ganador correcto = 1 pt. El que más acumule gana.',
               bg: 'rgba(251,191,36,0.18)', border: 'rgba(251,191,36,0.45)',
               glow: 'rgba(251,191,36,0.10)', numColor: '#fbbf24',
@@ -272,10 +272,10 @@ export default function Home() {
             <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #fbbf24, transparent)' }} />
             <div className="leading-none relative">
               <span className="text-7xl font-black text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #fb923c, #fbbf24)' }}>+1</span>
-              <span className="text-2xl font-black text-amber-400"> punto</span>
+              <span className="text-2xl font-black text-amber-400"> punto extra</span>
             </div>
-            <div className="font-bold text-white text-base">Visitás el local</div>
-            <div className="text-zinc-400 text-xs">Durante cualquier partido</div>
+            <div className="font-bold text-white text-base">En el local</div>
+            <div className="text-zinc-400 text-xs">Por consumir viendo un partido, y cada 4 donas especiales del Mundial</div>
           </div>
 
         </div>
