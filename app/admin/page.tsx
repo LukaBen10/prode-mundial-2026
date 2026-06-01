@@ -52,7 +52,24 @@ interface CamposEdicion {
   puntos: string;
 }
 
-type Tab = 'participantes' | 'resultados' | 'consumos' | 'admins' | 'auditoria';
+type Tab = 'participantes' | 'resultados' | 'consumos' | 'predicciones' | 'admins' | 'auditoria';
+
+interface PredAdmin {
+  participante_id: number;
+  nombre_usuario: string;
+  nombre_completo: string;
+  grupo: string;
+  fase: string;
+  fecha: string;
+  equipo_local: string;
+  equipo_visitante: string;
+  pred_local: number;
+  pred_visitante: number;
+  puntos: number;
+  real_local: number | null;
+  real_visitante: number | null;
+  jugado: number;
+}
 
 interface AuditEntry {
   id: number;
@@ -121,6 +138,12 @@ export default function AdminPage() {
   const [adminLevel, setAdminLevel] = useState(0);
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
+
+  // Predicciones
+  const [predicciones, setPredicciones] = useState<PredAdmin[]>([]);
+  const [loadingPreds, setLoadingPreds] = useState(false);
+  const [personaExpandida, setPersonaExpandida] = useState<number | null>(null);
+  const [filtroPreds, setFiltroPreds] = useState('');
 
   useEffect(() => {
     const participanteId = localStorage.getItem('prode_id');
@@ -271,6 +294,40 @@ export default function AdminPage() {
     setLoadingAudit(false);
   }
 
+  async function cargarPredicciones() {
+    setLoadingPreds(true);
+    const res = await fetch('/api/admin/predicciones', { headers: getHeaders() });
+    if (res.status === 401) { window.location.href = '/login'; return; }
+    const data = await res.json();
+    setPredicciones(Array.isArray(data) ? data : []);
+    setLoadingPreds(false);
+  }
+
+  function exportarPrediccionesCSV() {
+    const headers = ['Usuario', 'Nombre completo', 'Fase/Grupo', 'Fecha', 'Partido', 'Pronóstico', 'Resultado real', 'Puntos'];
+    const filas = predicciones.map(p => [
+      p.nombre_usuario,
+      p.nombre_completo,
+      p.grupo ? `Grupo ${p.grupo}` : (p.fase || ''),
+      p.fecha,
+      `${p.equipo_local || 'Por definir'} vs ${p.equipo_visitante || 'Por definir'}`,
+      `${p.pred_local}-${p.pred_visitante}`,
+      p.jugado ? `${p.real_local}-${p.real_visitante}` : 'sin jugar',
+      String(p.puntos ?? 0),
+    ]);
+    // Separador ; y BOM para que Excel (config. español) lo abra en columnas con tildes
+    const csv = [headers, ...filas]
+      .map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(';'))
+      .join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `predicciones-prode-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function sincronizarResultados() {
     setSyncing(true);
     setSyncMsg('');
@@ -413,6 +470,25 @@ export default function AdminPage() {
   const jugados = partidos.filter(p => p.jugado);
   // Partidos de eliminatoria (num 73-104) para definir cruces a mano
   const eliminatorias = partidos.filter(p => (p.num_partido ?? 0) >= 73);
+
+  // Predicciones agrupadas por persona (para la tab Predicciones)
+  const prediccionesPorPersona = (() => {
+    const map = new Map<number, { id: number; usuario: string; nombre: string; preds: PredAdmin[]; puntos: number }>();
+    for (const p of predicciones) {
+      if (!map.has(p.participante_id)) {
+        map.set(p.participante_id, { id: p.participante_id, usuario: p.nombre_usuario, nombre: p.nombre_completo, preds: [], puntos: 0 });
+      }
+      const g = map.get(p.participante_id)!;
+      g.preds.push(p);
+      g.puntos += p.puntos ?? 0;
+    }
+    return Array.from(map.values());
+  })();
+  const prediccionesPorPersonaFiltradas = prediccionesPorPersona.filter(g =>
+    !filtroPreds ||
+    g.usuario.toLowerCase().includes(filtroPreds.toLowerCase()) ||
+    g.nombre.toLowerCase().includes(filtroPreds.toLowerCase())
+  );
   const participantesFiltrados = participantes.filter(p =>
     !filtroBusqueda ||
     p.nombre_completo.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
@@ -457,6 +533,7 @@ export default function AdminPage() {
           { id: 'participantes', label: '👥 Participantes', minLevel: 2 },
           { id: 'resultados',    label: '⚽ Resultados',    minLevel: 2 },
           { id: 'consumos',      label: '🍩 Consumos',      minLevel: 1 },
+          { id: 'predicciones',  label: '📝 Predicciones',  minLevel: 2 },
           { id: 'admins',        label: '🔑 Admins',        minLevel: 3 },
           { id: 'auditoria',     label: '📋 Auditoría',     minLevel: 3 },
         ] as { id: Tab; label: string; minLevel: number }[])
@@ -466,6 +543,7 @@ export default function AdminPage() {
               onClick={() => {
                 setTab(t.id);
                 if (t.id === 'auditoria' && auditLog.length === 0) cargarAuditLog();
+                if (t.id === 'predicciones' && predicciones.length === 0) cargarPredicciones();
               }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
                 tab === t.id ? 'text-white border-green-500' : 'text-zinc-400 border-transparent hover:text-white'
@@ -812,6 +890,91 @@ export default function AdminPage() {
           )}
           {busqueda.length >= 2 && resultadosBusqueda.length === 0 && (
             <p className="text-zinc-500 text-sm">No se encontró ningún usuario.</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Predicciones ─────────────────────────────────── */}
+      {tab === 'predicciones' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-sm text-zinc-400">
+              Predicciones de cada participante. Tocá un nombre para ver el detalle.
+            </p>
+            <div className="flex items-center gap-2">
+              <button onClick={cargarPredicciones} disabled={loadingPreds}
+                className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+                {loadingPreds ? '⏳' : '🔄 Actualizar'}
+              </button>
+              <button onClick={exportarPrediccionesCSV} disabled={predicciones.length === 0}
+                className="text-xs bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-bold transition-colors">
+                ⬇️ Exportar Excel
+              </button>
+            </div>
+          </div>
+
+          <input type="text" value={filtroPreds} onChange={e => setFiltroPreds(e.target.value)}
+            placeholder="Buscar participante por usuario o nombre..."
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
+
+          {loadingPreds ? (
+            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+          ) : prediccionesPorPersonaFiltradas.length === 0 ? (
+            <div className="text-center py-12 text-zinc-500">
+              {predicciones.length === 0 ? 'Todavía nadie cargó predicciones.' : 'No hay resultados para ese filtro.'}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {prediccionesPorPersonaFiltradas.map(g => {
+                const abierto = personaExpandida === g.id;
+                return (
+                  <div key={g.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                    <button onClick={() => setPersonaExpandida(abierto ? null : g.id)}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-zinc-800/30 transition-colors">
+                      <div className="min-w-0">
+                        <span className="font-semibold text-white">@{g.usuario}</span>
+                        <span className="text-zinc-400 text-sm ml-2">{g.nombre}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-xs text-zinc-500">{g.preds.length} pred.</span>
+                        <span className="text-sm font-bold text-green-400">{g.puntos} pts</span>
+                        <span className="text-zinc-500 text-xs">{abierto ? '▲' : '▼'}</span>
+                      </div>
+                    </button>
+                    {abierto && (
+                      <div className="border-t border-zinc-800 overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="text-zinc-500 border-b border-zinc-800/70">
+                              <th className="text-left px-3 py-2 font-medium">Fase</th>
+                              <th className="text-left px-3 py-2 font-medium">Partido</th>
+                              <th className="text-center px-3 py-2 font-medium">Pred.</th>
+                              <th className="text-center px-3 py-2 font-medium">Real</th>
+                              <th className="text-right px-3 py-2 font-medium">Pts</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {g.preds.map((p, i) => (
+                              <tr key={i} className="border-b border-zinc-800/40 last:border-0">
+                                <td className="px-3 py-2 text-zinc-500 whitespace-nowrap">{p.grupo ? `G ${p.grupo}` : (p.fase || '')}</td>
+                                <td className="px-3 py-2 text-zinc-300">
+                                  {(p.equipo_local || 'Por definir')} <span className="text-zinc-600">vs</span> {(p.equipo_visitante || 'Por definir')}
+                                </td>
+                                <td className="px-3 py-2 text-center font-bold text-white whitespace-nowrap">{p.pred_local}-{p.pred_visitante}</td>
+                                <td className="px-3 py-2 text-center text-zinc-400 whitespace-nowrap">{p.jugado ? `${p.real_local}-${p.real_visitante}` : '—'}</td>
+                                <td className={`px-3 py-2 text-right font-bold ${p.puntos === 3 ? 'text-green-400' : p.puntos === 1 ? 'text-orange-400' : 'text-zinc-600'}`}>
+                                  {p.jugado ? p.puntos : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
