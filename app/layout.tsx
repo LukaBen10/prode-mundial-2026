@@ -105,9 +105,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <p className="font-semibold text-zinc-400">Creado por</p>
                 <p>Luka Benincasa</p>
                 <p>
-                  <a href="mailto:lukabenincasa@gmail.com" className="hover:text-zinc-300 transition-colors break-all">
-                    lukabenincasa@gmail.com
-                  </a>
+                  <Link href="/contacto" className="text-orange-400/80 hover:text-orange-300 transition-colors font-medium">
+                    ¿Querés una web o app? Escribime →
+                  </Link>
                 </p>
               </div>
             </div>

@@ -52,7 +52,16 @@ interface CamposEdicion {
   puntos: string;
 }
 
-type Tab = 'participantes' | 'resultados' | 'consumos' | 'predicciones' | 'admins' | 'auditoria';
+type Tab = 'participantes' | 'resultados' | 'consumos' | 'predicciones' | 'admins' | 'auditoria' | 'mensajes';
+
+interface MensajeContacto {
+  id: number;
+  nombre: string;
+  contacto: string;
+  mensaje: string;
+  leido: number;
+  created_at: string;
+}
 
 interface PredAdmin {
   participante_id: number;
@@ -144,6 +153,11 @@ export default function AdminPage() {
   const [loadingPreds, setLoadingPreds] = useState(false);
   const [personaExpandida, setPersonaExpandida] = useState<number | null>(null);
   const [filtroPreds, setFiltroPreds] = useState('');
+
+  // Mensajes de contacto
+  const [mensajesContacto, setMensajesContacto] = useState<MensajeContacto[]>([]);
+  const [loadingMensajes, setLoadingMensajes] = useState(false);
+  const [confirmDelMsg, setConfirmDelMsg] = useState<number | null>(null);
 
   useEffect(() => {
     const participanteId = localStorage.getItem('prode_id');
@@ -326,6 +340,34 @@ export default function AdminPage() {
     a.download = `predicciones-prode-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function cargarMensajes() {
+    setLoadingMensajes(true);
+    const res = await fetch('/api/admin/mensajes', { headers: getHeaders() });
+    if (res.status === 401) { window.location.href = '/login'; return; }
+    const data = await res.json();
+    setMensajesContacto(Array.isArray(data) ? data : []);
+    setLoadingMensajes(false);
+  }
+
+  async function marcarLeido(id: number, leido: boolean) {
+    await fetch('/api/admin/mensajes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id, leido }),
+    });
+    setMensajesContacto(prev => prev.map(m => m.id === id ? { ...m, leido: leido ? 1 : 0 } : m));
+  }
+
+  async function eliminarMensaje(id: number) {
+    await fetch('/api/admin/mensajes', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id }),
+    });
+    setMensajesContacto(prev => prev.filter(m => m.id !== id));
+    setConfirmDelMsg(null);
   }
 
   async function sincronizarResultados() {
@@ -534,6 +576,7 @@ export default function AdminPage() {
           { id: 'resultados',    label: '⚽ Resultados',    minLevel: 2 },
           { id: 'consumos',      label: '🍩 Consumos',      minLevel: 1 },
           { id: 'predicciones',  label: '📝 Predicciones',  minLevel: 2 },
+          { id: 'mensajes',      label: '✉️ Mensajes',      minLevel: 3 },
           { id: 'admins',        label: '🔑 Admins',        minLevel: 3 },
           { id: 'auditoria',     label: '📋 Auditoría',     minLevel: 3 },
         ] as { id: Tab; label: string; minLevel: number }[])
@@ -544,6 +587,7 @@ export default function AdminPage() {
                 setTab(t.id);
                 if (t.id === 'auditoria' && auditLog.length === 0) cargarAuditLog();
                 if (t.id === 'predicciones' && predicciones.length === 0) cargarPredicciones();
+                if (t.id === 'mensajes' && mensajesContacto.length === 0) cargarMensajes();
               }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
                 tab === t.id ? 'text-white border-green-500' : 'text-zinc-400 border-transparent hover:text-white'
@@ -974,6 +1018,74 @@ export default function AdminPage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Mensajes ─────────────────────────────────────── */}
+      {tab === 'mensajes' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-sm text-zinc-400">Mensajes de gente que te quiere contactar (desde la página de contacto).</p>
+            <button onClick={cargarMensajes} disabled={loadingMensajes}
+              className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+              {loadingMensajes ? '⏳' : '🔄 Actualizar'}
+            </button>
+          </div>
+
+          {loadingMensajes ? (
+            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+          ) : mensajesContacto.length === 0 ? (
+            <div className="text-center py-12 text-zinc-500">
+              <div className="text-4xl mb-3">✉️</div>
+              <p>Todavía no recibiste ningún mensaje.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {mensajesContacto.map(m => (
+                <div key={m.id} className={`rounded-xl p-4 border ${m.leido ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900 border-orange-500/30'}`}>
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-white">{m.nombre}</span>
+                        {!m.leido && <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase">Nuevo</span>}
+                      </div>
+                      <p className="text-sm mt-0.5">
+                        {m.contacto.includes('@') ? (
+                          <a href={`mailto:${m.contacto}`} className="text-orange-400 hover:text-orange-300 underline break-all">{m.contacto}</a>
+                        ) : (
+                          <span className="text-zinc-300 break-all">{m.contacto}</span>
+                        )}
+                      </p>
+                    </div>
+                    <span className="text-xs text-zinc-500 whitespace-nowrap">{formatFechaHora(m.created_at)}</span>
+                  </div>
+
+                  <p className="text-zinc-300 text-sm mt-3 whitespace-pre-wrap leading-relaxed border-t border-zinc-800 pt-3">{m.mensaje}</p>
+
+                  <div className="flex items-center justify-end gap-2 mt-3">
+                    {confirmDelMsg === m.id ? (
+                      <>
+                        <span className="text-xs text-red-400 mr-1">¿Borrar?</span>
+                        <button onClick={() => eliminarMensaje(m.id)} className="bg-red-500 hover:bg-red-400 text-white px-2.5 py-1 rounded text-xs font-semibold">Sí</button>
+                        <button onClick={() => setConfirmDelMsg(null)} className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">No</button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => marcarLeido(m.id, !m.leido)}
+                          className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-2.5 py-1 rounded font-semibold transition-colors">
+                          {m.leido ? 'Marcar no leído' : 'Marcar leído'}
+                        </button>
+                        <button onClick={() => setConfirmDelMsg(m.id)}
+                          className="text-xs bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1 rounded font-semibold transition-colors">
+                          Eliminar
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

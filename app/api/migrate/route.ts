@@ -108,6 +108,23 @@ export async function GET() {
     results.push({ column: 'audit_log', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }
 
+  // ── tabla mensajes_contacto (formulario "contratar al creador") ──
+  try {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS mensajes_contacto (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre     TEXT    NOT NULL DEFAULT '',
+        contacto   TEXT    NOT NULL DEFAULT '',
+        mensaje    TEXT    NOT NULL DEFAULT '',
+        leido      INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT    DEFAULT (datetime('now'))
+      )
+    `);
+    results.push({ column: 'mensajes_contacto', status: 'tabla lista' });
+  } catch (err) {
+    results.push({ column: 'mensajes_contacto', status: `error: ${err instanceof Error ? err.message : String(err)}` });
+  }
+
   // ── superadmin ────────────────────────────────────────────────
   try {
     const r = await db.execute({ sql: "UPDATE participantes SET is_admin = 3 WHERE nombre_usuario = 'luka'", args: [] });
