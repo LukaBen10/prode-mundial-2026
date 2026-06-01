@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { hashPassword } from '@/lib/hash';
+import { hashPassword, verifyPassword, generarToken } from '@/lib/hash';
+
+const SESSION_DAYS = 14;
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,14 +24,41 @@ export async function POST(req: NextRequest) {
     const row = result.rows[0];
     const storedHash = row[5] as string;
 
-    // Usuarios viejos sin contraseña: permitir login con cualquier cosa hasta que la setteen
-    if (storedHash && storedHash !== '' && storedHash !== hashPassword(password)) {
+    // Usuarios sin contraseña (legado): bloquear
+    if (!storedHash || storedHash === '') {
+      return NextResponse.json({ error: 'Tu cuenta necesita contraseña. Contactá al organizador.' }, { status: 403 });
+    }
+
+    if (!verifyPassword(password, storedHash)) {
       return NextResponse.json({ error: 'Usuario o contraseña incorrectos' }, { status: 401 });
     }
 
-    return NextResponse.json({ id: row[0], nombre_completo: row[1], nombre_usuario: row[2], puntos: row[3], codigo: row[4], is_admin: row[6] ?? 0 });
+    const participanteId = row[0] as number;
+
+    // Migrar hash legacy SHA-256 → scrypt de forma transparente
+    if (!storedHash.startsWith('scrypt:')) {
+      const nuevoHash = hashPassword(password);
+      await db.execute({ sql: 'UPDATE participantes SET password_hash = ? WHERE id = ?', args: [nuevoHash, participanteId] });
+    }
+
+    // Crear sesión
+    const token = generarToken();
+    await db.execute({
+      sql: `INSERT INTO sessions (token, participante_id, expires_at)
+            VALUES (?, ?, datetime('now', '+${SESSION_DAYS} days'))`,
+      args: [token, participanteId],
+    });
+
+    return NextResponse.json({
+      id: row[0],
+      nombre_completo: row[1],
+      nombre_usuario: row[2],
+      puntos: row[3],
+      codigo: row[4],
+      is_admin: row[6] ?? 0,
+      token,
+    });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }

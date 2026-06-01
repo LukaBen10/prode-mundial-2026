@@ -181,11 +181,13 @@ function PrediccionesContent() {
       <div className="flex flex-wrap gap-2">
         {GRUPOS.map((g) => {
           const pG = partidos.filter((p) => p.grupo === g);
-          const completo = pG.filter((p) => predicciones[p.id]).length === pG.length && pG.length > 0;
+          const cargados = pG.filter((p) => predicciones[p.id]).length;
+          const total = pG.length;
+          const completo = cargados === total && total > 0;
           return (
             <button key={g} onClick={() => setGrupoActivo(g)}
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${grupoActivo === g ? 'bg-green-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
-              Grupo {g}{completo && ' ✓'}
+              {completo ? `Grupo ${g} ✓` : `Grupo ${g} ${cargados > 0 ? `${cargados}/${total}` : ''}`}
             </button>
           );
         })}

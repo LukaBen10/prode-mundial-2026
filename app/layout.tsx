@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
 
         <Navbar />
-        <main className="max-w-5xl mx-auto px-4 py-8">{children}</main>
+        <main className="max-w-5xl mx-auto px-4 py-8 animate-fadeIn">{children}</main>
         <footer className="border-t border-zinc-800/60 mt-16">
           <div className="max-w-5xl mx-auto px-4 py-6 text-center text-zinc-500 text-sm">
             Donut Makers Bakery · Av. La Plata 702, CABA

@@ -109,8 +109,9 @@ export default function ResultadosPage() {
               const gV = partido.goles_visitante ?? 0;
               const pts = pred ? calcularPuntos(parseInt(pred.local) || 0, parseInt(pred.visitante) || 0, gL, gV) : null;
 
+              const borderColor = pts === 3 ? 'border-green-500/40' : pts === 1 ? 'border-orange-500/30' : pts === 0 ? 'border-red-500/20' : 'border-zinc-800';
               return (
-                <div key={partido.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+                <div key={partido.id} className={`bg-zinc-900 border ${borderColor} rounded-xl p-4 space-y-3`}>
                   {/* Resultado real */}
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex-1 min-w-0 text-right font-semibold text-sm truncate">

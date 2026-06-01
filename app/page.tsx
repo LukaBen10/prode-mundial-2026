@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Countdown from '@/components/Countdown';
+import SocialProof from '@/components/SocialProof';
 
 export default function Home() {
   return (
@@ -69,6 +70,11 @@ export default function Home() {
           Los clientes de <span className="text-white font-bold">Donut Makers</span> predicen
           el Mundial. Cargá tus resultados antes de cada partido y demostrá que sabés de fútbol.
         </p>
+
+        {/* Social proof */}
+        <div className="flex justify-center">
+          <SocialProof />
+        </div>
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-1">

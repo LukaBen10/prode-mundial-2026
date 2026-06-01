@@ -136,7 +136,10 @@ export default function AdminPage() {
 
 
   function getHeaders(): Record<string, string> {
-    return { 'x-admin-participante-id': localStorage.getItem('prode_id') ?? '' };
+    return {
+      'x-admin-participante-id': localStorage.getItem('prode_id') ?? '',
+      'x-session-token': localStorage.getItem('prode_token') ?? '',
+    };
   }
 
   async function cargarParticipantes(pid?: string) {

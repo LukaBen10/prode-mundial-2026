@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LoadingState from '@/components/LoadingState';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import type { RankingEntry } from '@/lib/types';
 
 export default function MiProdePage() {
+  const router = useRouter();
   const participanteId = useAuthRedirect();
   const [nombre, setNombre] = useState('');
   const [posicion, setPosicion] = useState<number | null>(null);
@@ -42,6 +44,15 @@ export default function MiProdePage() {
   }, [participanteId]);
 
   if (!participanteId || loading) return <LoadingState />;
+
+  async function handleLogout() {
+    const token = localStorage.getItem('prode_token');
+    if (token) {
+      await fetch('/api/logout', { method: 'POST', headers: { 'x-session-token': token } });
+    }
+    localStorage.clear();
+    router.push('/login');
+  }
 
   const medalla = posicion === 1 ? '🥇' : posicion === 2 ? '🥈' : posicion === 3 ? '🥉' : null;
 
@@ -134,6 +145,14 @@ export default function MiProdePage() {
           </Link>
         )}
       </div>
+
+      {/* Cerrar sesión */}
+      <button
+        onClick={handleLogout}
+        className="w-full text-zinc-600 hover:text-zinc-400 text-sm py-2 transition-colors text-center"
+      >
+        Cerrar sesión
+      </button>
 
       {/* Reglas */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
