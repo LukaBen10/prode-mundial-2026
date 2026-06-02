@@ -134,7 +134,7 @@ export async function GET() {
   }
 
   // ── renombrar equipos ─────────────────────────────────────────
-  for (const { viejo, nuevo } of [{ viejo: 'Chequia', nuevo: 'República Checa' }]) {
+  for (const { viejo, nuevo } of [{ viejo: 'Chequia', nuevo: 'República Checa' }, { viejo: 'Catar', nuevo: 'Qatar' }]) {
     try {
       await db.execute({ sql: 'UPDATE partidos SET equipo_local = ? WHERE equipo_local = ?', args: [nuevo, viejo] });
       await db.execute({ sql: 'UPDATE partidos SET equipo_visitante = ? WHERE equipo_visitante = ?', args: [nuevo, viejo] });

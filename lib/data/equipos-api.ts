@@ -74,7 +74,7 @@ export const NOMBRE_API: Record<string, string> = {
   'Irán':                  'IR Iran',
   'Australia':             'Australia',
   'Nueva Zelanda':         'New Zealand',
-  'Catar':                 'Qatar',
+  'Qatar':                 'Qatar',
   'Irak':                  'Iraq',
   'Jordania':              'Jordan',
   'Uzbekistán':            'Uzbekistan',

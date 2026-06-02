@@ -1,6 +1,6 @@
 const GRUPOS: Record<string, string[]> = {
   A: ['México', 'Sudáfrica', 'Corea del Sur', 'República Checa'],
-  B: ['Canadá', 'Bosnia y Herzegovina', 'Catar', 'Suiza'],
+  B: ['Canadá', 'Bosnia y Herzegovina', 'Qatar', 'Suiza'],
   C: ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
   D: ['Estados Unidos', 'Paraguay', 'Australia', 'Turquía'],
   E: ['Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador'],
@@ -44,7 +44,7 @@ const SCHEDULE: Record<string, [InfoPartido, InfoPartido, InfoPartido, InfoParti
     { hora: '22:00', estadio: 'Estadio Azteca',        ciudad: 'Ciudad de México' }, // M5 MEX-CZE 24/6
     { hora: '22:00', estadio: 'Estadio BBVA',           ciudad: 'Monterrey'         }, // M6 SAF-KOR 24/6
   ],
-  // Grupo B: Canadá, Bosnia y Herzegovina, Catar, Suiza
+  // Grupo B: Canadá, Bosnia y Herzegovina, Qatar, Suiza
   B: [
     { hora: '16:00', estadio: 'BMO Field',              ciudad: 'Toronto'           }, // M1 CAN-BOS 12/6
     { hora: '16:00', estadio: "Levi's Stadium",         ciudad: 'San Francisco'     }, // M2 CAT-SUI 13/6
