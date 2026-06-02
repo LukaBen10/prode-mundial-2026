@@ -29,7 +29,7 @@ export default function BasesPage() {
         <p className="text-violet-400 text-xs">Última actualización: 1 de junio de 2026</p>
       </div>
 
-      <div className="bg-violet-950/40 border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
+      <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-6 sm:p-8 space-y-6">
 
         <Seccion n={1} titulo="Organizador">
           <p>

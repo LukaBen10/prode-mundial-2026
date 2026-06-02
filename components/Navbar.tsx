@@ -42,12 +42,12 @@ export default function Navbar() {
   const mobileLinkClass = (path: string) =>
     `flex items-center w-full text-left py-3.5 px-4 text-base font-semibold transition-colors rounded-xl ${
       pathname === path
-        ? 'text-white bg-violet-800/50'
+        ? 'text-white bg-violet-800/70'
         : 'text-violet-200 hover:text-white hover:bg-violet-800/40 active:bg-violet-800/60'
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 bg-violet-950/80 backdrop-blur-md border-b border-white/10">
+    <nav className="sticky top-0 z-50 bg-violet-950/80 backdrop-blur-md border-b border-white/15">
       {/* Línea de acento degradado */}
       <div
         className="absolute bottom-0 left-0 right-0 h-[1px]"
@@ -122,7 +122,7 @@ export default function Navbar() {
 
       {/* ── Mobile dropdown ──────────────────────────────── */}
       {menuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-violet-950/95 backdrop-blur-md px-3 py-2 space-y-0.5">
+        <div className="md:hidden border-t border-white/15 bg-violet-950/95 backdrop-blur-md px-3 py-2 space-y-0.5">
           <Link href="/predicciones" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/predicciones')}>
             ⚽ Predicciones
           </Link>

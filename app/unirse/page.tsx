@@ -58,7 +58,7 @@ export default function UnirsePage() {
     }
   }
 
-  const inputClass = "w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors";
+  const inputClass = "w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors";
 
   return (
     <div className="max-w-md mx-auto space-y-8">
@@ -71,7 +71,7 @@ export default function UnirsePage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-violet-950/40 border border-white/10 rounded-2xl p-5 sm:p-8 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-violet-950/70 border border-white/15 rounded-2xl p-5 sm:p-8 space-y-5">
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-violet-200">Nombre completo</label>
@@ -118,13 +118,13 @@ export default function UnirsePage() {
         </div>
 
         {/* Checkbox IG */}
-        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
           <input
             type="checkbox"
             checked={sigueIG}
             onChange={(e) => setSigueIG(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
           />
           <span className="text-sm text-violet-200 leading-relaxed">
             Ya sigo a{' '}
@@ -138,13 +138,13 @@ export default function UnirsePage() {
         </label>
 
         {/* Checkbox mayor de edad */}
-        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
           <input
             type="checkbox"
             checked={mayorEdad}
             onChange={(e) => setMayorEdad(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
           />
           <span className="text-sm text-violet-200 leading-relaxed">
             Confirmo que soy <strong className="text-white">mayor de 18 años</strong>.
@@ -152,13 +152,13 @@ export default function UnirsePage() {
         </label>
 
         {/* Checkbox bases y condiciones */}
-        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
           <input
             type="checkbox"
             checked={aceptaBases}
             onChange={(e) => setAceptaBases(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
           />
           <span className="text-sm text-violet-200 leading-relaxed">
             Leí y acepto las{' '}
@@ -169,12 +169,12 @@ export default function UnirsePage() {
         </label>
 
         {/* Checkbox uso de imagen (opcional) */}
-        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
           <input
             type="checkbox"
             checked={autorizaImagen}
             onChange={(e) => setAutorizaImagen(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
           />
           <span className="text-sm text-violet-200 leading-relaxed">
             Autorizo que, si gano, se publique mi nombre y foto en las redes de Donut Makers.{' '}
@@ -183,12 +183,12 @@ export default function UnirsePage() {
         </label>
 
         {/* Checkbox avisos por mail (opcional) */}
-        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
           <input
             type="checkbox"
             checked={aceptaAvisos}
             onChange={(e) => setAceptaAvisos(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
           />
           <span className="text-sm text-violet-200 leading-relaxed">
             📧 Avisame por mail los días que juego, así no me olvido de cargar mis predicciones.{' '}

@@ -87,7 +87,7 @@ export default function ResultadosPage() {
             <div className="flex flex-wrap gap-2">
               {gruposConJugados.map((g) => (
                 <button key={g} onClick={() => setVista(g)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-amber-400 text-violet-950' : 'bg-violet-900/40 text-violet-300 hover:text-violet-950 hover:bg-violet-800/60'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-amber-400 text-violet-950' : 'bg-violet-950/65 text-violet-300 hover:text-white hover:bg-violet-800/60'}`}>
                   Grupo {g}
                 </button>
               ))}
@@ -96,7 +96,7 @@ export default function ResultadosPage() {
               <div className="flex flex-wrap gap-2">
                 {fasesConJugados.map((f) => (
                   <button key={f.fase} onClick={() => setVista(f.fase)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === f.fase ? 'bg-amber-500 text-white' : 'bg-violet-900/40 text-amber-400/70 hover:text-amber-300 hover:bg-violet-800/60'}`}>
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === f.fase ? 'bg-amber-500 text-white' : 'bg-violet-950/65 text-amber-400/70 hover:text-amber-300 hover:bg-violet-800/60'}`}>
                     {f.corto}
                   </button>
                 ))}
@@ -111,7 +111,7 @@ export default function ResultadosPage() {
               if (!partido.jugado) {
                 const definido = !!partido.equipo_local && !!partido.equipo_visitante;
                 return (
-                  <div key={partido.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between text-sm opacity-50">
+                  <div key={partido.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 flex items-center justify-between text-sm opacity-50">
                     <span className="text-violet-300">
                       {definido ? (
                         <>
@@ -131,18 +131,18 @@ export default function ResultadosPage() {
               const gV = partido.goles_visitante ?? 0;
               const pts = pred ? calcularPuntos(parseInt(pred.local) || 0, parseInt(pred.visitante) || 0, gL, gV) : null;
 
-              const borderColor = pts === 3 ? 'border-amber-400/40' : pts === 1 ? 'border-blue-500/35' : pts === 0 ? 'border-red-500/20' : 'border-white/10';
+              const borderColor = pts === 3 ? 'border-amber-400/40' : pts === 1 ? 'border-blue-500/35' : pts === 0 ? 'border-red-500/20' : 'border-white/15';
               return (
-                <div key={partido.id} className={`bg-violet-950/40 border ${borderColor} rounded-xl p-4 space-y-3`}>
+                <div key={partido.id} className={`bg-violet-950/70 border ${borderColor} rounded-xl p-4 space-y-3`}>
                   {/* Resultado real */}
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex-1 min-w-0 text-right font-semibold text-sm truncate">
                       <Flag equipo={partido.equipo_local} />{partido.equipo_local}
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                      <div className="w-10 h-10 flex items-center justify-center bg-violet-900/40 rounded-lg font-black text-white text-lg">{gL}</div>
+                      <div className="w-10 h-10 flex items-center justify-center bg-violet-950/65 rounded-lg font-black text-white text-lg">{gL}</div>
                       <span className="text-violet-300 font-bold">-</span>
-                      <div className="w-10 h-10 flex items-center justify-center bg-violet-900/40 rounded-lg font-black text-white text-lg">{gV}</div>
+                      <div className="w-10 h-10 flex items-center justify-center bg-violet-950/65 rounded-lg font-black text-white text-lg">{gV}</div>
                     </div>
                     <div className="flex-1 min-w-0 font-semibold text-sm truncate">
                       <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
@@ -150,7 +150,7 @@ export default function ResultadosPage() {
                   </div>
 
                   {/* Tu predicción + puntos */}
-                  <div className="flex items-center justify-between border-t border-white/10 pt-2 text-xs">
+                  <div className="flex items-center justify-between border-t border-white/15 pt-2 text-xs">
                     {pred ? (
                       <span className="text-violet-300">
                         Tu pred: <span className="text-violet-100 font-bold">{pred.local} - {pred.visitante}</span>

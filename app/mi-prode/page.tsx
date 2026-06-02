@@ -100,7 +100,7 @@ export default function MiProdePage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-violet-950/40 border border-white/10 rounded-2xl p-4 text-center space-y-1">
+        <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-4 text-center space-y-1">
           <div className="text-4xl font-black">
             {medalla ?? <span className="text-white">#{posicion}</span>}
           </div>
@@ -110,12 +110,12 @@ export default function MiProdePage() {
           )}
         </div>
 
-        <div className="bg-violet-950/40 border border-white/10 rounded-2xl p-4 text-center space-y-1">
+        <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-4 text-center space-y-1">
           <div className="text-4xl font-black text-amber-400">{puntos}</div>
           <div className="text-violet-300 text-xs">Tus puntos</div>
         </div>
 
-        <div className="bg-violet-950/40 border border-white/10 rounded-2xl p-4 text-center space-y-1">
+        <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-4 text-center space-y-1">
           {posicion === 1 ? (
             <>
               <div className="text-4xl">🏆</div>
@@ -139,7 +139,7 @@ export default function MiProdePage() {
       <div className="space-y-3">
         <Link
           href={`/predicciones?participanteId=${participanteId ?? ''}`}
-          className="flex items-center justify-between w-full bg-violet-950/40 border border-white/10 hover:border-amber-400/40 rounded-2xl p-5 transition-colors group"
+          className="flex items-center justify-between w-full bg-violet-950/70 border border-white/15 hover:border-amber-400/40 rounded-2xl p-5 transition-colors group"
         >
           <div className="space-y-0.5">
             <div className="font-bold text-lg">⚽ Mis predicciones</div>
@@ -150,7 +150,7 @@ export default function MiProdePage() {
 
         <Link
           href="/ranking"
-          className="flex items-center justify-between w-full bg-violet-950/40 border border-white/10 hover:border-violet-400/25 rounded-2xl p-5 transition-colors group"
+          className="flex items-center justify-between w-full bg-violet-950/70 border border-white/15 hover:border-violet-400/40 rounded-2xl p-5 transition-colors group"
         >
           <div className="space-y-0.5">
             <div className="font-bold text-lg">🏆 Tabla de posiciones</div>
@@ -163,7 +163,7 @@ export default function MiProdePage() {
         {esAdmin && (
           <Link
             href="/admin"
-            className="flex items-center justify-between w-full bg-violet-950/40 border border-amber-500/20 hover:border-amber-500/50 rounded-2xl p-5 transition-colors group"
+            className="flex items-center justify-between w-full bg-violet-950/70 border border-amber-500/20 hover:border-amber-500/50 rounded-2xl p-5 transition-colors group"
           >
             <div className="space-y-0.5">
               <div className="font-bold text-lg">🔑 Panel Admin</div>
@@ -183,7 +183,7 @@ export default function MiProdePage() {
       </button>
 
       {/* Avisos por mail */}
-      <div className={`rounded-2xl p-5 ${!avisosDefinido ? 'bg-amber-400/10 border border-amber-400/30' : 'bg-violet-950/40 border border-white/10'}`}>
+      <div className={`rounded-2xl p-5 ${!avisosDefinido ? 'bg-amber-400/10 border border-amber-400/30' : 'bg-violet-950/70 border border-white/15'}`}>
         {!avisosDefinido ? (
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -202,7 +202,7 @@ export default function MiProdePage() {
                 Sí, avisame
               </button>
               <button onClick={() => guardarAvisos(false)} disabled={savingAvisos}
-                className="flex-1 bg-violet-900/40 hover:bg-violet-800/60 text-violet-200 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                className="flex-1 bg-violet-950/65 hover:bg-violet-800/60 text-violet-200 py-2.5 rounded-xl font-bold text-sm transition-colors">
                 No, gracias
               </button>
             </div>
@@ -217,7 +217,7 @@ export default function MiProdePage() {
               </div>
             </div>
             <button onClick={() => guardarAvisos(!aceptaAvisos)} disabled={savingAvisos}
-              className={`relative w-12 h-7 rounded-full transition-colors shrink-0 disabled:opacity-50 ${aceptaAvisos ? 'bg-amber-400' : 'bg-violet-800/50'}`}
+              className={`relative w-12 h-7 rounded-full transition-colors shrink-0 disabled:opacity-50 ${aceptaAvisos ? 'bg-amber-400' : 'bg-violet-800/70'}`}
               aria-label="Activar o desactivar avisos por mail">
               <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${aceptaAvisos ? 'left-6' : 'left-1'}`} />
             </button>
@@ -226,7 +226,7 @@ export default function MiProdePage() {
       </div>
 
       {/* Reglas */}
-      <div className="bg-violet-950/40 border border-white/10 rounded-2xl p-5 space-y-3">
+      <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-5 space-y-3">
         <h2 className="font-semibold text-violet-200 text-sm">Cómo se suman los puntos</h2>
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-3">

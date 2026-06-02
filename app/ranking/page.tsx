@@ -58,7 +58,7 @@ export default function RankingPage() {
                   className={`flex-1 text-center rounded-2xl p-5 space-y-2 mt-8 ${
                     miId && String(top3[1].id) === miId
                       ? 'bg-blue-500/15 border border-blue-500/35'
-                      : 'bg-violet-950/40 border border-violet-400/25'
+                      : 'bg-violet-950/70 border border-violet-400/40'
                   }`}
                 >
                   <div className="text-3xl">🥈</div>
@@ -76,7 +76,7 @@ export default function RankingPage() {
                 className={`flex-1 text-center rounded-2xl p-6 space-y-2 relative ${
                   miId && String(top3[0].id) === miId
                     ? 'bg-blue-500/15 border border-blue-400/40'
-                    : 'bg-violet-950/40 border border-amber-400/40'
+                    : 'bg-violet-950/70 border border-amber-400/40'
                 }`}
                 style={{
                   boxShadow: miId && String(top3[0].id) === miId
@@ -106,7 +106,7 @@ export default function RankingPage() {
                   className={`flex-1 text-center rounded-2xl p-5 space-y-2 mt-14 ${
                     miId && String(top3[2].id) === miId
                       ? 'bg-blue-500/15 border border-blue-500/35'
-                      : 'bg-violet-950/40 border border-violet-400/25'
+                      : 'bg-violet-950/70 border border-violet-400/40'
                   }`}
                 >
                   <div className="text-3xl">🥉</div>
@@ -132,15 +132,15 @@ export default function RankingPage() {
           {/* Línea divisora */}
           {resto.length > 0 && (
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-violet-900/40" />
+              <div className="flex-1 h-px bg-violet-950/65" />
               <span className="text-violet-400 text-xs font-medium">RESTO DEL RANKING</span>
-              <div className="flex-1 h-px bg-violet-900/40" />
+              <div className="flex-1 h-px bg-violet-950/65" />
             </div>
           )}
 
           {/* ── Resto de la tabla ── */}
           {resto.length > 0 && (
-            <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="bg-violet-950/70 border border-white/15 rounded-2xl overflow-hidden">
               <table className="w-full">
                 <tbody>
                   {resto.map((entry) => {
@@ -148,7 +148,7 @@ export default function RankingPage() {
                     return (
                       <tr
                         key={entry.id}
-                        className={`border-b border-white/10 last:border-0 transition-colors ${
+                        className={`border-b border-white/15 last:border-0 transition-colors ${
                           soyYo ? 'bg-blue-500/15' : 'hover:bg-violet-800/30'
                         }`}
                       >

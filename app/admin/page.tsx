@@ -104,7 +104,7 @@ function waLink(numero: string): string {
   return `https://wa.me/549${clean}`;
 }
 
-const inputCell = "w-full bg-violet-900/40 border border-violet-400/25 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-amber-400 min-w-0";
+const inputCell = "w-full bg-violet-950/65 border border-violet-400/40 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-amber-400 min-w-0";
 
 export default function AdminPage() {
   const [authMode, setAuthMode] = useState<'participant' | null>(null);
@@ -549,7 +549,7 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold">Panel Admin</h1>
           {adminLevel >= 3 && <span className="text-xs bg-amber-400/15 border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-full font-bold">⭐ superadmin</span>}
           {adminLevel === 2 && <span className="text-xs bg-blue-400/15 border border-blue-400/30 text-blue-400 px-2.5 py-1 rounded-full font-bold">🛡️ moderador</span>}
-          {adminLevel === 1 && <span className="text-xs bg-violet-800/50 border border-violet-400/25 text-violet-200 px-2.5 py-1 rounded-full font-bold">admin</span>}
+          {adminLevel === 1 && <span className="text-xs bg-violet-800/70 border border-violet-400/40 text-violet-200 px-2.5 py-1 rounded-full font-bold">admin</span>}
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           {stats && isSuperAdmin && (
@@ -562,7 +562,7 @@ export default function AdminPage() {
           <button
             onClick={() => cargarParticipantes()}
             disabled={loadingParts}
-            className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
           >
             {loadingParts ? '⏳' : '🔄 Actualizar'}
           </button>
@@ -570,7 +570,7 @@ export default function AdminPage() {
       </div>
 
       {/* Tabs por nivel: 1=consumos, 2=+participantes+resultados, 3=+admins+auditoría */}
-      <div className="flex gap-2 border-b border-white/10 pb-0 flex-wrap">
+      <div className="flex gap-2 border-b border-white/15 pb-0 flex-wrap">
         {([
           { id: 'participantes', label: '👥 Participantes', minLevel: 2 },
           { id: 'resultados',    label: '⚽ Resultados',    minLevel: 2 },
@@ -608,7 +608,7 @@ export default function AdminPage() {
           )}
           <input type="text" value={filtroBusqueda} onChange={e => setFiltroBusqueda(e.target.value)}
             placeholder="Filtrar por nombre, usuario, DNI o mail..."
-            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
+            className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
 
           {loadingParts ? (
             <p className="text-violet-300 py-8 text-center">Cargando...</p>
@@ -617,10 +617,10 @@ export default function AdminPage() {
               {participantes.length === 0 ? 'Todavía no se inscribió nadie.' : 'No hay resultados para ese filtro.'}
             </div>
           ) : (
-            <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-x-auto">
+            <div className="bg-violet-950/70 border border-white/15 rounded-2xl overflow-x-auto">
               <table className="w-full text-sm min-w-[860px]">
                 <thead>
-                  <tr className="border-b border-white/10 text-violet-300">
+                  <tr className="border-b border-white/15 text-violet-300">
                     <th className="text-left px-3 py-3 font-medium">#</th>
                     <th className="text-left px-3 py-3 font-medium">Usuario</th>
                     <th className="text-left px-3 py-3 font-medium">Nombre completo</th>
@@ -642,7 +642,7 @@ export default function AdminPage() {
                       // Fila en modo edición
                       const c = editando.campos;
                       return (
-                        <tr key={p.id} className="border-b border-white/10 bg-violet-900/30">
+                        <tr key={p.id} className="border-b border-white/15 bg-violet-900/55">
                           <td className="px-3 py-2 text-violet-300 font-mono">{i + 1}</td>
                           <td className="px-3 py-2">
                             <input className={inputCell} value={c.nombre_usuario}
@@ -677,7 +677,7 @@ export default function AdminPage() {
                                 {savingEdit ? '...' : 'Guardar'}
                               </button>
                               <button onClick={cancelarEdicion}
-                                className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">
+                                className="bg-violet-800/70 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">
                                 Cancelar
                               </button>
                             </div>
@@ -688,7 +688,7 @@ export default function AdminPage() {
 
                     const esSuperAdmin = (p.is_admin as number) >= 2;
                     return (
-                      <tr key={p.id} className={`border-b border-white/10 last:border-0 transition-colors ${esSuperAdmin ? 'bg-amber-400/5' : 'hover:bg-violet-800/20'}`}>
+                      <tr key={p.id} className={`border-b border-white/15 last:border-0 transition-colors ${esSuperAdmin ? 'bg-amber-400/5' : 'hover:bg-violet-800/20'}`}>
                         <td className="px-3 py-3 text-violet-300 font-mono">{i + 1}</td>
                         <td className="px-3 py-3 font-semibold text-white">
                           <div className="flex items-center gap-1">
@@ -705,7 +705,7 @@ export default function AdminPage() {
                               className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold transition-colors disabled:opacity-50 ${
                                 p.fuera_premios
                                   ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
-                                  : 'bg-violet-900/40 text-violet-300 border border-violet-400/25 hover:text-violet-200'
+                                  : 'bg-violet-950/65 text-violet-300 border border-violet-400/40 hover:text-violet-200'
                               }`}
                             >
                               {togglingPremios === p.id ? '…' : p.fuera_premios ? '🏠 sin premios' : '🏆 compite'}
@@ -750,14 +750,14 @@ export default function AdminPage() {
                                 {isDeleting ? '...' : 'Sí'}
                               </button>
                               <button onClick={() => setConfirmDelete(null)}
-                                className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">
+                                className="bg-violet-800/70 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">
                                 No
                               </button>
                             </div>
                           ) : (
                             <div className="flex items-center justify-end gap-1.5">
                               <button onClick={() => iniciarEdicion(p)}
-                                className="bg-violet-800/50 hover:bg-violet-700 text-violet-100 px-2.5 py-1 rounded text-xs font-semibold transition-colors">
+                                className="bg-violet-800/70 hover:bg-violet-700 text-violet-100 px-2.5 py-1 rounded text-xs font-semibold transition-colors">
                                 Editar
                               </button>
                               <button onClick={() => { setConfirmDelete(p.id); setEditando(null); }}
@@ -782,7 +782,7 @@ export default function AdminPage() {
         <div className="space-y-6">
 
           {/* Sync automático */}
-          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="bg-violet-950/70 border border-white/15 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
             <div>
               <p className="text-sm font-semibold text-white">🔄 Sincronización automática</p>
               <p className="text-xs text-violet-300 mt-0.5">Trae resultados reales de football-data.org y calcula puntos</p>
@@ -805,12 +805,12 @@ export default function AdminPage() {
 
           {/* Definir cruces de eliminatoria (a mano, respaldo del auto-sync) */}
           {eliminatorias.length > 0 && (
-            <details className="bg-violet-950/40 border border-amber-500/20 rounded-xl overflow-hidden">
+            <details className="bg-violet-950/70 border border-amber-500/20 rounded-xl overflow-hidden">
               <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-white flex items-center justify-between gap-2">
                 <span>🏆 Definir cruces de eliminatoria</span>
                 <span className="text-xs text-violet-300">{eliminatorias.filter(p => p.equipo_local && p.equipo_visitante).length}/{eliminatorias.length} definidos</span>
               </summary>
-              <div className="px-4 pb-4 space-y-4 border-t border-white/10 pt-3">
+              <div className="px-4 pb-4 space-y-4 border-t border-white/15 pt-3">
                 <p className="text-xs text-violet-300">Normalmente se completan solos con la API. Acá podés definir o corregir quién juega cada partido a mano.</p>
                 {FASES_ELIM.map(f => {
                   const pF = eliminatorias.filter(p => p.fase === f.fase);
@@ -822,7 +822,7 @@ export default function AdminPage() {
                         const edit = crucesEdit[p.id];
                         const localVal = edit?.local ?? p.equipo_local;
                         const visitanteVal = edit?.visitante ?? p.equipo_visitante;
-                        const selCls = "bg-violet-900/40 border border-violet-400/25 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-amber-400 flex-1 min-w-[110px]";
+                        const selCls = "bg-violet-950/65 border border-violet-400/40 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-amber-400 flex-1 min-w-[110px]";
                         return (
                           <div key={p.id} className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs text-violet-300 w-32 shrink-0">{formatFecha(p.fecha)} · {p.estadio}</span>
@@ -854,19 +854,19 @@ export default function AdminPage() {
               <p className="text-violet-300">No hay partidos pendientes.</p>
             ) : (
               pendientes.map(partido => (
-                <div key={partido.id} className="bg-violet-950/40 border border-white/10 rounded-xl p-4">
+                <div key={partido.id} className="bg-violet-950/70 border border-white/15 rounded-xl p-4">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-xs text-violet-300 w-16 shrink-0">{formatFecha(partido.fecha)}</span>
-                    <span className="text-xs bg-violet-900/40 text-violet-300 px-2 py-0.5 rounded">G {partido.grupo}</span>
+                    <span className="text-xs bg-violet-950/65 text-violet-300 px-2 py-0.5 rounded">G {partido.grupo}</span>
                     <div className="flex-1 flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium truncate flex-1 text-right min-w-0">{partido.equipo_local}</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
                         onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local: e.target.value } }))}
-                        className="w-10 h-8 text-center bg-violet-900/40 border border-violet-400/25 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
+                        className="w-10 h-8 text-center bg-violet-950/65 border border-violet-400/40 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
                       <span className="text-violet-300 shrink-0">-</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
                         onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante: e.target.value } }))}
-                        className="w-10 h-8 text-center bg-violet-900/40 border border-violet-400/25 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
+                        className="w-10 h-8 text-center bg-violet-950/65 border border-violet-400/40 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
                       <span className="text-sm font-medium truncate flex-1 min-w-0">{partido.equipo_visitante}</span>
                     </div>
                     <button onClick={() => cargarResultado(partido.id)}
@@ -883,11 +883,11 @@ export default function AdminPage() {
           {jugados.length > 0 && (
             <section className="space-y-2">
               <h2 className="font-semibold text-violet-300">Jugados ({jugados.length})</h2>
-              <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-hidden">
+              <div className="bg-violet-950/70 border border-white/15 rounded-2xl overflow-hidden">
                 {jugados.map(p => (
-                  <div key={p.id} className="flex items-center gap-3 text-sm px-4 py-3 border-b border-white/10 last:border-0">
+                  <div key={p.id} className="flex items-center gap-3 text-sm px-4 py-3 border-b border-white/15 last:border-0">
                     <span className="text-violet-300 text-xs w-14 shrink-0">{formatFecha(p.fecha)}</span>
-                    <span className="bg-violet-900/40 px-2 py-0.5 rounded text-xs text-violet-300">G {p.grupo}</span>
+                    <span className="bg-violet-950/65 px-2 py-0.5 rounded text-xs text-violet-300">G {p.grupo}</span>
                     <span className="flex-1 text-right text-violet-200">{p.equipo_local}</span>
                     <span className="font-bold text-white px-2">{p.goles_local} - {p.goles_visitante}</span>
                     <span className="flex-1 text-violet-200">{p.equipo_visitante}</span>
@@ -905,11 +905,11 @@ export default function AdminPage() {
           <p className="text-violet-300 text-sm">Buscá al cliente y sumale o restale puntos de visita al local.</p>
           <input type="text" value={busqueda} onChange={e => buscarParticipante(e.target.value)}
             placeholder="Buscar por usuario o nombre..."
-            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
+            className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
           {resultadosBusqueda.length > 0 && (
             <div className="space-y-2">
               {resultadosBusqueda.map(p => (
-                <div key={p.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                <div key={p.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                   <div>
                     <span className="font-semibold text-white">@{p.nombre_usuario}</span>
                     <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
@@ -947,7 +947,7 @@ export default function AdminPage() {
             </p>
             <div className="flex items-center gap-2">
               <button onClick={cargarPredicciones} disabled={loadingPreds}
-                className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+                className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
                 {loadingPreds ? '⏳' : '🔄 Actualizar'}
               </button>
               <button onClick={exportarPrediccionesCSV} disabled={predicciones.length === 0}
@@ -959,7 +959,7 @@ export default function AdminPage() {
 
           <input type="text" value={filtroPreds} onChange={e => setFiltroPreds(e.target.value)}
             placeholder="Buscar participante por usuario o nombre..."
-            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
+            className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
 
           {loadingPreds ? (
             <p className="text-violet-300 py-8 text-center">Cargando...</p>
@@ -972,7 +972,7 @@ export default function AdminPage() {
               {prediccionesPorPersonaFiltradas.map(g => {
                 const abierto = personaExpandida === g.id;
                 return (
-                  <div key={g.id} className="bg-violet-950/40 border border-white/10 rounded-xl overflow-hidden">
+                  <div key={g.id} className="bg-violet-950/70 border border-white/15 rounded-xl overflow-hidden">
                     <button onClick={() => setPersonaExpandida(abierto ? null : g.id)}
                       className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-violet-800/30 transition-colors">
                       <div className="min-w-0">
@@ -986,10 +986,10 @@ export default function AdminPage() {
                       </div>
                     </button>
                     {abierto && (
-                      <div className="border-t border-white/10 overflow-x-auto">
+                      <div className="border-t border-white/15 overflow-x-auto">
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="text-violet-300 border-b border-white/10">
+                            <tr className="text-violet-300 border-b border-white/15">
                               <th className="text-left px-3 py-2 font-medium">Fase</th>
                               <th className="text-left px-3 py-2 font-medium">Partido</th>
                               <th className="text-center px-3 py-2 font-medium">Pred.</th>
@@ -999,7 +999,7 @@ export default function AdminPage() {
                           </thead>
                           <tbody>
                             {g.preds.map((p, i) => (
-                              <tr key={i} className="border-b border-white/10 last:border-0">
+                              <tr key={i} className="border-b border-white/15 last:border-0">
                                 <td className="px-3 py-2 text-violet-300 whitespace-nowrap">{p.grupo ? `G ${p.grupo}` : (p.fase || '')}</td>
                                 <td className="px-3 py-2 text-violet-200">
                                   {(p.equipo_local || 'Por definir')} <span className="text-violet-400">vs</span> {(p.equipo_visitante || 'Por definir')}
@@ -1029,7 +1029,7 @@ export default function AdminPage() {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-sm text-violet-300">Mensajes de gente que te quiere contactar (desde la página de contacto).</p>
             <button onClick={cargarMensajes} disabled={loadingMensajes}
-              className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+              className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
               {loadingMensajes ? '⏳' : '🔄 Actualizar'}
             </button>
           </div>
@@ -1044,7 +1044,7 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-3">
               {mensajesContacto.map(m => (
-                <div key={m.id} className={`rounded-xl p-4 border ${m.leido ? 'bg-violet-950/40 border-white/10' : 'bg-violet-950/40 border-amber-400/30'}`}>
+                <div key={m.id} className={`rounded-xl p-4 border ${m.leido ? 'bg-violet-950/70 border-white/15' : 'bg-violet-950/70 border-amber-400/30'}`}>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -1062,19 +1062,19 @@ export default function AdminPage() {
                     <span className="text-xs text-violet-300 whitespace-nowrap">{formatFechaHora(m.created_at)}</span>
                   </div>
 
-                  <p className="text-violet-200 text-sm mt-3 whitespace-pre-wrap leading-relaxed border-t border-white/10 pt-3">{m.mensaje}</p>
+                  <p className="text-violet-200 text-sm mt-3 whitespace-pre-wrap leading-relaxed border-t border-white/15 pt-3">{m.mensaje}</p>
 
                   <div className="flex items-center justify-end gap-2 mt-3">
                     {confirmDelMsg === m.id ? (
                       <>
                         <span className="text-xs text-red-400 mr-1">¿Borrar?</span>
                         <button onClick={() => eliminarMensaje(m.id)} className="bg-red-500 hover:bg-red-400 text-white px-2.5 py-1 rounded text-xs font-semibold">Sí</button>
-                        <button onClick={() => setConfirmDelMsg(null)} className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">No</button>
+                        <button onClick={() => setConfirmDelMsg(null)} className="bg-violet-800/70 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">No</button>
                       </>
                     ) : (
                       <>
                         <button onClick={() => marcarLeido(m.id, !m.leido)}
-                          className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-2.5 py-1 rounded font-semibold transition-colors">
+                          className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-2.5 py-1 rounded font-semibold transition-colors">
                           {m.leido ? 'Marcar no leído' : 'Marcar leído'}
                         </button>
                         <button onClick={() => setConfirmDelMsg(m.id)}
@@ -1099,7 +1099,7 @@ export default function AdminPage() {
               <p className="text-sm text-violet-300">Registro de todas las acciones de los administradores.</p>
             </div>
             <button onClick={cargarAuditLog} disabled={loadingAudit}
-              className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+              className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
               {loadingAudit ? '⏳' : '🔄 Actualizar'}
             </button>
           </div>
@@ -1112,10 +1112,10 @@ export default function AdminPage() {
               <p>Sin actividad registrada todavía.</p>
             </div>
           ) : (
-            <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-x-auto">
+            <div className="bg-violet-950/70 border border-white/15 rounded-2xl overflow-x-auto">
               <table className="w-full text-sm min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-white/10 text-violet-300">
+                  <tr className="border-b border-white/15 text-violet-300">
                     <th className="text-left px-4 py-3 font-medium">Fecha</th>
                     <th className="text-left px-4 py-3 font-medium">Admin</th>
                     <th className="text-left px-4 py-3 font-medium">Acción</th>
@@ -1124,7 +1124,7 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {auditLog.map(entry => (
-                    <tr key={entry.id} className="border-b border-white/10 last:border-0 hover:bg-violet-800/20">
+                    <tr key={entry.id} className="border-b border-white/15 last:border-0 hover:bg-violet-800/20">
                       <td className="px-4 py-3 text-violet-300 text-xs whitespace-nowrap">
                         {new Date(entry.created_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </td>
@@ -1156,7 +1156,7 @@ export default function AdminPage() {
                   const esSA = nivel >= 3;
                   const rolLabel = nivel >= 3 ? '⭐ superadmin' : nivel === 2 ? '🛡️ moderador' : '🔑 admin';
                   return (
-                    <div key={p.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                    <div key={p.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                       <div>
                         <span className="font-semibold text-white">@{p.nombre_usuario}</span>
                         <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
@@ -1165,7 +1165,7 @@ export default function AdminPage() {
                       {!esSA && (
                         <div className="flex items-center gap-2 flex-wrap">
                           {msgAdmin[p.id] && <span className="text-xs text-amber-400">{msgAdmin[p.id]}</span>}
-                          {nivel !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">→ Admin</button>}
+                          {nivel !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-violet-800/70 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">→ Admin</button>}
                           {nivel !== 2 && <button onClick={() => setRol(p.id, 2)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded text-xs font-semibold">→ Moderador</button>}
                           <button onClick={() => setRol(p.id, 0)} className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1 rounded text-xs font-semibold">Quitar rol</button>
                         </div>
@@ -1182,14 +1182,14 @@ export default function AdminPage() {
             <h2 className="font-semibold text-violet-200">Asignar rol a un participante</h2>
             <input type="text" value={busquedaAdmin} onChange={e => buscarAdmin(e.target.value)}
               placeholder="Buscar por usuario o nombre..."
-              className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
+              className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
             {resultadosAdmin.length > 0 && (
               <div className="space-y-2">
                 {resultadosAdmin.map(p => {
                   const nivelActual = (adminsActuales.find(a => a.id === p.id)?.is_admin as number) ?? 0;
                   const esSA = nivelActual >= 3;
                   return (
-                    <div key={p.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                    <div key={p.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                       <div>
                         <span className="font-semibold text-white">@{p.nombre_usuario}</span>
                         <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
@@ -1198,7 +1198,7 @@ export default function AdminPage() {
                       {!esSA && (
                         <div className="flex items-center gap-2 flex-wrap">
                           {msgAdmin[p.id] && <span className="text-xs text-amber-400">{msgAdmin[p.id]}</span>}
-                          {nivelActual !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 border border-violet-400/25 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Admin</button>}
+                          {nivelActual !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-violet-800/70 hover:bg-violet-700 text-violet-200 border border-violet-400/40 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Admin</button>}
                           {nivelActual !== 2 && <button onClick={() => setRol(p.id, 2)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Moderador</button>}
                           {nivelActual > 0 && <button onClick={() => setRol(p.id, 0)} className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Quitar</button>}
                         </div>

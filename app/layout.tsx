@@ -64,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <Navbar />
         <main className="max-w-5xl mx-auto px-4 py-8 animate-fadeIn">{children}</main>
-        <footer className="border-t border-white/10 mt-16">
+        <footer className="border-t border-white/15 mt-16">
           <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
             <div className="grid sm:grid-cols-3 gap-5 text-sm">
               {/* Local */}
@@ -117,7 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </div>
 
-            <div className="border-t border-white/10 pt-4 text-center text-xs text-violet-400">
+            <div className="border-t border-white/15 pt-4 text-center text-xs text-violet-400">
               © 2026 Donut Makers Caballito · El Prode del Mundial 2026
             </div>
           </div>

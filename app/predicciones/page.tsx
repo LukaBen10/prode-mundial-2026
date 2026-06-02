@@ -62,7 +62,7 @@ function DeadlineBadge({ partido }: { partido: Partido }) {
 function GoalInput({ value, onChange, disabled }: { value: string; onChange: (v: string) => void; disabled: boolean }) {
   return (
     <input type="number" min={0} max={20} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}
-      className="w-12 h-10 text-center bg-violet-900/40 border border-violet-400/25 rounded-lg text-white font-bold focus:outline-none focus:border-amber-400 disabled:opacity-40 transition-colors" />
+      className="w-12 h-10 text-center bg-violet-950/65 border border-violet-400/40 rounded-lg text-white font-bold focus:outline-none focus:border-amber-400 disabled:opacity-40 transition-colors" />
   );
 }
 
@@ -154,17 +154,17 @@ function PrediccionesContent() {
 
       {miRanking && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 text-center space-y-1">
+          <div className="bg-violet-950/70 border border-white/15 rounded-xl p-4 text-center space-y-1">
             <div className="text-3xl font-bold text-white">
               {miRanking.posicion === 1 ? '🥇' : miRanking.posicion === 2 ? '🥈' : miRanking.posicion === 3 ? '🥉' : `#${miRanking.posicion}`}
             </div>
             <div className="text-violet-300 text-xs">Tu posición</div>
           </div>
-          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 text-center space-y-1">
+          <div className="bg-violet-950/70 border border-white/15 rounded-xl p-4 text-center space-y-1">
             <div className="text-3xl font-bold text-amber-400">{miRanking.puntos}</div>
             <div className="text-violet-300 text-xs">Tus puntos</div>
           </div>
-          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 text-center space-y-1">
+          <div className="bg-violet-950/70 border border-white/15 rounded-xl p-4 text-center space-y-1">
             {miRanking.puntosNext !== null && miRanking.puntosNext > 0 ? (
               <><div className="text-3xl font-bold text-amber-400">+{miRanking.puntosNext}</div><div className="text-violet-300 text-xs">Para subir un puesto</div></>
             ) : miRanking.posicion === 1 ? (
@@ -183,7 +183,7 @@ function PrediccionesContent() {
         </p>
       </div>
 
-      <div className="h-2 bg-violet-900/40 rounded-full overflow-hidden">
+      <div className="h-2 bg-violet-950/65 rounded-full overflow-hidden">
         <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${(predCount / totalPartidos) * 100}%` }} />
       </div>
 
@@ -196,7 +196,7 @@ function PrediccionesContent() {
             const completo = cargados === total && total > 0;
             return (
               <button key={g} onClick={() => setVista(g)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-amber-400 text-violet-950' : 'bg-violet-900/40 text-violet-300 hover:text-violet-950 hover:bg-violet-800/60'}`}>
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-amber-400 text-violet-950' : 'bg-violet-950/65 text-violet-300 hover:text-white hover:bg-violet-800/60'}`}>
                 {completo ? `Grupo ${g} ✓` : `Grupo ${g} ${cargados > 0 ? `${cargados}/${total}` : ''}`}
               </button>
             );
@@ -211,7 +211,7 @@ function PrediccionesContent() {
             return (
               <button key={f.fase} onClick={() => setVista(f.fase)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                  vista === f.fase ? 'bg-amber-500 text-white' : 'bg-violet-900/40 text-amber-400/70 hover:text-amber-300 hover:bg-violet-800/60'
+                  vista === f.fase ? 'bg-amber-500 text-white' : 'bg-violet-950/65 text-amber-400/70 hover:text-amber-300 hover:bg-violet-800/60'
                 }`}>
                 {f.corto}{definidos === 0 ? ' 🔒' : ''}
               </button>
@@ -223,7 +223,7 @@ function PrediccionesContent() {
       <div className="space-y-3">
         <h2 className="font-bold text-lg text-violet-200">{tituloVista}</h2>
         {!esGrupo && partidosVista.every((p) => !tieneEquipos(p)) && (
-          <p className="text-violet-300 text-sm bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3">
+          <p className="text-violet-300 text-sm bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3">
             🔒 Todavía no se sabe quiénes juegan esta fase. Los cruces y la predicción se habilitan a medida que avanzan los grupos.
           </p>
         )}
@@ -232,7 +232,7 @@ function PrediccionesContent() {
           const definido = tieneEquipos(partido);
           const locked = !definido || estaLocked(partido);
           return (
-            <div key={partido.id} className={`bg-violet-950/40 border rounded-xl p-4 space-y-3 ${locked ? 'border-white/10 opacity-70' : 'border-violet-400/25'}`}>
+            <div key={partido.id} className={`bg-violet-950/70 border rounded-xl p-4 space-y-3 ${locked ? 'border-white/15 opacity-70' : 'border-violet-400/40'}`}>
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex-1 min-w-0 text-right">
                   <span className="font-semibold text-sm block truncate">
@@ -260,7 +260,7 @@ function PrediccionesContent() {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-violet-300 border-t border-white/10 pt-2">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-violet-300 border-t border-white/15 pt-2">
                 <span>📅 {formatFecha(partido.fecha)}</span>
                 <span>🕐 {partido.hora}hs AR</span>
                 {partido.estadio && <span>🏟️ {partido.estadio}, {partido.ciudad}</span>}
