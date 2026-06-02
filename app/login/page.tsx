@@ -20,7 +20,7 @@ export default function LoginPage() {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_usuario: nombreUsuario, password }),
+        body: JSON.stringify({ identificador: nombreUsuario, password }),
       });
 
       const data = await res.json();
@@ -50,17 +50,17 @@ export default function LoginPage() {
       <div className="text-center space-y-2">
         <div className="text-5xl">🍩⚽</div>
         <h1 className="text-3xl font-black tracking-tight">Dale, entrá</h1>
-        <p className="text-violet-300 text-sm">Ingresá con tu usuario y contraseña</p>
+        <p className="text-violet-300 text-sm">Ingresá con tu usuario, mail o DNI y tu contraseña</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-violet-950/70 border border-white/15 rounded-2xl p-5 sm:p-8 space-y-5">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-violet-200">Usuario</label>
+          <label className="block text-sm font-medium text-violet-200">Usuario, mail o DNI</label>
           <input
             type="text"
             value={nombreUsuario}
             onChange={e => setNombreUsuario(e.target.value)}
-            placeholder="Ej: martingol"
+            placeholder="Tu usuario, mail o DNI"
             required autoFocus
             autoComplete="username"
             className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors"

@@ -6,19 +6,25 @@ const SESSION_DAYS = 14;
 
 export async function POST(req: NextRequest) {
   try {
-    const { nombre_usuario, password } = await req.json();
+    const body = await req.json();
+    // Acepta usuario, mail o DNI (campo "identificador"; compat con "nombre_usuario")
+    const ident = String(body.identificador ?? body.nombre_usuario ?? '').trim();
+    const password = body.password;
 
-    if (!nombre_usuario?.trim() || !password?.trim()) {
-      return NextResponse.json({ error: 'Completá usuario y contraseña' }, { status: 400 });
+    if (!ident || !password?.trim()) {
+      return NextResponse.json({ error: 'Completá tus datos y la contraseña' }, { status: 400 });
     }
 
     const result = await db.execute({
-      sql: 'SELECT id, nombre_completo, nombre_usuario, puntos, codigo, password_hash, is_admin FROM participantes WHERE nombre_usuario = ?',
-      args: [nombre_usuario.trim()],
+      sql: `SELECT id, nombre_completo, nombre_usuario, puntos, codigo, password_hash, is_admin
+            FROM participantes
+            WHERE LOWER(nombre_usuario) = LOWER(?) OR LOWER(mail) = LOWER(?) OR dni = ?
+            LIMIT 1`,
+      args: [ident, ident, ident],
     });
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Usuario o contraseña incorrectos' }, { status: 401 });
+      return NextResponse.json({ error: 'Datos o contraseña incorrectos' }, { status: 401 });
     }
 
     const row = result.rows[0];
@@ -30,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!verifyPassword(password, storedHash)) {
-      return NextResponse.json({ error: 'Usuario o contraseña incorrectos' }, { status: 401 });
+      return NextResponse.json({ error: 'Datos o contraseña incorrectos' }, { status: 401 });
     }
 
     const participanteId = row[0] as number;
