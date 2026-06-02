@@ -26,6 +26,7 @@ export default function MiProdePage() {
   const [aceptaAvisos, setAceptaAvisos] = useState(false);
   const [avisosDefinido, setAvisosDefinido] = useState(true); // true hasta cargar, para no parpadear el banner
   const [savingAvisos, setSavingAvisos] = useState(false);
+  const [donas, setDonas] = useState(0);
 
   useEffect(() => {
     if (!participanteId) return;
@@ -37,7 +38,7 @@ export default function MiProdePage() {
       headers: { 'x-participante-id': participanteId, 'x-session-token': localStorage.getItem('prode_token') ?? '' },
     })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) { setAceptaAvisos(!!d.acepta_avisos); setAvisosDefinido(!!d.avisos_definido); } })
+      .then(d => { if (d) { setAceptaAvisos(!!d.acepta_avisos); setAvisosDefinido(!!d.avisos_definido); setDonas(d.donas_especiales ?? 0); } })
       .catch(() => {});
 
     fetch('/api/ranking')
@@ -136,6 +137,22 @@ export default function MiProdePage() {
             </>
           )}
         </div>
+      </div>
+
+      {/* Donas especiales del Mundial */}
+      <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-5 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-bold text-white flex items-center gap-2">🍩 Donas especiales</h2>
+          <span className="text-amber-400 font-bold tabular-nums">{donas} {donas === 1 ? 'dona' : 'donas'}</span>
+        </div>
+        <div className="h-2.5 bg-violet-900/60 rounded-full overflow-hidden">
+          <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${((donas % 4) / 4) * 100}%` }} />
+        </div>
+        <p className="text-violet-300 text-xs leading-relaxed">
+          {donas === 0
+            ? 'Cada 4 donas especiales del Mundial que comprés en el local te suman +1 punto. 🔥'
+            : <>Llevás <strong className="text-white">{donas}</strong>{Math.floor(donas / 4) > 0 ? <> = <strong className="text-amber-400">{Math.floor(donas / 4)} {Math.floor(donas / 4) === 1 ? 'punto' : 'puntos'}</strong></> : ''}. Te {4 - (donas % 4) === 1 ? 'falta' : 'faltan'} <strong className="text-white">{4 - (donas % 4)}</strong> para el próximo punto 🍩</>}
+        </p>
       </div>
 
       {/* Acciones */}

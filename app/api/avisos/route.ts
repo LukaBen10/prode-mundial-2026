@@ -8,13 +8,14 @@ export async function GET(req: NextRequest) {
   if (!pid) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const r = await db.execute({
-    sql: 'SELECT acepta_avisos, avisos_definido FROM participantes WHERE id = ?',
+    sql: 'SELECT acepta_avisos, avisos_definido, donas_especiales FROM participantes WHERE id = ?',
     args: [pid],
   });
   const row = r.rows[0];
   return NextResponse.json({
     acepta_avisos: Number(row?.[0] ?? 0),
     avisos_definido: Number(row?.[1] ?? 0),
+    donas_especiales: Number(row?.[2] ?? 0),
   });
 }
 
