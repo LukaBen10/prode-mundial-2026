@@ -10,9 +10,9 @@ function Seccion({ n, titulo, children }: { n: number; titulo: string; children:
   return (
     <section className="space-y-2">
       <h2 className="text-base font-bold text-white flex items-baseline gap-2">
-        <span className="text-orange-400 tabular-nums">{n}.</span> {titulo}
+        <span className="text-amber-400 tabular-nums">{n}.</span> {titulo}
       </h2>
-      <div className="text-sm text-zinc-400 leading-relaxed space-y-2">{children}</div>
+      <div className="text-sm text-violet-300 leading-relaxed space-y-2">{children}</div>
     </section>
   );
 }
@@ -25,11 +25,11 @@ export default function BasesPage() {
       <div className="text-center space-y-2 pt-2">
         <div className="text-4xl">📋</div>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Bases y Condiciones</h1>
-        <p className="text-zinc-500 text-sm">El Prode de Donut Makers Caballito · Mundial 2026</p>
-        <p className="text-zinc-600 text-xs">Última actualización: 1 de junio de 2026</p>
+        <p className="text-violet-300 text-sm">El Prode de Donut Makers Caballito · Mundial 2026</p>
+        <p className="text-violet-400 text-xs">Última actualización: 1 de junio de 2026</p>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 space-y-6">
+      <div className="bg-violet-950/40 border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
 
         <Seccion n={1} titulo="Organizador">
           <p>
@@ -38,7 +38,7 @@ export default function BasesPage() {
             Caballito, Ciudad Autónoma de Buenos Aires, Argentina (en adelante, &ldquo;el Organizador&rdquo;). Ante
             cualquier duda, escribinos por Instagram a{' '}
             <a href="https://www.instagram.com/donut.makers.caballito" target="_blank" rel="noopener noreferrer"
-              className="text-orange-400 hover:text-orange-300 underline">@donut.makers.caballito</a>.
+              className="text-amber-400 hover:text-amber-300 underline">@donut.makers.caballito</a>.
           </p>
         </Seccion>
 
@@ -80,9 +80,9 @@ export default function BasesPage() {
         <Seccion n={6} titulo="Cómo se puntúa">
           <p>Por cada partido predicho:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong className="text-green-400">3 puntos</strong> — resultado exacto (el marcador igual al real).</li>
-            <li><strong className="text-orange-400">1 punto</strong> — ganador correcto (acertás quién gana o el empate, pero no el marcador exacto).</li>
-            <li><strong className="text-zinc-300">0 puntos</strong> — pronóstico equivocado.</li>
+            <li><strong className="text-amber-400">3 puntos</strong> — resultado exacto (el marcador igual al real).</li>
+            <li><strong className="text-amber-400">1 punto</strong> — ganador correcto (acertás quién gana o el empate, pero no el marcador exacto).</li>
+            <li><strong className="text-violet-200">0 puntos</strong> — pronóstico equivocado.</li>
           </ul>
           <p>
             Las predicciones se pueden cargar y editar libremente hasta <strong className="text-white">1 minuto antes</strong> del
@@ -195,14 +195,14 @@ export default function BasesPage() {
 
       </div>
 
-      <p className="text-center text-zinc-600 text-xs">
+      <p className="text-center text-violet-400 text-xs">
         Donut Makers Caballito · Av. La Plata 702, CABA ·{' '}
         <a href="https://www.instagram.com/donut.makers.caballito" target="_blank" rel="noopener noreferrer"
-          className="text-orange-400/80 hover:text-orange-300 underline">@donut.makers.caballito</a>
+          className="text-amber-400/80 hover:text-amber-300 underline">@donut.makers.caballito</a>
       </p>
 
       <div className="text-center">
-        <Link href="/unirse" className="inline-block bg-orange-500 hover:bg-orange-400 text-white px-7 py-3 rounded-full font-bold transition-all shadow-lg shadow-orange-500/20">
+        <Link href="/unirse" className="inline-block bg-amber-400 hover:bg-amber-300 text-violet-950 px-7 py-3 rounded-full font-bold transition-all shadow-lg shadow-amber-400/20">
           Sumarme al prode ⚽
         </Link>
       </div>

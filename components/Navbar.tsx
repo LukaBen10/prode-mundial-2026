@@ -35,23 +35,23 @@ export default function Navbar() {
   const linkClass = (path: string) =>
     `text-sm font-semibold transition-colors px-1 pb-0.5 ${
       pathname === path
-        ? 'text-white border-b-2 border-orange-500'
-        : 'text-zinc-400 hover:text-white border-b-2 border-transparent'
+        ? 'text-white border-b-2 border-amber-400'
+        : 'text-violet-200 hover:text-white border-b-2 border-transparent'
     }`;
 
   const mobileLinkClass = (path: string) =>
     `flex items-center w-full text-left py-3.5 px-4 text-base font-semibold transition-colors rounded-xl ${
       pathname === path
-        ? 'text-white bg-zinc-800/80'
-        : 'text-zinc-300 hover:text-white hover:bg-zinc-800/50 active:bg-zinc-800'
+        ? 'text-white bg-violet-800/50'
+        : 'text-violet-200 hover:text-white hover:bg-violet-800/40 active:bg-violet-800/60'
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 bg-zinc-950/85 backdrop-blur-md border-b border-zinc-800/50">
+    <nav className="sticky top-0 z-50 bg-violet-950/80 backdrop-blur-md border-b border-white/10">
       {/* Línea de acento degradado */}
       <div
         className="absolute bottom-0 left-0 right-0 h-[1px]"
-        style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(251,146,60,0.5) 30%, rgba(251,191,36,0.6) 50%, rgba(251,146,60,0.5) 70%, transparent 100%)' }}
+        style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.5) 30%, rgba(251,191,36,0.7) 50%, rgba(212,175,55,0.5) 70%, transparent 100%)' }}
       />
 
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -74,7 +74,7 @@ export default function Navbar() {
             <>
               {esAdmin && <Link href="/admin" className={linkClass('/admin')}>⚙️ Admin</Link>}
               <Link href="/mi-prode" className={linkClass('/mi-prode')}>👤 @{nombre}</Link>
-              <button onClick={cerrarSesion} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors ml-1">
+              <button onClick={cerrarSesion} className="text-xs text-violet-300 hover:text-white transition-colors ml-1">
                 Salir
               </button>
             </>
@@ -83,7 +83,7 @@ export default function Navbar() {
               <Link href="/login" className={linkClass('/login')}>Entrar</Link>
               <Link
                 href="/unirse"
-                className="bg-orange-500 hover:bg-orange-400 text-white text-sm px-4 py-1.5 rounded-full font-bold transition-all shadow-md shadow-orange-500/20 hover:shadow-orange-500/30 ml-1"
+                className="bg-amber-400 hover:bg-amber-300 text-violet-950 text-sm px-4 py-1.5 rounded-full font-bold transition-all shadow-md shadow-amber-400/30 hover:shadow-amber-400/50 ml-1"
               >
                 Participar
               </Link>
@@ -97,14 +97,14 @@ export default function Navbar() {
             <Link
               href="/unirse"
               onClick={() => setMenuOpen(false)}
-              className="bg-orange-500 text-white text-xs px-3.5 py-2 rounded-full font-bold active:bg-orange-600"
+              className="bg-amber-400 text-violet-950 text-xs px-3.5 py-2 rounded-full font-bold active:bg-amber-500"
             >
               Participar
             </Link>
           )}
           <button
             onClick={() => setMenuOpen(m => !m)}
-            className="p-2 text-zinc-400 hover:text-white active:text-white transition-colors"
+            className="p-2 text-violet-200 hover:text-white active:text-white transition-colors"
             aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
           >
             {menuOpen ? (
@@ -122,7 +122,7 @@ export default function Navbar() {
 
       {/* ── Mobile dropdown ──────────────────────────────── */}
       {menuOpen && (
-        <div className="md:hidden border-t border-zinc-800/50 bg-zinc-950/96 backdrop-blur-md px-3 py-2 space-y-0.5">
+        <div className="md:hidden border-t border-white/10 bg-violet-950/95 backdrop-blur-md px-3 py-2 space-y-0.5">
           <Link href="/predicciones" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/predicciones')}>
             ⚽ Predicciones
           </Link>
@@ -136,12 +136,12 @@ export default function Navbar() {
             📋 Bases y Condiciones
           </Link>
 
-          <div className="h-px bg-zinc-800/60 mx-4 my-1" />
+          <div className="h-px bg-white/10 mx-4 my-1" />
 
           {logueado ? (
             <>
               <Link href="/mi-prode" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/mi-prode')}>
-                👤 Mi prode <span className="text-zinc-500 font-normal ml-1">@{nombre}</span>
+                👤 Mi prode <span className="text-violet-300 font-normal ml-1">@{nombre}</span>
               </Link>
               {esAdmin && (
                 <Link href="/admin" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/admin')}>
@@ -150,7 +150,7 @@ export default function Navbar() {
               )}
               <button
                 onClick={cerrarSesion}
-                className="flex items-center w-full text-left py-3.5 px-4 text-base font-semibold text-red-400 hover:text-red-300 active:text-red-300 transition-colors rounded-xl hover:bg-zinc-800/50"
+                className="flex items-center w-full text-left py-3.5 px-4 text-base font-semibold text-red-400 hover:text-red-300 active:text-red-300 transition-colors rounded-xl hover:bg-violet-800/40"
               >
                 Cerrar sesión
               </button>

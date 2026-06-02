@@ -104,7 +104,7 @@ function waLink(numero: string): string {
   return `https://wa.me/549${clean}`;
 }
 
-const inputCell = "w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-green-500 min-w-0";
+const inputCell = "w-full bg-violet-900/40 border border-violet-400/25 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-amber-400 min-w-0";
 
 export default function AdminPage() {
   const [authMode, setAuthMode] = useState<'participant' | null>(null);
@@ -504,7 +504,7 @@ export default function AdminPage() {
   }
 
   if (!authMode) {
-    return <div className="text-center py-20 text-zinc-500">Verificando acceso...</div>;
+    return <div className="text-center py-20 text-violet-300">Verificando acceso...</div>;
   }
 
   // Pendientes de cargar resultado: no jugados y con equipos ya definidos
@@ -549,11 +549,11 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold">Panel Admin</h1>
           {adminLevel >= 3 && <span className="text-xs bg-amber-400/15 border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-full font-bold">⭐ superadmin</span>}
           {adminLevel === 2 && <span className="text-xs bg-blue-400/15 border border-blue-400/30 text-blue-400 px-2.5 py-1 rounded-full font-bold">🛡️ moderador</span>}
-          {adminLevel === 1 && <span className="text-xs bg-zinc-700 border border-zinc-600 text-zinc-300 px-2.5 py-1 rounded-full font-bold">admin</span>}
+          {adminLevel === 1 && <span className="text-xs bg-violet-800/50 border border-violet-400/25 text-violet-200 px-2.5 py-1 rounded-full font-bold">admin</span>}
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           {stats && isSuperAdmin && (
-            <div className="flex gap-4 text-sm text-zinc-400">
+            <div className="flex gap-4 text-sm text-violet-300">
               <span><strong className="text-white">{stats.total}</strong> inscriptos</span>
               <span><strong className="text-white">{stats.conPredicciones as number}</strong> con predicciones</span>
               <span><strong className="text-white">{jugados.length}</strong> partidos jugados</span>
@@ -562,7 +562,7 @@ export default function AdminPage() {
           <button
             onClick={() => cargarParticipantes()}
             disabled={loadingParts}
-            className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
           >
             {loadingParts ? '⏳' : '🔄 Actualizar'}
           </button>
@@ -570,7 +570,7 @@ export default function AdminPage() {
       </div>
 
       {/* Tabs por nivel: 1=consumos, 2=+participantes+resultados, 3=+admins+auditoría */}
-      <div className="flex gap-2 border-b border-zinc-800 pb-0 flex-wrap">
+      <div className="flex gap-2 border-b border-white/10 pb-0 flex-wrap">
         {([
           { id: 'participantes', label: '👥 Participantes', minLevel: 2 },
           { id: 'resultados',    label: '⚽ Resultados',    minLevel: 2 },
@@ -590,7 +590,7 @@ export default function AdminPage() {
                 if (t.id === 'mensajes' && mensajesContacto.length === 0) cargarMensajes();
               }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
-                tab === t.id ? 'text-white border-green-500' : 'text-zinc-400 border-transparent hover:text-white'
+                tab === t.id ? 'text-white border-amber-400' : 'text-violet-300 border-transparent hover:text-white'
               }`}>
               {t.label}
             </button>
@@ -608,19 +608,19 @@ export default function AdminPage() {
           )}
           <input type="text" value={filtroBusqueda} onChange={e => setFiltroBusqueda(e.target.value)}
             placeholder="Filtrar por nombre, usuario, DNI o mail..."
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
+            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
 
           {loadingParts ? (
-            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+            <p className="text-violet-300 py-8 text-center">Cargando...</p>
           ) : participantesFiltrados.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
+            <div className="text-center py-12 text-violet-300">
               {participantes.length === 0 ? 'Todavía no se inscribió nadie.' : 'No hay resultados para ese filtro.'}
             </div>
           ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-x-auto">
+            <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-x-auto">
               <table className="w-full text-sm min-w-[860px]">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-400">
+                  <tr className="border-b border-white/10 text-violet-300">
                     <th className="text-left px-3 py-3 font-medium">#</th>
                     <th className="text-left px-3 py-3 font-medium">Usuario</th>
                     <th className="text-left px-3 py-3 font-medium">Nombre completo</th>
@@ -642,8 +642,8 @@ export default function AdminPage() {
                       // Fila en modo edición
                       const c = editando.campos;
                       return (
-                        <tr key={p.id} className="border-b border-zinc-800/50 bg-zinc-800/30">
-                          <td className="px-3 py-2 text-zinc-500 font-mono">{i + 1}</td>
+                        <tr key={p.id} className="border-b border-white/10 bg-violet-900/30">
+                          <td className="px-3 py-2 text-violet-300 font-mono">{i + 1}</td>
                           <td className="px-3 py-2">
                             <input className={inputCell} value={c.nombre_usuario}
                               onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, nombre_usuario: e.target.value } }))} />
@@ -668,16 +668,16 @@ export default function AdminPage() {
                             <input className={`${inputCell} w-14 text-right`} type="number" value={c.puntos}
                               onChange={e => setEditando(prev => prev && ({ ...prev, campos: { ...prev.campos, puntos: e.target.value } }))} />
                           </td>
-                          <td className="px-3 py-2 text-zinc-500 text-xs text-right">{formatFechaHora(p.created_at)}</td>
+                          <td className="px-3 py-2 text-violet-300 text-xs text-right">{formatFechaHora(p.created_at)}</td>
                           <td className="px-3 py-2">
                             <div className="flex items-center justify-end gap-1.5 flex-nowrap">
                               {msgEdit && <span className="text-xs text-red-400 mr-1">{msgEdit}</span>}
                               <button onClick={guardarEdicion} disabled={savingEdit}
-                                className="bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap">
+                                className="bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-violet-950 px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap">
                                 {savingEdit ? '...' : 'Guardar'}
                               </button>
                               <button onClick={cancelarEdicion}
-                                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">
+                                className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">
                                 Cancelar
                               </button>
                             </div>
@@ -688,8 +688,8 @@ export default function AdminPage() {
 
                     const esSuperAdmin = (p.is_admin as number) >= 2;
                     return (
-                      <tr key={p.id} className={`border-b border-zinc-800/50 last:border-0 transition-colors ${esSuperAdmin ? 'bg-amber-400/5' : 'hover:bg-zinc-800/20'}`}>
-                        <td className="px-3 py-3 text-zinc-500 font-mono">{i + 1}</td>
+                      <tr key={p.id} className={`border-b border-white/10 last:border-0 transition-colors ${esSuperAdmin ? 'bg-amber-400/5' : 'hover:bg-violet-800/20'}`}>
+                        <td className="px-3 py-3 text-violet-300 font-mono">{i + 1}</td>
                         <td className="px-3 py-3 font-semibold text-white">
                           <div className="flex items-center gap-1">
                             @{p.nombre_usuario}
@@ -705,43 +705,43 @@ export default function AdminPage() {
                               className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold transition-colors disabled:opacity-50 ${
                                 p.fuera_premios
                                   ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
-                                  : 'bg-zinc-800 text-zinc-500 border border-zinc-700 hover:text-zinc-300'
+                                  : 'bg-violet-900/40 text-violet-300 border border-violet-400/25 hover:text-violet-200'
                               }`}
                             >
                               {togglingPremios === p.id ? '…' : p.fuera_premios ? '🏠 sin premios' : '🏆 compite'}
                             </button>
                           )}
                         </td>
-                        <td className="px-3 py-3 text-zinc-300">{p.nombre_completo}</td>
-                        <td className="px-3 py-3 text-zinc-400 font-mono">{p.dni}</td>
+                        <td className="px-3 py-3 text-violet-200">{p.nombre_completo}</td>
+                        <td className="px-3 py-3 text-violet-300 font-mono">{p.dni}</td>
                         <td className="px-3 py-3">
                           <a href={waLink(p.whatsapp)} target="_blank" rel="noopener noreferrer"
-                            className="text-green-400 hover:text-green-300 underline underline-offset-2">
+                            className="text-amber-400 hover:text-amber-300 underline underline-offset-2">
                             {p.whatsapp}
                           </a>
                         </td>
-                        <td className="px-3 py-3 text-zinc-400 break-all">{p.mail}</td>
+                        <td className="px-3 py-3 text-violet-300 break-all">{p.mail}</td>
                         <td className="px-3 py-3">
                           {isSuperAdmin ? (
                             <div className="flex items-center justify-end gap-1">
                               <button onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, -1)} disabled={ajustando === p.id}
                                 className="w-6 h-6 flex items-center justify-center rounded bg-red-500/15 hover:bg-red-500/35 text-red-400 text-sm font-bold transition-colors disabled:opacity-40">−</button>
-                              <span className={`font-bold w-7 text-center tabular-nums ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
+                              <span className={`font-bold w-7 text-center tabular-nums ${p.puntos > 0 ? 'text-amber-400' : 'text-violet-300'}`}>
                                 {ajustando === p.id ? '…' : p.puntos}
                               </span>
                               <button onClick={() => ajustarPuntosRapido(p.nombre_usuario, p.id, 1)} disabled={ajustando === p.id}
-                                className="w-6 h-6 flex items-center justify-center rounded bg-green-500/15 hover:bg-green-500/35 text-green-400 text-sm font-bold transition-colors disabled:opacity-40">+</button>
+                                className="w-6 h-6 flex items-center justify-center rounded bg-blue-500/15 hover:bg-blue-500/35 text-blue-300 text-sm font-bold transition-colors disabled:opacity-40">+</button>
                             </div>
                           ) : (
-                            <span className={`font-bold text-right block pr-2 tabular-nums ${p.puntos > 0 ? 'text-green-400' : 'text-zinc-500'}`}>{p.puntos}</span>
+                            <span className={`font-bold text-right block pr-2 tabular-nums ${p.puntos > 0 ? 'text-amber-400' : 'text-violet-300'}`}>{p.puntos}</span>
                           )}
                         </td>
-                        <td className="px-3 py-3 text-right text-zinc-500 text-xs whitespace-nowrap">{formatFechaHora(p.created_at)}</td>
+                        <td className="px-3 py-3 text-right text-violet-300 text-xs whitespace-nowrap">{formatFechaHora(p.created_at)}</td>
                         <td className="px-3 py-3">
                           {esSuperAdmin ? (
                             <span className="text-xs text-amber-400/60 font-semibold pr-2">🔒 protegido</span>
                           ) : !isSuperAdmin ? (
-                            <span className="text-xs text-zinc-600 pr-2">—</span>
+                            <span className="text-xs text-violet-400 pr-2">—</span>
                           ) : isConfirmingDelete ? (
                             <div className="flex items-center justify-end gap-1.5">
                               <span className="text-xs text-red-400 mr-1">¿Eliminar?</span>
@@ -750,14 +750,14 @@ export default function AdminPage() {
                                 {isDeleting ? '...' : 'Sí'}
                               </button>
                               <button onClick={() => setConfirmDelete(null)}
-                                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">
+                                className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">
                                 No
                               </button>
                             </div>
                           ) : (
                             <div className="flex items-center justify-end gap-1.5">
                               <button onClick={() => iniciarEdicion(p)}
-                                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-200 px-2.5 py-1 rounded text-xs font-semibold transition-colors">
+                                className="bg-violet-800/50 hover:bg-violet-700 text-violet-100 px-2.5 py-1 rounded text-xs font-semibold transition-colors">
                                 Editar
                               </button>
                               <button onClick={() => { setConfirmDelete(p.id); setEditando(null); }}
@@ -782,21 +782,21 @@ export default function AdminPage() {
         <div className="space-y-6">
 
           {/* Sync automático */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
             <div>
               <p className="text-sm font-semibold text-white">🔄 Sincronización automática</p>
-              <p className="text-xs text-zinc-500 mt-0.5">Trae resultados reales de football-data.org y calcula puntos</p>
+              <p className="text-xs text-violet-300 mt-0.5">Trae resultados reales de football-data.org y calcula puntos</p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {syncMsg && (
-                <span className={`text-xs font-medium max-w-xs ${syncMsg.startsWith('✓') ? 'text-green-400' : 'text-red-400'}`}>
+                <span className={`text-xs font-medium max-w-xs ${syncMsg.startsWith('✓') ? 'text-amber-400' : 'text-red-400'}`}>
                   {syncMsg}
                 </span>
               )}
               <button
                 onClick={sincronizarResultados}
                 disabled={syncing}
-                className="bg-green-500 hover:bg-green-400 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+                className="bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-violet-950 px-4 py-2 rounded-lg text-sm font-bold transition-colors"
               >
                 {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar ahora'}
               </button>
@@ -805,13 +805,13 @@ export default function AdminPage() {
 
           {/* Definir cruces de eliminatoria (a mano, respaldo del auto-sync) */}
           {eliminatorias.length > 0 && (
-            <details className="bg-zinc-900 border border-amber-500/20 rounded-xl overflow-hidden">
+            <details className="bg-violet-950/40 border border-amber-500/20 rounded-xl overflow-hidden">
               <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-white flex items-center justify-between gap-2">
                 <span>🏆 Definir cruces de eliminatoria</span>
-                <span className="text-xs text-zinc-500">{eliminatorias.filter(p => p.equipo_local && p.equipo_visitante).length}/{eliminatorias.length} definidos</span>
+                <span className="text-xs text-violet-300">{eliminatorias.filter(p => p.equipo_local && p.equipo_visitante).length}/{eliminatorias.length} definidos</span>
               </summary>
-              <div className="px-4 pb-4 space-y-4 border-t border-zinc-800 pt-3">
-                <p className="text-xs text-zinc-500">Normalmente se completan solos con la API. Acá podés definir o corregir quién juega cada partido a mano.</p>
+              <div className="px-4 pb-4 space-y-4 border-t border-white/10 pt-3">
+                <p className="text-xs text-violet-300">Normalmente se completan solos con la API. Acá podés definir o corregir quién juega cada partido a mano.</p>
                 {FASES_ELIM.map(f => {
                   const pF = eliminatorias.filter(p => p.fase === f.fase);
                   if (pF.length === 0) return null;
@@ -822,22 +822,22 @@ export default function AdminPage() {
                         const edit = crucesEdit[p.id];
                         const localVal = edit?.local ?? p.equipo_local;
                         const visitanteVal = edit?.visitante ?? p.equipo_visitante;
-                        const selCls = "bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-amber-500 flex-1 min-w-[110px]";
+                        const selCls = "bg-violet-900/40 border border-violet-400/25 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-amber-400 flex-1 min-w-[110px]";
                         return (
                           <div key={p.id} className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-zinc-500 w-32 shrink-0">{formatFecha(p.fecha)} · {p.estadio}</span>
+                            <span className="text-xs text-violet-300 w-32 shrink-0">{formatFecha(p.fecha)} · {p.estadio}</span>
                             <select value={localVal} onChange={e => setCrucesEdit(prev => ({ ...prev, [p.id]: { local: e.target.value, visitante: visitanteVal } }))} className={selCls}>
                               <option value="">Por definir</option>
                               {TODOS_LOS_EQUIPOS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
                             </select>
-                            <span className="text-zinc-500 text-xs">vs</span>
+                            <span className="text-violet-300 text-xs">vs</span>
                             <select value={visitanteVal} onChange={e => setCrucesEdit(prev => ({ ...prev, [p.id]: { local: localVal, visitante: e.target.value } }))} className={selCls}>
                               <option value="">Por definir</option>
                               {TODOS_LOS_EQUIPOS.map(eq => <option key={eq} value={eq}>{eq}</option>)}
                             </select>
                             <button onClick={() => guardarCruce(p.id, p.equipo_local, p.equipo_visitante)}
-                              className="bg-amber-500 hover:bg-amber-400 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0">Guardar</button>
-                            {cruceMsg[p.id] && <span className="text-xs text-green-400">{cruceMsg[p.id]}</span>}
+                              className="bg-amber-500 hover:bg-amber-400 text-violet-950 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0">Guardar</button>
+                            {cruceMsg[p.id] && <span className="text-xs text-amber-400">{cruceMsg[p.id]}</span>}
                           </div>
                         );
                       })}
@@ -849,32 +849,32 @@ export default function AdminPage() {
           )}
 
           <section className="space-y-3">
-            <h2 className="font-semibold text-zinc-300">Partidos pendientes ({pendientes.length})</h2>
-            {loadingPartidos ? <p className="text-zinc-500">Cargando...</p> : pendientes.length === 0 ? (
-              <p className="text-zinc-500">No hay partidos pendientes.</p>
+            <h2 className="font-semibold text-violet-200">Partidos pendientes ({pendientes.length})</h2>
+            {loadingPartidos ? <p className="text-violet-300">Cargando...</p> : pendientes.length === 0 ? (
+              <p className="text-violet-300">No hay partidos pendientes.</p>
             ) : (
               pendientes.map(partido => (
-                <div key={partido.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                <div key={partido.id} className="bg-violet-950/40 border border-white/10 rounded-xl p-4">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs text-zinc-500 w-16 shrink-0">{formatFecha(partido.fecha)}</span>
-                    <span className="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">G {partido.grupo}</span>
+                    <span className="text-xs text-violet-300 w-16 shrink-0">{formatFecha(partido.fecha)}</span>
+                    <span className="text-xs bg-violet-900/40 text-violet-300 px-2 py-0.5 rounded">G {partido.grupo}</span>
                     <div className="flex-1 flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium truncate flex-1 text-right min-w-0">{partido.equipo_local}</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
                         onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local: e.target.value } }))}
-                        className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-base focus:outline-none focus:border-green-500 shrink-0" />
-                      <span className="text-zinc-500 shrink-0">-</span>
+                        className="w-10 h-8 text-center bg-violet-900/40 border border-violet-400/25 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
+                      <span className="text-violet-300 shrink-0">-</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
                         onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante: e.target.value } }))}
-                        className="w-10 h-8 text-center bg-zinc-800 border border-zinc-700 rounded text-white text-base focus:outline-none focus:border-green-500 shrink-0" />
+                        className="w-10 h-8 text-center bg-violet-900/40 border border-violet-400/25 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
                       <span className="text-sm font-medium truncate flex-1 min-w-0">{partido.equipo_visitante}</span>
                     </div>
                     <button onClick={() => cargarResultado(partido.id)}
-                      className="bg-green-500 hover:bg-green-400 text-white px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
+                      className="bg-amber-400 hover:bg-amber-300 text-violet-950 px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
                       Guardar
                     </button>
                   </div>
-                  {mensajes[partido.id] && <p className="text-xs text-green-400 mt-2 pl-20">{mensajes[partido.id]}</p>}
+                  {mensajes[partido.id] && <p className="text-xs text-amber-400 mt-2 pl-20">{mensajes[partido.id]}</p>}
                 </div>
               ))
             )}
@@ -882,15 +882,15 @@ export default function AdminPage() {
 
           {jugados.length > 0 && (
             <section className="space-y-2">
-              <h2 className="font-semibold text-zinc-400">Jugados ({jugados.length})</h2>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <h2 className="font-semibold text-violet-300">Jugados ({jugados.length})</h2>
+              <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-hidden">
                 {jugados.map(p => (
-                  <div key={p.id} className="flex items-center gap-3 text-sm px-4 py-3 border-b border-zinc-800/50 last:border-0">
-                    <span className="text-zinc-500 text-xs w-14 shrink-0">{formatFecha(p.fecha)}</span>
-                    <span className="bg-zinc-800 px-2 py-0.5 rounded text-xs text-zinc-400">G {p.grupo}</span>
-                    <span className="flex-1 text-right text-zinc-300">{p.equipo_local}</span>
+                  <div key={p.id} className="flex items-center gap-3 text-sm px-4 py-3 border-b border-white/10 last:border-0">
+                    <span className="text-violet-300 text-xs w-14 shrink-0">{formatFecha(p.fecha)}</span>
+                    <span className="bg-violet-900/40 px-2 py-0.5 rounded text-xs text-violet-300">G {p.grupo}</span>
+                    <span className="flex-1 text-right text-violet-200">{p.equipo_local}</span>
                     <span className="font-bold text-white px-2">{p.goles_local} - {p.goles_visitante}</span>
-                    <span className="flex-1 text-zinc-300">{p.equipo_visitante}</span>
+                    <span className="flex-1 text-violet-200">{p.equipo_visitante}</span>
                   </div>
                 ))}
               </div>
@@ -902,30 +902,30 @@ export default function AdminPage() {
       {/* ── Tab: Consumos ──────────────────────────────────────── */}
       {tab === 'consumos' && (
         <div className="space-y-4">
-          <p className="text-zinc-400 text-sm">Buscá al cliente y sumale o restale puntos de visita al local.</p>
+          <p className="text-violet-300 text-sm">Buscá al cliente y sumale o restale puntos de visita al local.</p>
           <input type="text" value={busqueda} onChange={e => buscarParticipante(e.target.value)}
             placeholder="Buscar por usuario o nombre..."
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
+            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
           {resultadosBusqueda.length > 0 && (
             <div className="space-y-2">
               {resultadosBusqueda.map(p => (
-                <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                <div key={p.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                   <div>
                     <span className="font-semibold text-white">@{p.nombre_usuario}</span>
-                    <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
+                    <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-green-400 font-bold min-w-[50px] text-right">{p.puntos} pts</span>
+                    <span className="text-amber-400 font-bold min-w-[50px] text-right">{p.puntos} pts</span>
                     <button onClick={() => darPuntoConsumo(p.nombre_usuario, -1)}
                       className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
                       −1
                     </button>
                     <button onClick={() => darPuntoConsumo(p.nombre_usuario, 1)}
-                      className="bg-orange-500 hover:bg-orange-400 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
+                      className="bg-amber-400 hover:bg-amber-300 text-violet-950 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
                       +1
                     </button>
                     {msgConsumo[p.nombre_usuario] && (
-                      <span className="text-xs text-green-400">{msgConsumo[p.nombre_usuario]}</span>
+                      <span className="text-xs text-amber-400">{msgConsumo[p.nombre_usuario]}</span>
                     )}
                   </div>
                 </div>
@@ -933,7 +933,7 @@ export default function AdminPage() {
             </div>
           )}
           {busqueda.length >= 2 && resultadosBusqueda.length === 0 && (
-            <p className="text-zinc-500 text-sm">No se encontró ningún usuario.</p>
+            <p className="text-violet-300 text-sm">No se encontró ningún usuario.</p>
           )}
         </div>
       )}
@@ -942,16 +942,16 @@ export default function AdminPage() {
       {tab === 'predicciones' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-violet-300">
               Predicciones de cada participante. Tocá un nombre para ver el detalle.
             </p>
             <div className="flex items-center gap-2">
               <button onClick={cargarPredicciones} disabled={loadingPreds}
-                className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+                className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
                 {loadingPreds ? '⏳' : '🔄 Actualizar'}
               </button>
               <button onClick={exportarPrediccionesCSV} disabled={predicciones.length === 0}
-                className="text-xs bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-bold transition-colors">
+                className="text-xs bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-violet-950 px-3 py-1.5 rounded-lg font-bold transition-colors">
                 ⬇️ Exportar Excel
               </button>
             </div>
@@ -959,12 +959,12 @@ export default function AdminPage() {
 
           <input type="text" value={filtroPreds} onChange={e => setFiltroPreds(e.target.value)}
             placeholder="Buscar participante por usuario o nombre..."
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500" />
+            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
 
           {loadingPreds ? (
-            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+            <p className="text-violet-300 py-8 text-center">Cargando...</p>
           ) : prediccionesPorPersonaFiltradas.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
+            <div className="text-center py-12 text-violet-300">
               {predicciones.length === 0 ? 'Todavía nadie cargó predicciones.' : 'No hay resultados para ese filtro.'}
             </div>
           ) : (
@@ -972,24 +972,24 @@ export default function AdminPage() {
               {prediccionesPorPersonaFiltradas.map(g => {
                 const abierto = personaExpandida === g.id;
                 return (
-                  <div key={g.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                  <div key={g.id} className="bg-violet-950/40 border border-white/10 rounded-xl overflow-hidden">
                     <button onClick={() => setPersonaExpandida(abierto ? null : g.id)}
-                      className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-zinc-800/30 transition-colors">
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-violet-800/30 transition-colors">
                       <div className="min-w-0">
                         <span className="font-semibold text-white">@{g.usuario}</span>
-                        <span className="text-zinc-400 text-sm ml-2">{g.nombre}</span>
+                        <span className="text-violet-300 text-sm ml-2">{g.nombre}</span>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs text-zinc-500">{g.preds.length} pred.</span>
-                        <span className="text-sm font-bold text-green-400">{g.puntos} pts</span>
-                        <span className="text-zinc-500 text-xs">{abierto ? '▲' : '▼'}</span>
+                        <span className="text-xs text-violet-300">{g.preds.length} pred.</span>
+                        <span className="text-sm font-bold text-amber-400">{g.puntos} pts</span>
+                        <span className="text-violet-300 text-xs">{abierto ? '▲' : '▼'}</span>
                       </div>
                     </button>
                     {abierto && (
-                      <div className="border-t border-zinc-800 overflow-x-auto">
+                      <div className="border-t border-white/10 overflow-x-auto">
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="text-zinc-500 border-b border-zinc-800/70">
+                            <tr className="text-violet-300 border-b border-white/10">
                               <th className="text-left px-3 py-2 font-medium">Fase</th>
                               <th className="text-left px-3 py-2 font-medium">Partido</th>
                               <th className="text-center px-3 py-2 font-medium">Pred.</th>
@@ -999,14 +999,14 @@ export default function AdminPage() {
                           </thead>
                           <tbody>
                             {g.preds.map((p, i) => (
-                              <tr key={i} className="border-b border-zinc-800/40 last:border-0">
-                                <td className="px-3 py-2 text-zinc-500 whitespace-nowrap">{p.grupo ? `G ${p.grupo}` : (p.fase || '')}</td>
-                                <td className="px-3 py-2 text-zinc-300">
-                                  {(p.equipo_local || 'Por definir')} <span className="text-zinc-600">vs</span> {(p.equipo_visitante || 'Por definir')}
+                              <tr key={i} className="border-b border-white/10 last:border-0">
+                                <td className="px-3 py-2 text-violet-300 whitespace-nowrap">{p.grupo ? `G ${p.grupo}` : (p.fase || '')}</td>
+                                <td className="px-3 py-2 text-violet-200">
+                                  {(p.equipo_local || 'Por definir')} <span className="text-violet-400">vs</span> {(p.equipo_visitante || 'Por definir')}
                                 </td>
                                 <td className="px-3 py-2 text-center font-bold text-white whitespace-nowrap">{p.pred_local}-{p.pred_visitante}</td>
-                                <td className="px-3 py-2 text-center text-zinc-400 whitespace-nowrap">{p.jugado ? `${p.real_local}-${p.real_visitante}` : '—'}</td>
-                                <td className={`px-3 py-2 text-right font-bold ${p.puntos === 3 ? 'text-green-400' : p.puntos === 1 ? 'text-orange-400' : 'text-zinc-600'}`}>
+                                <td className="px-3 py-2 text-center text-violet-300 whitespace-nowrap">{p.jugado ? `${p.real_local}-${p.real_visitante}` : '—'}</td>
+                                <td className={`px-3 py-2 text-right font-bold ${p.puntos === 3 ? 'text-amber-400' : p.puntos === 1 ? 'text-amber-400' : 'text-violet-400'}`}>
                                   {p.jugado ? p.puntos : '—'}
                                 </td>
                               </tr>
@@ -1027,54 +1027,54 @@ export default function AdminPage() {
       {tab === 'mensajes' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-sm text-zinc-400">Mensajes de gente que te quiere contactar (desde la página de contacto).</p>
+            <p className="text-sm text-violet-300">Mensajes de gente que te quiere contactar (desde la página de contacto).</p>
             <button onClick={cargarMensajes} disabled={loadingMensajes}
-              className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+              className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
               {loadingMensajes ? '⏳' : '🔄 Actualizar'}
             </button>
           </div>
 
           {loadingMensajes ? (
-            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+            <p className="text-violet-300 py-8 text-center">Cargando...</p>
           ) : mensajesContacto.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
+            <div className="text-center py-12 text-violet-300">
               <div className="text-4xl mb-3">✉️</div>
               <p>Todavía no recibiste ningún mensaje.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {mensajesContacto.map(m => (
-                <div key={m.id} className={`rounded-xl p-4 border ${m.leido ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900 border-orange-500/30'}`}>
+                <div key={m.id} className={`rounded-xl p-4 border ${m.leido ? 'bg-violet-950/40 border-white/10' : 'bg-violet-950/40 border-amber-400/30'}`}>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-white">{m.nombre}</span>
-                        {!m.leido && <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase">Nuevo</span>}
+                        {!m.leido && <span className="text-[10px] bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full font-bold uppercase">Nuevo</span>}
                       </div>
                       <p className="text-sm mt-0.5">
                         {m.contacto.includes('@') ? (
-                          <a href={`mailto:${m.contacto}`} className="text-orange-400 hover:text-orange-300 underline break-all">{m.contacto}</a>
+                          <a href={`mailto:${m.contacto}`} className="text-amber-400 hover:text-amber-300 underline break-all">{m.contacto}</a>
                         ) : (
-                          <span className="text-zinc-300 break-all">{m.contacto}</span>
+                          <span className="text-violet-200 break-all">{m.contacto}</span>
                         )}
                       </p>
                     </div>
-                    <span className="text-xs text-zinc-500 whitespace-nowrap">{formatFechaHora(m.created_at)}</span>
+                    <span className="text-xs text-violet-300 whitespace-nowrap">{formatFechaHora(m.created_at)}</span>
                   </div>
 
-                  <p className="text-zinc-300 text-sm mt-3 whitespace-pre-wrap leading-relaxed border-t border-zinc-800 pt-3">{m.mensaje}</p>
+                  <p className="text-violet-200 text-sm mt-3 whitespace-pre-wrap leading-relaxed border-t border-white/10 pt-3">{m.mensaje}</p>
 
                   <div className="flex items-center justify-end gap-2 mt-3">
                     {confirmDelMsg === m.id ? (
                       <>
                         <span className="text-xs text-red-400 mr-1">¿Borrar?</span>
                         <button onClick={() => eliminarMensaje(m.id)} className="bg-red-500 hover:bg-red-400 text-white px-2.5 py-1 rounded text-xs font-semibold">Sí</button>
-                        <button onClick={() => setConfirmDelMsg(null)} className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">No</button>
+                        <button onClick={() => setConfirmDelMsg(null)} className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">No</button>
                       </>
                     ) : (
                       <>
                         <button onClick={() => marcarLeido(m.id, !m.leido)}
-                          className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-2.5 py-1 rounded font-semibold transition-colors">
+                          className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-2.5 py-1 rounded font-semibold transition-colors">
                           {m.leido ? 'Marcar no leído' : 'Marcar leído'}
                         </button>
                         <button onClick={() => setConfirmDelMsg(m.id)}
@@ -1096,26 +1096,26 @@ export default function AdminPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-zinc-400">Registro de todas las acciones de los administradores.</p>
+              <p className="text-sm text-violet-300">Registro de todas las acciones de los administradores.</p>
             </div>
             <button onClick={cargarAuditLog} disabled={loadingAudit}
-              className="text-xs bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
+              className="text-xs bg-violet-900/40 hover:bg-violet-800/60 border border-violet-400/25 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50">
               {loadingAudit ? '⏳' : '🔄 Actualizar'}
             </button>
           </div>
 
           {loadingAudit ? (
-            <p className="text-zinc-500 py-8 text-center">Cargando...</p>
+            <p className="text-violet-300 py-8 text-center">Cargando...</p>
           ) : auditLog.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
+            <div className="text-center py-12 text-violet-300">
               <div className="text-4xl mb-3">📋</div>
               <p>Sin actividad registrada todavía.</p>
             </div>
           ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-x-auto">
+            <div className="bg-violet-950/40 border border-white/10 rounded-2xl overflow-x-auto">
               <table className="w-full text-sm min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-400">
+                  <tr className="border-b border-white/10 text-violet-300">
                     <th className="text-left px-4 py-3 font-medium">Fecha</th>
                     <th className="text-left px-4 py-3 font-medium">Admin</th>
                     <th className="text-left px-4 py-3 font-medium">Acción</th>
@@ -1124,13 +1124,13 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {auditLog.map(entry => (
-                    <tr key={entry.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/20">
-                      <td className="px-4 py-3 text-zinc-500 text-xs whitespace-nowrap">
+                    <tr key={entry.id} className="border-b border-white/10 last:border-0 hover:bg-violet-800/20">
+                      <td className="px-4 py-3 text-violet-300 text-xs whitespace-nowrap">
                         {new Date(entry.created_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-4 py-3 font-semibold text-amber-400 text-xs">@{entry.admin_nombre}</td>
                       <td className="px-4 py-3 text-white text-xs">{entry.accion}</td>
-                      <td className="px-4 py-3 text-zinc-400 text-xs">{entry.detalle}</td>
+                      <td className="px-4 py-3 text-violet-300 text-xs">{entry.detalle}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1146,9 +1146,9 @@ export default function AdminPage() {
 
           {/* Admins actuales */}
           <section className="space-y-3">
-            <h2 className="font-semibold text-zinc-300">Con rol admin ({adminsActuales.length})</h2>
+            <h2 className="font-semibold text-violet-200">Con rol admin ({adminsActuales.length})</h2>
             {adminsActuales.length === 0 ? (
-              <p className="text-zinc-500 text-sm">No hay admins asignados todavía.</p>
+              <p className="text-violet-300 text-sm">No hay admins asignados todavía.</p>
             ) : (
               <div className="space-y-2">
                 {adminsActuales.map(p => {
@@ -1156,16 +1156,16 @@ export default function AdminPage() {
                   const esSA = nivel >= 3;
                   const rolLabel = nivel >= 3 ? '⭐ superadmin' : nivel === 2 ? '🛡️ moderador' : '🔑 admin';
                   return (
-                    <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                    <div key={p.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                       <div>
                         <span className="font-semibold text-white">@{p.nombre_usuario}</span>
-                        <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
-                        <span className={`ml-2 text-xs ${esSA ? 'text-amber-400' : nivel === 2 ? 'text-blue-400' : 'text-zinc-400'}`}>{rolLabel}</span>
+                        <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
+                        <span className={`ml-2 text-xs ${esSA ? 'text-amber-400' : nivel === 2 ? 'text-blue-400' : 'text-violet-300'}`}>{rolLabel}</span>
                       </div>
                       {!esSA && (
                         <div className="flex items-center gap-2 flex-wrap">
-                          {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
-                          {nivel !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-2.5 py-1 rounded text-xs font-semibold">→ Admin</button>}
+                          {msgAdmin[p.id] && <span className="text-xs text-amber-400">{msgAdmin[p.id]}</span>}
+                          {nivel !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 px-2.5 py-1 rounded text-xs font-semibold">→ Admin</button>}
                           {nivel !== 2 && <button onClick={() => setRol(p.id, 2)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded text-xs font-semibold">→ Moderador</button>}
                           <button onClick={() => setRol(p.id, 0)} className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1 rounded text-xs font-semibold">Quitar rol</button>
                         </div>
@@ -1179,26 +1179,26 @@ export default function AdminPage() {
 
           {/* Asignar rol a usuario */}
           <section className="space-y-3">
-            <h2 className="font-semibold text-zinc-300">Asignar rol a un participante</h2>
+            <h2 className="font-semibold text-violet-200">Asignar rol a un participante</h2>
             <input type="text" value={busquedaAdmin} onChange={e => buscarAdmin(e.target.value)}
               placeholder="Buscar por usuario o nombre..."
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500" />
+              className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
             {resultadosAdmin.length > 0 && (
               <div className="space-y-2">
                 {resultadosAdmin.map(p => {
                   const nivelActual = (adminsActuales.find(a => a.id === p.id)?.is_admin as number) ?? 0;
                   const esSA = nivelActual >= 3;
                   return (
-                    <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                    <div key={p.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
                       <div>
                         <span className="font-semibold text-white">@{p.nombre_usuario}</span>
-                        <span className="text-zinc-400 text-sm ml-2">{p.nombre_completo}</span>
-                        {nivelActual > 0 && !esSA && <span className="ml-2 text-zinc-500 text-xs">actual: {nivelActual === 2 ? 'moderador' : 'admin'}</span>}
+                        <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
+                        {nivelActual > 0 && !esSA && <span className="ml-2 text-violet-300 text-xs">actual: {nivelActual === 2 ? 'moderador' : 'admin'}</span>}
                       </div>
                       {!esSA && (
                         <div className="flex items-center gap-2 flex-wrap">
-                          {msgAdmin[p.id] && <span className="text-xs text-green-400">{msgAdmin[p.id]}</span>}
-                          {nivelActual !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 border border-zinc-600 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Admin</button>}
+                          {msgAdmin[p.id] && <span className="text-xs text-amber-400">{msgAdmin[p.id]}</span>}
+                          {nivelActual !== 1 && <button onClick={() => setRol(p.id, 1)} className="bg-violet-800/50 hover:bg-violet-700 text-violet-200 border border-violet-400/25 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Admin</button>}
                           {nivelActual !== 2 && <button onClick={() => setRol(p.id, 2)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Moderador</button>}
                           {nivelActual > 0 && <button onClick={() => setRol(p.id, 0)} className="bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 px-2.5 py-1.5 rounded-lg text-xs font-semibold">Quitar</button>}
                         </div>
@@ -1209,7 +1209,7 @@ export default function AdminPage() {
               </div>
             )}
             {busquedaAdmin.length >= 2 && resultadosAdmin.length === 0 && (
-              <p className="text-zinc-500 text-sm">No se encontró ningún usuario.</p>
+              <p className="text-violet-300 text-sm">No se encontró ningún usuario.</p>
             )}
           </section>
         </div>

@@ -36,18 +36,18 @@ function DeadlineBadge({ partido }: { partido: Partido }) {
     function calcular() {
       const kickoff = kickoffDate(partido);
       const diffMs = kickoff.getTime() - Date.now();
-      if (diffMs <= 0) { setTexto('🔒 Cerrado'); setColor('text-zinc-500'); return; }
+      if (diffMs <= 0) { setTexto('🔒 Cerrado'); setColor('text-violet-300'); return; }
       const diffH = diffMs / 3600000;
       if (diffH < 1) {
         setTexto(`⏰ Cierra en ${Math.floor(diffMs / 60000)}m`);
         setColor('text-red-400');
       } else if (diffH < 24) {
         setTexto(`⏰ Cierra en ${Math.floor(diffH)}h`);
-        setColor('text-orange-400');
+        setColor('text-amber-400');
       } else {
         const dia = kickoff.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: 'America/Argentina/Buenos_Aires' });
         setTexto(`Cierra el ${dia} · ${partido.hora}hs AR`);
-        setColor('text-zinc-500');
+        setColor('text-violet-300');
       }
     }
     calcular();
@@ -62,7 +62,7 @@ function DeadlineBadge({ partido }: { partido: Partido }) {
 function GoalInput({ value, onChange, disabled }: { value: string; onChange: (v: string) => void; disabled: boolean }) {
   return (
     <input type="number" min={0} max={20} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}
-      className="w-12 h-10 text-center bg-zinc-800 border border-zinc-700 rounded-lg text-white font-bold focus:outline-none focus:border-green-500 disabled:opacity-40 transition-colors" />
+      className="w-12 h-10 text-center bg-violet-900/40 border border-violet-400/25 rounded-lg text-white font-bold focus:outline-none focus:border-amber-400 disabled:opacity-40 transition-colors" />
   );
 }
 
@@ -149,42 +149,42 @@ function PrediccionesContent() {
 
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">Tus predicciones{nombre ? `, ${nombre}` : ''} ⚽</h1>
-        <p className="text-zinc-400 text-sm">{predCount} de {totalPartidos} partidos completados</p>
+        <p className="text-violet-300 text-sm">{predCount} de {totalPartidos} partidos completados</p>
       </div>
 
       {miRanking && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center space-y-1">
+          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 text-center space-y-1">
             <div className="text-3xl font-bold text-white">
               {miRanking.posicion === 1 ? '🥇' : miRanking.posicion === 2 ? '🥈' : miRanking.posicion === 3 ? '🥉' : `#${miRanking.posicion}`}
             </div>
-            <div className="text-zinc-400 text-xs">Tu posición</div>
+            <div className="text-violet-300 text-xs">Tu posición</div>
           </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center space-y-1">
-            <div className="text-3xl font-bold text-green-400">{miRanking.puntos}</div>
-            <div className="text-zinc-400 text-xs">Tus puntos</div>
+          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 text-center space-y-1">
+            <div className="text-3xl font-bold text-amber-400">{miRanking.puntos}</div>
+            <div className="text-violet-300 text-xs">Tus puntos</div>
           </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center space-y-1">
+          <div className="bg-violet-950/40 border border-white/10 rounded-xl p-4 text-center space-y-1">
             {miRanking.puntosNext !== null && miRanking.puntosNext > 0 ? (
-              <><div className="text-3xl font-bold text-orange-400">+{miRanking.puntosNext}</div><div className="text-zinc-400 text-xs">Para subir un puesto</div></>
+              <><div className="text-3xl font-bold text-amber-400">+{miRanking.puntosNext}</div><div className="text-violet-300 text-xs">Para subir un puesto</div></>
             ) : miRanking.posicion === 1 ? (
-              <><div className="text-3xl">🏆</div><div className="text-zinc-400 text-xs">¡Vas primero!</div></>
+              <><div className="text-3xl">🏆</div><div className="text-violet-300 text-xs">¡Vas primero!</div></>
             ) : (
-              <><div className="text-3xl font-bold text-zinc-500">{miRanking.puntosLider}</div><div className="text-zinc-400 text-xs">Puntos del líder</div></>
+              <><div className="text-3xl font-bold text-violet-300">{miRanking.puntosLider}</div><div className="text-violet-300 text-xs">Puntos del líder</div></>
             )}
           </div>
         </div>
       )}
 
-      <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl px-4 py-3 flex items-start gap-3">
-        <span className="text-orange-400 text-lg shrink-0">⏰</span>
-        <p className="text-sm text-orange-200">
+      <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl px-4 py-3 flex items-start gap-3">
+        <span className="text-amber-400 text-lg shrink-0">⏰</span>
+        <p className="text-sm text-amber-200">
           <strong>¡Atención!</strong> Cada predicción se cierra cuando arranca el partido. Los horarios son <strong>hora Argentina (ART)</strong>.
         </p>
       </div>
 
-      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-        <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${(predCount / totalPartidos) * 100}%` }} />
+      <div className="h-2 bg-violet-900/40 rounded-full overflow-hidden">
+        <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${(predCount / totalPartidos) * 100}%` }} />
       </div>
 
       <div className="space-y-2">
@@ -196,7 +196,7 @@ function PrediccionesContent() {
             const completo = cargados === total && total > 0;
             return (
               <button key={g} onClick={() => setVista(g)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-green-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-amber-400 text-violet-950' : 'bg-violet-900/40 text-violet-300 hover:text-violet-950 hover:bg-violet-800/60'}`}>
                 {completo ? `Grupo ${g} ✓` : `Grupo ${g} ${cargados > 0 ? `${cargados}/${total}` : ''}`}
               </button>
             );
@@ -211,7 +211,7 @@ function PrediccionesContent() {
             return (
               <button key={f.fase} onClick={() => setVista(f.fase)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                  vista === f.fase ? 'bg-amber-500 text-white' : 'bg-zinc-800 text-amber-400/70 hover:text-amber-300 hover:bg-zinc-700'
+                  vista === f.fase ? 'bg-amber-500 text-white' : 'bg-violet-900/40 text-amber-400/70 hover:text-amber-300 hover:bg-violet-800/60'
                 }`}>
                 {f.corto}{definidos === 0 ? ' 🔒' : ''}
               </button>
@@ -221,9 +221,9 @@ function PrediccionesContent() {
       </div>
 
       <div className="space-y-3">
-        <h2 className="font-bold text-lg text-zinc-300">{tituloVista}</h2>
+        <h2 className="font-bold text-lg text-violet-200">{tituloVista}</h2>
         {!esGrupo && partidosVista.every((p) => !tieneEquipos(p)) && (
-          <p className="text-zinc-500 text-sm bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3">
+          <p className="text-violet-300 text-sm bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3">
             🔒 Todavía no se sabe quiénes juegan esta fase. Los cruces y la predicción se habilitan a medida que avanzan los grupos.
           </p>
         )}
@@ -232,7 +232,7 @@ function PrediccionesContent() {
           const definido = tieneEquipos(partido);
           const locked = !definido || estaLocked(partido);
           return (
-            <div key={partido.id} className={`bg-zinc-900 border rounded-xl p-4 space-y-3 ${locked ? 'border-zinc-800 opacity-70' : 'border-zinc-700'}`}>
+            <div key={partido.id} className={`bg-violet-950/40 border rounded-xl p-4 space-y-3 ${locked ? 'border-white/10 opacity-70' : 'border-violet-400/25'}`}>
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex-1 min-w-0 text-right">
                   <span className="font-semibold text-sm block truncate">
@@ -241,12 +241,12 @@ function PrediccionesContent() {
                         {BANDERAS[partido.equipo_local] && <FlagIcon code={BANDERAS[partido.equipo_local]} alt={partido.equipo_local} className="mr-1.5" />}
                         {partido.equipo_local}
                       </>
-                    ) : <span className="text-zinc-600 italic">Por definir</span>}
+                    ) : <span className="text-violet-400 italic">Por definir</span>}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <GoalInput value={pred?.local ?? ''} onChange={(v) => updatePred(partido.id, 'local', v)} disabled={locked} />
-                  <span className="text-zinc-500 font-bold">-</span>
+                  <span className="text-violet-300 font-bold">-</span>
                   <GoalInput value={pred?.visitante ?? ''} onChange={(v) => updatePred(partido.id, 'visitante', v)} disabled={locked} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -256,15 +256,15 @@ function PrediccionesContent() {
                         {BANDERAS[partido.equipo_visitante] && <FlagIcon code={BANDERAS[partido.equipo_visitante]} alt={partido.equipo_visitante} className="mr-1.5" />}
                         {partido.equipo_visitante}
                       </>
-                    ) : <span className="text-zinc-600 italic">Por definir</span>}
+                    ) : <span className="text-violet-400 italic">Por definir</span>}
                   </span>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 border-t border-zinc-800 pt-2">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-violet-300 border-t border-white/10 pt-2">
                 <span>📅 {formatFecha(partido.fecha)}</span>
                 <span>🕐 {partido.hora}hs AR</span>
                 {partido.estadio && <span>🏟️ {partido.estadio}, {partido.ciudad}</span>}
-                <span className="ml-auto">{definido ? <DeadlineBadge partido={partido} /> : <span className="text-zinc-600">A definir</span>}</span>
+                <span className="ml-auto">{definido ? <DeadlineBadge partido={partido} /> : <span className="text-violet-400">A definir</span>}</span>
               </div>
             </div>
           );
@@ -273,7 +273,7 @@ function PrediccionesContent() {
 
       <div className="pt-4 pb-6">
         <button onClick={guardar} disabled={saving || guardado}
-          className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-60 text-white py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-green-500/20">
+          className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-violet-950 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-400/30">
           {saving ? 'Guardando...' : guardado ? '✓ Predicciones guardadas' : 'Guardar predicciones'}
         </button>
       </div>

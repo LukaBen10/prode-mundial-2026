@@ -50,12 +50,12 @@ export default function LoginPage() {
       <div className="text-center space-y-2">
         <div className="text-5xl">🍩⚽</div>
         <h1 className="text-3xl font-black tracking-tight">Dale, entrá</h1>
-        <p className="text-zinc-400 text-sm">Ingresá con tu usuario y contraseña</p>
+        <p className="text-violet-300 text-sm">Ingresá con tu usuario y contraseña</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-violet-950/40 border border-white/10 rounded-2xl p-5 sm:p-8 space-y-5">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Usuario</label>
+          <label className="block text-sm font-medium text-violet-200">Usuario</label>
           <input
             type="text"
             value={nombreUsuario}
@@ -63,12 +63,12 @@ export default function LoginPage() {
             placeholder="Ej: martingol"
             required autoFocus
             autoComplete="username"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
+            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Contraseña</label>
+          <label className="block text-sm font-medium text-violet-200">Contraseña</label>
           <input
             type="password"
             value={password}
@@ -76,7 +76,7 @@ export default function LoginPage() {
             placeholder="Tu contraseña"
             required
             autoComplete="current-password"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
+            className="w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors"
           />
         </div>
 
@@ -89,15 +89,15 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition-colors"
+          className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-violet-950 py-3 rounded-xl font-bold text-lg transition-colors"
         >
           {loading ? 'Entrando...' : 'Entrar al prode ⚽'}
         </button>
       </form>
 
-      <p className="text-center text-zinc-500 text-sm">
+      <p className="text-center text-violet-300 text-sm">
         ¿Todavía no te anotaste?{' '}
-        <Link href="/unirse" className="text-orange-400 hover:text-orange-300 underline">
+        <Link href="/unirse" className="text-amber-400 hover:text-amber-300 underline">
           Registrate acá
         </Link>
       </p>

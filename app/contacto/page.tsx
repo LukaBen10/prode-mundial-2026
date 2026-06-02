@@ -31,14 +31,14 @@ export default function ContactoPage() {
     }
   }
 
-  const inputClass = "w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors";
+  const inputClass = "w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors";
 
   if (enviado) {
     return (
       <div className="max-w-md mx-auto text-center py-16 space-y-4">
         <div className="text-6xl">🙌</div>
         <h1 className="text-2xl font-black">¡Mensaje enviado!</h1>
-        <p className="text-zinc-400">Te voy a responder lo antes posible. ¡Gracias por escribir!</p>
+        <p className="text-violet-300">Te voy a responder lo antes posible. ¡Gracias por escribir!</p>
       </div>
     );
   }
@@ -49,30 +49,30 @@ export default function ContactoPage() {
       <div className="text-center space-y-3">
         <div className="text-5xl">👋</div>
         <h1 className="text-3xl font-black tracking-tight">¿Te gustó el prode?</h1>
-        <p className="text-zinc-400 text-sm leading-relaxed">
-          Lo armé yo, de cero. Si tenés un negocio y querés una <strong className="text-zinc-200">web</strong>, una{' '}
-          <strong className="text-zinc-200">app</strong> o <strong className="text-zinc-200">automatizar algo con IA</strong>,
+        <p className="text-violet-300 text-sm leading-relaxed">
+          Lo armé yo, de cero. Si tenés un negocio y querés una <strong className="text-violet-100">web</strong>, una{' '}
+          <strong className="text-violet-100">app</strong> o <strong className="text-violet-100">automatizar algo con IA</strong>,
           escribime y lo charlamos. Dejame tu contacto y te respondo.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-violet-950/40 border border-white/10 rounded-2xl p-5 sm:p-8 space-y-5">
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Tu nombre</label>
+          <label className="block text-sm font-medium text-violet-200">Tu nombre</label>
           <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)}
             placeholder="Ej: Martín García" required maxLength={100} className={inputClass} />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Tu contacto</label>
+          <label className="block text-sm font-medium text-violet-200">Tu contacto</label>
           <input type="text" value={contacto} onChange={(e) => setContacto(e.target.value)}
             placeholder="Tu mail o WhatsApp" required maxLength={150} className={inputClass} />
-          <p className="text-xs text-zinc-500">Por acá te respondo. Mail o número, lo que prefieras.</p>
+          <p className="text-xs text-violet-300">Por acá te respondo. Mail o número, lo que prefieras.</p>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Tu mensaje</label>
+          <label className="block text-sm font-medium text-violet-200">Tu mensaje</label>
           <textarea value={mensaje} onChange={(e) => setMensaje(e.target.value)}
             placeholder="Contame qué tenés en mente..." required maxLength={2000} rows={4}
             className={`${inputClass} resize-none`} />
@@ -92,7 +92,7 @@ export default function ContactoPage() {
         )}
 
         <button type="submit" disabled={loading}
-          className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-orange-500/20">
+          className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-violet-950 py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-400/20">
           {loading ? 'Enviando...' : 'Enviar mensaje'}
         </button>
       </form>

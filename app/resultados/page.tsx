@@ -17,8 +17,8 @@ function formatFecha(fecha: string) {
 }
 
 function PtsBadge({ pts }: { pts: number }) {
-  if (pts === 3) return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">✓ 3 pts</span>;
-  if (pts === 1) return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">~ 1 pt</span>;
+  if (pts === 3) return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/30">✓ 3 pts</span>;
+  if (pts === 1) return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/35">~ 1 pt</span>;
   return <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-500/15 text-red-400 border border-red-500/20">✗ 0 pts</span>;
 }
 
@@ -69,7 +69,7 @@ export default function ResultadosPage() {
       <div className="text-center space-y-1 pt-2">
         <div className="text-4xl mb-2">📊</div>
         <h1 className="text-3xl font-black tracking-tight">Resultados</h1>
-        <p className="text-zinc-500 text-sm">
+        <p className="text-violet-300 text-sm">
           {jugados.length === 0 ? 'Todavía no se jugó ningún partido' : `${jugados.length} ${jugados.length === 1 ? 'partido jugado' : 'partidos jugados'}`}
         </p>
       </div>
@@ -77,8 +77,8 @@ export default function ResultadosPage() {
       {jugados.length === 0 ? (
         <div className="py-16 text-center space-y-3">
           <div className="text-5xl">⏳</div>
-          <p className="text-zinc-300 font-bold text-lg">Todavía no se jugó ningún partido.</p>
-          <p className="text-zinc-500 text-sm">Los resultados van a aparecer acá cuando arranquen.</p>
+          <p className="text-violet-200 font-bold text-lg">Todavía no se jugó ningún partido.</p>
+          <p className="text-violet-300 text-sm">Los resultados van a aparecer acá cuando arranquen.</p>
         </div>
       ) : (
         <>
@@ -87,7 +87,7 @@ export default function ResultadosPage() {
             <div className="flex flex-wrap gap-2">
               {gruposConJugados.map((g) => (
                 <button key={g} onClick={() => setVista(g)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === g ? 'bg-amber-400 text-violet-950' : 'bg-violet-900/40 text-violet-300 hover:text-violet-950 hover:bg-violet-800/60'}`}>
                   Grupo {g}
                 </button>
               ))}
@@ -96,7 +96,7 @@ export default function ResultadosPage() {
               <div className="flex flex-wrap gap-2">
                 {fasesConJugados.map((f) => (
                   <button key={f.fase} onClick={() => setVista(f.fase)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === f.fase ? 'bg-amber-500 text-white' : 'bg-zinc-800 text-amber-400/70 hover:text-amber-300 hover:bg-zinc-700'}`}>
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${vista === f.fase ? 'bg-amber-500 text-white' : 'bg-violet-900/40 text-amber-400/70 hover:text-amber-300 hover:bg-violet-800/60'}`}>
                     {f.corto}
                   </button>
                 ))}
@@ -105,23 +105,23 @@ export default function ResultadosPage() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="font-bold text-lg text-zinc-300">{tituloVista}</h2>
+            <h2 className="font-bold text-lg text-violet-200">{tituloVista}</h2>
 
             {partidosVista.map((partido) => {
               if (!partido.jugado) {
                 const definido = !!partido.equipo_local && !!partido.equipo_visitante;
                 return (
-                  <div key={partido.id} className="bg-zinc-900/50 border border-zinc-800/40 rounded-xl px-4 py-3 flex items-center justify-between text-sm opacity-50">
-                    <span className="text-zinc-400">
+                  <div key={partido.id} className="bg-violet-950/40 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between text-sm opacity-50">
+                    <span className="text-violet-300">
                       {definido ? (
                         <>
                           <Flag equipo={partido.equipo_local} />{partido.equipo_local}
-                          <span className="text-zinc-600 mx-2">vs</span>
+                          <span className="text-violet-400 mx-2">vs</span>
                           <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
                         </>
-                      ) : <span className="text-zinc-600 italic">Por definir</span>}
+                      ) : <span className="text-violet-400 italic">Por definir</span>}
                     </span>
-                    <span className="text-zinc-600 text-xs">⏳ {formatFecha(partido.fecha)}</span>
+                    <span className="text-violet-400 text-xs">⏳ {formatFecha(partido.fecha)}</span>
                   </div>
                 );
               }
@@ -131,18 +131,18 @@ export default function ResultadosPage() {
               const gV = partido.goles_visitante ?? 0;
               const pts = pred ? calcularPuntos(parseInt(pred.local) || 0, parseInt(pred.visitante) || 0, gL, gV) : null;
 
-              const borderColor = pts === 3 ? 'border-green-500/40' : pts === 1 ? 'border-orange-500/30' : pts === 0 ? 'border-red-500/20' : 'border-zinc-800';
+              const borderColor = pts === 3 ? 'border-amber-400/40' : pts === 1 ? 'border-blue-500/35' : pts === 0 ? 'border-red-500/20' : 'border-white/10';
               return (
-                <div key={partido.id} className={`bg-zinc-900 border ${borderColor} rounded-xl p-4 space-y-3`}>
+                <div key={partido.id} className={`bg-violet-950/40 border ${borderColor} rounded-xl p-4 space-y-3`}>
                   {/* Resultado real */}
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex-1 min-w-0 text-right font-semibold text-sm truncate">
                       <Flag equipo={partido.equipo_local} />{partido.equipo_local}
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                      <div className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-lg font-black text-white text-lg">{gL}</div>
-                      <span className="text-zinc-500 font-bold">-</span>
-                      <div className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-lg font-black text-white text-lg">{gV}</div>
+                      <div className="w-10 h-10 flex items-center justify-center bg-violet-900/40 rounded-lg font-black text-white text-lg">{gL}</div>
+                      <span className="text-violet-300 font-bold">-</span>
+                      <div className="w-10 h-10 flex items-center justify-center bg-violet-900/40 rounded-lg font-black text-white text-lg">{gV}</div>
                     </div>
                     <div className="flex-1 min-w-0 font-semibold text-sm truncate">
                       <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
@@ -150,15 +150,15 @@ export default function ResultadosPage() {
                   </div>
 
                   {/* Tu predicción + puntos */}
-                  <div className="flex items-center justify-between border-t border-zinc-800 pt-2 text-xs">
+                  <div className="flex items-center justify-between border-t border-white/10 pt-2 text-xs">
                     {pred ? (
-                      <span className="text-zinc-400">
-                        Tu pred: <span className="text-zinc-200 font-bold">{pred.local} - {pred.visitante}</span>
+                      <span className="text-violet-300">
+                        Tu pred: <span className="text-violet-100 font-bold">{pred.local} - {pred.visitante}</span>
                       </span>
                     ) : (
-                      <span className="text-zinc-600 italic">Sin predicción</span>
+                      <span className="text-violet-400 italic">Sin predicción</span>
                     )}
-                    {pts !== null ? <PtsBadge pts={pts} /> : <span className="text-zinc-600">–</span>}
+                    {pts !== null ? <PtsBadge pts={pts} /> : <span className="text-violet-400">–</span>}
                   </div>
                 </div>
               );

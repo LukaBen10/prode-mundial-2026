@@ -58,7 +58,7 @@ export default function UnirsePage() {
     }
   }
 
-  const inputClass = "w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors";
+  const inputClass = "w-full bg-violet-900/40 border border-violet-400/25 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400 transition-colors";
 
   return (
     <div className="max-w-md mx-auto space-y-8">
@@ -66,133 +66,133 @@ export default function UnirsePage() {
       <div className="text-center space-y-3">
         <div className="text-5xl">🍩⚽</div>
         <h1 className="text-3xl font-black tracking-tight">Sumate al prode</h1>
-        <p className="text-zinc-400 text-sm">
+        <p className="text-violet-300 text-sm">
           Gratis. Tarda menos de 1 minuto.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-violet-950/40 border border-white/10 rounded-2xl p-5 sm:p-8 space-y-5">
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Nombre completo</label>
+          <label className="block text-sm font-medium text-violet-200">Nombre completo</label>
           <input type="text" value={nombreCompleto} onChange={(e) => setNombreCompleto(e.target.value)}
             placeholder="Ej: Martín García" required className={inputClass} />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Usuario</label>
+          <label className="block text-sm font-medium text-violet-200">Usuario</label>
           <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)}
             placeholder="Ej: martingol" required className={inputClass} />
-          <p className="text-xs text-zinc-500">Es lo que aparece en el ranking. Tiene que ser único.</p>
+          <p className="text-xs text-violet-300">Es lo que aparece en el ranking. Tiene que ser único.</p>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Mail</label>
+          <label className="block text-sm font-medium text-violet-200">Mail</label>
           <input type="email" value={mail} onChange={(e) => setMail(e.target.value)}
             placeholder="Ej: martin@gmail.com" required className={inputClass} />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">WhatsApp</label>
+          <label className="block text-sm font-medium text-violet-200">WhatsApp</label>
           <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
             placeholder="Ej: 1123456789" required className={inputClass} />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">DNI</label>
+          <label className="block text-sm font-medium text-violet-200">DNI</label>
           <input type="text" value={dni} onChange={(e) => setDni(e.target.value)}
             placeholder="Ej: 38456789" required className={inputClass} />
-          <p className="text-xs text-zinc-500">Solo para evitar multicuentas. No se muestra públicamente.</p>
+          <p className="text-xs text-violet-300">Solo para evitar multicuentas. No se muestra públicamente.</p>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Contraseña</label>
+          <label className="block text-sm font-medium text-violet-200">Contraseña</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
             placeholder="Mínimo 6 caracteres" required autoComplete="new-password" className={inputClass} />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Confirmá la contraseña</label>
+          <label className="block text-sm font-medium text-violet-200">Confirmá la contraseña</label>
           <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Repetí la contraseña" required autoComplete="new-password" className={inputClass} />
         </div>
 
         {/* Checkbox IG */}
-        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
           <input
             type="checkbox"
             checked={sigueIG}
             onChange={(e) => setSigueIG(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
           />
-          <span className="text-sm text-zinc-300 leading-relaxed">
+          <span className="text-sm text-violet-200 leading-relaxed">
             Ya sigo a{' '}
             <a href="https://www.instagram.com/donut.makers.caballito" target="_blank" rel="noopener noreferrer"
-              className="text-orange-400 hover:text-orange-300 underline font-semibold">
+              className="text-amber-400 hover:text-amber-300 underline font-semibold">
               @donut.makers.caballito
             </a>{' '}
             en Instagram.{' '}
-            <span className="text-zinc-500">(Imprescindible para recibir el premio)</span>
+            <span className="text-violet-300">(Imprescindible para recibir el premio)</span>
           </span>
         </label>
 
         {/* Checkbox mayor de edad */}
-        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
           <input
             type="checkbox"
             checked={mayorEdad}
             onChange={(e) => setMayorEdad(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
           />
-          <span className="text-sm text-zinc-300 leading-relaxed">
+          <span className="text-sm text-violet-200 leading-relaxed">
             Confirmo que soy <strong className="text-white">mayor de 18 años</strong>.
           </span>
         </label>
 
         {/* Checkbox bases y condiciones */}
-        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
           <input
             type="checkbox"
             checked={aceptaBases}
             onChange={(e) => setAceptaBases(e.target.checked)}
             required
-            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
           />
-          <span className="text-sm text-zinc-300 leading-relaxed">
+          <span className="text-sm text-violet-200 leading-relaxed">
             Leí y acepto las{' '}
-            <Link href="/bases" target="_blank" className="text-orange-400 hover:text-orange-300 underline font-semibold">
+            <Link href="/bases" target="_blank" className="text-amber-400 hover:text-amber-300 underline font-semibold">
               Bases y Condiciones
             </Link>.
           </span>
         </label>
 
         {/* Checkbox uso de imagen (opcional) */}
-        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
           <input
             type="checkbox"
             checked={autorizaImagen}
             onChange={(e) => setAutorizaImagen(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
           />
-          <span className="text-sm text-zinc-300 leading-relaxed">
+          <span className="text-sm text-violet-200 leading-relaxed">
             Autorizo que, si gano, se publique mi nombre y foto en las redes de Donut Makers.{' '}
-            <span className="text-zinc-500">(Opcional)</span>
+            <span className="text-violet-300">(Opcional)</span>
           </span>
         </label>
 
         {/* Checkbox avisos por mail (opcional) */}
-        <label className="flex items-start gap-3 cursor-pointer bg-zinc-800/50 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/30 rounded-xl p-4">
           <input
             type="checkbox"
             checked={aceptaAvisos}
             onChange={(e) => setAceptaAvisos(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-orange-500 cursor-pointer shrink-0"
+            className="mt-0.5 h-4 w-4 rounded border-violet-400/25 bg-violet-900/40 accent-amber-400 cursor-pointer shrink-0"
           />
-          <span className="text-sm text-zinc-300 leading-relaxed">
+          <span className="text-sm text-violet-200 leading-relaxed">
             📧 Avisame por mail los días que juego, así no me olvido de cargar mis predicciones.{' '}
-            <span className="text-zinc-500">(Opcional · te podés dar de baja cuando quieras)</span>
+            <span className="text-violet-300">(Opcional · te podés dar de baja cuando quieras)</span>
           </span>
         </label>
 
@@ -205,15 +205,15 @@ export default function UnirsePage() {
         <button
           type="submit"
           disabled={loading || !sigueIG || !mayorEdad || !aceptaBases}
-          className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-orange-500/20"
+          className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-violet-950 py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-400/20"
         >
           {loading ? 'Registrando...' : 'Entrar al prode ⚽'}
         </button>
       </form>
 
-      <p className="text-center text-zinc-500 text-sm">
+      <p className="text-center text-violet-300 text-sm">
         ¿Ya participás?{' '}
-        <Link href="/login" className="text-orange-400 hover:text-orange-300 underline">
+        <Link href="/login" className="text-amber-400 hover:text-amber-300 underline">
           Iniciá sesión
         </Link>
       </p>
