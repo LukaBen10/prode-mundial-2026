@@ -7,6 +7,9 @@ import LoadingState from '@/components/LoadingState';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import type { RankingEntry } from '@/lib/types';
 
+// Recordatorios por mail: desactivado hasta configurar Resend. Poner true para reactivar.
+const MAILS_HABILITADOS = false;
+
 export default function MiProdePage() {
   const router = useRouter();
   const participanteId = useAuthRedirect();
@@ -182,7 +185,8 @@ export default function MiProdePage() {
         Cerrar sesión
       </button>
 
-      {/* Avisos por mail */}
+      {/* Avisos por mail — OCULTO hasta configurar Resend (MAILS_HABILITADOS) */}
+      {MAILS_HABILITADOS && (
       <div className={`rounded-2xl p-5 ${!avisosDefinido ? 'bg-amber-400/10 border border-amber-400/30' : 'bg-violet-950/70 border border-white/15'}`}>
         {!avisosDefinido ? (
           <div className="space-y-3">
@@ -224,6 +228,7 @@ export default function MiProdePage() {
           </div>
         )}
       </div>
+      )}
 
       {/* Reglas */}
       <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-5 space-y-3">

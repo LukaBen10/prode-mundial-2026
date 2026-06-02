@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// Recordatorios por mail: desactivado hasta configurar Resend. Poner true para reactivar.
+const MAILS_HABILITADOS = false;
+
 export default function UnirsePage() {
   const router = useRouter();
   const [nombreCompleto, setNombreCompleto] = useState('');
@@ -182,19 +185,21 @@ export default function UnirsePage() {
           </span>
         </label>
 
-        {/* Checkbox avisos por mail (opcional) */}
-        <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
-          <input
-            type="checkbox"
-            checked={aceptaAvisos}
-            onChange={(e) => setAceptaAvisos(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
-          />
-          <span className="text-sm text-violet-200 leading-relaxed">
-            📧 Avisame por mail los días que juego, así no me olvido de cargar mis predicciones.{' '}
-            <span className="text-violet-300">(Opcional · te podés dar de baja cuando quieras)</span>
-          </span>
-        </label>
+        {/* Checkbox avisos por mail — OCULTO hasta configurar Resend (poner true para reactivar) */}
+        {MAILS_HABILITADOS && (
+          <label className="flex items-start gap-3 cursor-pointer bg-violet-900/55 rounded-xl p-4">
+            <input
+              type="checkbox"
+              checked={aceptaAvisos}
+              onChange={(e) => setAceptaAvisos(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-violet-400/40 bg-violet-950/65 accent-amber-400 cursor-pointer shrink-0"
+            />
+            <span className="text-sm text-violet-200 leading-relaxed">
+              📧 Avisame por mail los días que juego, así no me olvido de cargar mis predicciones.{' '}
+              <span className="text-violet-300">(Opcional · te podés dar de baja cuando quieras)</span>
+            </span>
+          </label>
+        )}
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3">
