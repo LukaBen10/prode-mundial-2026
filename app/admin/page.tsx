@@ -21,6 +21,7 @@ interface ParticipanteBusqueda {
   nombre_usuario: string;
   nombre_completo: string;
   puntos: number;
+  donas_especiales?: number;
 }
 
 interface Partido {
@@ -464,6 +465,23 @@ export default function AdminPage() {
     }
   }
 
+  async function darDona(p: ParticipanteBusqueda, delta: number) {
+    const res = await fetch('/api/admin/donas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id: p.id, delta }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setResultadosBusqueda(prev => prev.map(x => x.id === p.id ? { ...x, donas_especiales: data.donas, puntos: data.puntos } : x));
+      if (data.deltaPuntos > 0) setMsgConsumo(prev => ({ ...prev, [p.nombre_usuario]: '🍩 ¡4 donas! +1 punto' }));
+      else if (data.deltaPuntos < 0) setMsgConsumo(prev => ({ ...prev, [p.nombre_usuario]: '🍩 −1 punto' }));
+      cargarParticipantes();
+    } else {
+      setMsgConsumo(prev => ({ ...prev, [p.nombre_usuario]: `Error: ${data.error}` }));
+    }
+  }
+
   async function buscarAdmin(q: string) {
     setBusquedaAdmin(q);
     if (q.length < 2) { setResultadosAdmin([]); return; }
@@ -902,34 +920,55 @@ export default function AdminPage() {
       {/* ── Tab: Consumos ──────────────────────────────────────── */}
       {tab === 'consumos' && (
         <div className="space-y-4">
-          <p className="text-violet-300 text-sm">Buscá al cliente y sumale o restale puntos de visita al local.</p>
+          <p className="text-violet-300 text-sm">Buscá al cliente y cargale puntos por venir al local o donas especiales del Mundial.</p>
           <input type="text" value={busqueda} onChange={e => buscarParticipante(e.target.value)}
             placeholder="Buscar por usuario o nombre..."
             className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
           {resultadosBusqueda.length > 0 && (
             <div className="space-y-2">
-              {resultadosBusqueda.map(p => (
-                <div key={p.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
-                  <div>
-                    <span className="font-semibold text-white">@{p.nombre_usuario}</span>
-                    <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
+              {resultadosBusqueda.map(p => {
+                const donas = p.donas_especiales ?? 0;
+                return (
+                  <div key={p.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 space-y-3">
+                    {/* Header */}
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="min-w-0">
+                        <span className="font-semibold text-white">@{p.nombre_usuario}</span>
+                        <span className="text-violet-300 text-sm ml-2">{p.nombre_completo}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {msgConsumo[p.nombre_usuario] && <span className="text-xs text-amber-300">{msgConsumo[p.nombre_usuario]}</span>}
+                        <span className="text-amber-400 font-bold">{p.puntos} pts</span>
+                      </div>
+                    </div>
+
+                    {/* Punto por venir al local */}
+                    <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2.5">
+                      <span className="text-violet-200 text-sm">🏟️ Vino a ver un partido</span>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => darPuntoConsumo(p.nombre_usuario, -1)}
+                          className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">−1 pt</button>
+                        <button onClick={() => darPuntoConsumo(p.nombre_usuario, 1)}
+                          className="bg-amber-400 hover:bg-amber-300 text-violet-950 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">+1 pt</button>
+                      </div>
+                    </div>
+
+                    {/* Donas especiales */}
+                    <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2.5">
+                      <span className="text-violet-200 text-sm">
+                        🍩 Donas especiales: <strong className="text-white tabular-nums">{donas}</strong>
+                        <span className="text-violet-400 text-xs ml-1.5">({donas % 4}/4 para +1 punto)</span>
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => darDona(p, -1)} disabled={donas === 0}
+                          className="bg-red-500/20 hover:bg-red-500/40 disabled:opacity-30 text-red-400 border border-red-500/30 w-8 h-8 rounded-lg text-base font-bold transition-colors">−</button>
+                        <button onClick={() => darDona(p, 1)}
+                          className="bg-amber-400 hover:bg-amber-300 text-violet-950 w-8 h-8 rounded-lg text-base font-bold transition-colors">+</button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-amber-400 font-bold min-w-[50px] text-right">{p.puntos} pts</span>
-                    <button onClick={() => darPuntoConsumo(p.nombre_usuario, -1)}
-                      className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
-                      −1
-                    </button>
-                    <button onClick={() => darPuntoConsumo(p.nombre_usuario, 1)}
-                      className="bg-amber-400 hover:bg-amber-300 text-violet-950 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
-                      +1
-                    </button>
-                    {msgConsumo[p.nombre_usuario] && (
-                      <span className="text-xs text-amber-400">{msgConsumo[p.nombre_usuario]}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           {busqueda.length >= 2 && resultadosBusqueda.length === 0 && (

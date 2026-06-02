@@ -46,11 +46,11 @@ export async function GET(req: NextRequest) {
 
   const query = req.nextUrl.searchParams.get('q') ?? '';
   const result = await db.execute({
-    sql: 'SELECT id, nombre_usuario, nombre_completo, puntos FROM participantes WHERE nombre_usuario LIKE ? OR nombre_completo LIKE ? LIMIT 10',
+    sql: 'SELECT id, nombre_usuario, nombre_completo, puntos, donas_especiales FROM participantes WHERE nombre_usuario LIKE ? OR nombre_completo LIKE ? LIMIT 10',
     args: [`%${query}%`, `%${query}%`],
   });
 
   return NextResponse.json(result.rows.map(r => ({
-    id: r[0], nombre_usuario: r[1], nombre_completo: r[2], puntos: r[3],
+    id: r[0], nombre_usuario: r[1], nombre_completo: r[2], puntos: r[3], donas_especiales: r[4] ?? 0,
   })));
 }

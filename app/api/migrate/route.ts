@@ -21,6 +21,7 @@ export async function GET() {
     // Avisos por email — opt-in explícito. acepta_avisos: 1 si quiere recibir. avisos_definido: 1 si ya eligió (sí o no)
     { name: 'acepta_avisos',   sql: 'ALTER TABLE participantes ADD COLUMN acepta_avisos INTEGER NOT NULL DEFAULT 0' },
     { name: 'avisos_definido', sql: 'ALTER TABLE participantes ADD COLUMN avisos_definido INTEGER NOT NULL DEFAULT 0' },
+    { name: 'donas_especiales', sql: 'ALTER TABLE participantes ADD COLUMN donas_especiales INTEGER NOT NULL DEFAULT 0' },
   ];
   for (const col of colsParticipantes) {
     try {
