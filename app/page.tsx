@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Countdown from '@/components/Countdown';
 import SocialProof from '@/components/SocialProof';
+import GuardarApp from '@/components/GuardarApp';
 
 export default function Home() {
   return (
@@ -83,12 +84,20 @@ export default function Home() {
             Quiero participar
           </Link>
           <Link
-            href="/ranking"
+            href="/login"
             className="border border-white/30 hover:border-white/60 bg-white/10 hover:bg-white/15 text-white px-10 py-3.5 rounded-full font-semibold text-lg transition-all backdrop-blur-sm"
           >
-            Ver el ranking
+            Ya tengo cuenta
           </Link>
         </div>
+        <p className="text-violet-300 text-sm pt-1">
+          ¿Primera vez? <Link href="/unirse" className="text-amber-400 hover:text-amber-300 underline font-semibold">Registrate gratis</Link> · ¿Ya jugás? <Link href="/login" className="text-amber-400 hover:text-amber-300 underline font-semibold">Iniciá sesión</Link>
+        </p>
+      </section>
+
+      {/* ── Guardar en el celu (PWA) ───────────────────────────── */}
+      <section>
+        <GuardarApp />
       </section>
 
       {/* ── Premios ────────────────────────────────────────────── */}

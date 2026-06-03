@@ -29,6 +29,11 @@ export const metadata: Metadata = {
     images: ['/icon.png'],
   },
   robots: { index: true, follow: true },
+  appleWebApp: {
+    capable: true,
+    title: 'Prode Donut',
+    statusBarStyle: 'default',
+  },
 };
 
 export const viewport: Viewport = {
