@@ -92,15 +92,24 @@ export default function Navbar() {
         </div>
 
         {/* ── Mobile: CTA + hamburger ──────────────────── */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex md:hidden items-center gap-1.5">
           {!logueado && (
-            <Link
-              href="/unirse"
-              onClick={() => setMenuOpen(false)}
-              className="bg-amber-400 text-violet-950 text-xs px-3.5 py-2 rounded-full font-bold active:bg-amber-500"
-            >
-              Participar
-            </Link>
+            <>
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="text-violet-100 text-xs font-semibold px-2.5 py-2 rounded-full border border-white/20 active:bg-violet-800/50"
+              >
+                Ingresar
+              </Link>
+              <Link
+                href="/unirse"
+                onClick={() => setMenuOpen(false)}
+                className="bg-amber-400 text-violet-950 text-xs px-3.5 py-2 rounded-full font-bold active:bg-amber-500"
+              >
+                Participar
+              </Link>
+            </>
           )}
           <button
             onClick={() => setMenuOpen(m => !m)}
