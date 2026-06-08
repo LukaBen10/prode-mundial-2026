@@ -22,5 +22,5 @@ export async function enviarEmail(to: string, subject: string, html: string): Pr
 
 /** URL base de la app, para los links dentro de los emails. */
 export function appUrl(): string {
-  return process.env.APP_URL ?? 'https://prode-mundial-2026-henna-zeta.vercel.app';
+  return process.env.APP_URL ?? 'https://prodedonut.com.ar';
 }

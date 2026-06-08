@@ -7,8 +7,8 @@ import LoadingState from '@/components/LoadingState';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import type { RankingEntry } from '@/lib/types';
 
-// Recordatorios por mail: desactivado hasta configurar Resend. Poner true para reactivar.
-const MAILS_HABILITADOS = false;
+// Recordatorios por mail: activo (Resend configurado con dominio prodedonut.com.ar).
+const MAILS_HABILITADOS = true;
 
 export default function MiProdePage() {
   const router = useRouter();

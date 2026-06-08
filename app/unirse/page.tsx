@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// Recordatorios por mail: desactivado hasta configurar Resend. Poner true para reactivar.
-const MAILS_HABILITADOS = false;
+// Recordatorios por mail: activo (Resend configurado con dominio prodedonut.com.ar).
+const MAILS_HABILITADOS = true;
 
 export default function UnirsePage() {
   const router = useRouter();

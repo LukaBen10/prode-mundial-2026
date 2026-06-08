@@ -3,7 +3,7 @@ import Link from 'next/link';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 
-const SITE_URL = 'https://prode-mundial-2026-henna-zeta.vercel.app';
+const SITE_URL = 'https://prodedonut.com.ar';
 
 export const metadata: Metadata = {
   title: {
