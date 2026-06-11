@@ -88,10 +88,21 @@ export function toApiName(nombreEs: string): string {
   return NOMBRE_API[nombreEs] ?? nombreEs;
 }
 
-/** Mapa inverso: nombre API → nombre en español */
-const NOMBRE_ES: Record<string, string> = Object.fromEntries(
-  Object.entries(NOMBRE_API).map(([es, en]) => [en.toLowerCase(), es])
-);
+/**
+ * Alias adicionales de la API → español. Algunos equipos pueden venir con más de
+ * un nombre desde football-data.org. Costa de Marfil es el caso típico: la API puede
+ * usar "Ivory Coast" o el nombre oficial FIFA "Côte d'Ivoire". Reconocemos ambos.
+ */
+const ALIAS_API: Record<string, string> = {
+  "côte d'ivoire": 'Costa de Marfil',
+  "cote d'ivoire": 'Costa de Marfil',
+};
+
+/** Mapa inverso: nombre API → nombre en español (con los alias) */
+const NOMBRE_ES: Record<string, string> = {
+  ...Object.fromEntries(Object.entries(NOMBRE_API).map(([es, en]) => [en.toLowerCase(), es])),
+  ...ALIAS_API,
+};
 
 /** Dado un nombre de la API, devuelve el nombre en español (para buscar en DB) */
 export function fromApiName(nombreApi: string): string {
