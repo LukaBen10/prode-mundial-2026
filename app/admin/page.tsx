@@ -100,11 +100,6 @@ function formatFechaHora(iso: string) {
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
-function waLink(numero: string): string {
-  const clean = numero.replace(/\D/g, '').replace(/^0+/, '');
-  return `https://wa.me/549${clean}`;
-}
-
 const inputCell = "w-full bg-violet-950/65 border border-violet-400/40 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-amber-400 min-w-0";
 
 export default function AdminPage() {
@@ -807,13 +802,13 @@ export default function AdminPage() {
                         </td>
                         <td className="px-3 py-3 text-violet-200">{p.nombre_completo}</td>
                         <td className="px-3 py-3 text-violet-300 font-mono">{p.dni}</td>
-                        <td className="px-3 py-3">
-                          <a href={waLink(p.whatsapp)} target="_blank" rel="noopener noreferrer"
+                        <td className="px-3 py-3 text-violet-300">{p.whatsapp}</td>
+                        <td className="px-3 py-3 break-all">
+                          <a href={`mailto:${p.mail}`}
                             className="text-amber-400 hover:text-amber-300 underline underline-offset-2">
-                            {p.whatsapp}
+                            {p.mail}
                           </a>
                         </td>
-                        <td className="px-3 py-3 text-violet-300 break-all">{p.mail}</td>
                         <td className="px-3 py-3">
                           {isSuperAdmin ? (
                             <div className="flex items-center justify-end gap-1">
