@@ -96,6 +96,13 @@ export function toApiName(nombreEs: string): string {
 const ALIAS_API: Record<string, string> = {
   "côte d'ivoire": 'Costa de Marfil',
   "cote d'ivoire": 'Costa de Marfil',
+  'cape verde islands': 'Cabo Verde',
+  'czechia': 'República Checa',
+  'south korea': 'Corea del Sur',
+  'turkey': 'Turquía',
+  'iran': 'Irán',
+  'congo dr': 'RD Congo',
+  'bosnia-herzegovina': 'Bosnia y Herzegovina',
 };
 
 /** Mapa inverso: nombre API → nombre en español (con los alias) */
