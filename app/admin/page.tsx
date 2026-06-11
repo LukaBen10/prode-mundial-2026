@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TODOS_LOS_EQUIPOS, FASES_ELIM } from '@/lib/data/partidos';
 
 interface ParticipanteCompleto {
@@ -133,6 +133,13 @@ export default function AdminPage() {
   const [syncMsg, setSyncMsg] = useState('');
   const [crucesEdit, setCrucesEdit] = useState<Record<number, { local: string; visitante: string }>>({});
   const [cruceMsg, setCruceMsg] = useState<Record<number, string>>({});
+  // Auto-guardado de resultados (reemplaza el botón Guardar)
+  const [guardandoAuto, setGuardandoAuto] = useState<Record<number, boolean>>({});
+  const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  useEffect(() => {
+    const timers = saveTimers.current;
+    return () => { Object.values(timers).forEach(clearTimeout); };
+  }, []);
 
   // Consumos
   const [busqueda, setBusqueda] = useState('');
@@ -411,15 +418,17 @@ export default function AdminPage() {
     }
   }
 
-  async function cargarResultado(partidoId: number) {
-    const res = resultados[partidoId];
+  async function cargarResultado(partidoId: number, valores?: { local: string; visitante: string }) {
+    const res = valores ?? resultados[partidoId];
     if (!res) return;
+    setGuardandoAuto(prev => ({ ...prev, [partidoId]: true }));
     const r = await fetch('/api/admin/resultado', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getHeaders() },
       body: JSON.stringify({ partido_id: partidoId, goles_local: parseInt(res.local) || 0, goles_visitante: parseInt(res.visitante) || 0 }),
     });
     const data = await r.json();
+    setGuardandoAuto(prev => ({ ...prev, [partidoId]: false }));
     if (data.ok) {
       setMensajes(prev => ({ ...prev, [partidoId]: `✓ ${data.prediccionesActualizadas} predicciones actualizadas` }));
       cargarPartidos();
@@ -427,6 +436,15 @@ export default function AdminPage() {
     } else {
       setMensajes(prev => ({ ...prev, [partidoId]: `Error: ${data.error}` }));
     }
+  }
+
+  // Cuando ya hay goles en los dos campos, guarda solo tras una breve pausa (debounce).
+  function programarAutoguardado(partidoId: number, local: string, visitante: string) {
+    if (saveTimers.current[partidoId]) clearTimeout(saveTimers.current[partidoId]);
+    if (local.trim() === '' || visitante.trim() === '') return; // espera a que estén los dos goles
+    saveTimers.current[partidoId] = setTimeout(() => {
+      cargarResultado(partidoId, { local, visitante });
+    }, 800);
   }
 
   async function ajustarPuntosRapido(nombre_usuario: string, id: number, delta: number) {
@@ -879,18 +897,27 @@ export default function AdminPage() {
                     <div className="flex-1 flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium truncate flex-1 text-right min-w-0">{partido.equipo_local}</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
-                        onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local: e.target.value } }))}
+                        onChange={e => {
+                          const local = e.target.value;
+                          setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local } }));
+                          programarAutoguardado(partido.id, local, resultados[partido.id]?.visitante ?? '');
+                        }}
                         className="w-10 h-8 text-center bg-violet-950/65 border border-violet-400/40 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
                       <span className="text-violet-300 shrink-0">-</span>
                       <input type="number" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
-                        onChange={e => setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante: e.target.value } }))}
+                        onChange={e => {
+                          const visitante = e.target.value;
+                          setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante } }));
+                          programarAutoguardado(partido.id, resultados[partido.id]?.local ?? '', visitante);
+                        }}
                         className="w-10 h-8 text-center bg-violet-950/65 border border-violet-400/40 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
                       <span className="text-sm font-medium truncate flex-1 min-w-0">{partido.equipo_visitante}</span>
                     </div>
-                    <button onClick={() => cargarResultado(partido.id)}
-                      className="bg-amber-400 hover:bg-amber-300 text-violet-950 px-3 py-1.5 rounded-lg text-sm font-semibold shrink-0">
-                      Guardar
-                    </button>
+                    <span className="text-xs shrink-0 w-24 text-right" aria-live="polite">
+                      {guardandoAuto[partido.id]
+                        ? <span className="text-amber-400 animate-pulse">💾 Guardando…</span>
+                        : <span className="text-violet-400/70">Se guarda solo</span>}
+                    </span>
                   </div>
                   {mensajes[partido.id] && <p className="text-xs text-amber-400 mt-2 pl-20">{mensajes[partido.id]}</p>}
                 </div>
