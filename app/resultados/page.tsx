@@ -38,20 +38,21 @@ export default function ResultadosPage() {
   useEffect(() => {
     if (!participanteId) return;
 
+    const authHeaders = { 'x-participante-id': String(participanteId), 'x-session-token': localStorage.getItem('prode_token') ?? '' };
     Promise.all([
       fetch('/api/partidos').then(r => r.json()),
-      fetch(`/api/predicciones?participanteId=${participanteId}`).then(r => r.json()),
+      fetch('/api/predicciones', { headers: authHeaders }).then(r => r.json()),
     ]).then(([partidos, preds]) => {
-      setPartidos(partidos);
+      setPartidos(Array.isArray(partidos) ? partidos : []);
       const map: Record<number, { local: string; visitante: string }> = {};
-      for (const p of preds) map[p.partido_id] = { local: String(p.goles_local), visitante: String(p.goles_visitante) };
+      if (Array.isArray(preds)) for (const p of preds) map[p.partido_id] = { local: String(p.goles_local), visitante: String(p.goles_visitante) };
       setPredicciones(map);
 
       const primerConJugados = GRUPOS.find(g => (partidos as Partido[]).some(p => p.grupo === g && p.jugado));
       if (primerConJugados) setVista(primerConJugados);
 
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, [participanteId]);
 
   const jugados = partidos.filter(p => p.jugado);

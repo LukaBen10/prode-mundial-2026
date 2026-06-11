@@ -78,25 +78,28 @@ function PrediccionesContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [error, setError] = useState('');
   const [nombre, setNombre] = useState('');
   const [miRanking, setMiRanking] = useState<{ posicion: number; puntos: number; puntosLider: number; puntosNext: number | null } | null>(null);
 
   useEffect(() => {
     if (!participanteId) { router.push('/login'); return; }
+    if (!localStorage.getItem('prode_token')) { router.push('/login'); return; } // sin sesión válida → re-login
     const n = localStorage.getItem('prode_nombre');
     if (n) setNombre(n);
 
+    const authHeaders = { 'x-participante-id': String(participanteId), 'x-session-token': localStorage.getItem('prode_token') ?? '' };
     Promise.all([
       fetch('/api/partidos').then((r) => r.json()),
-      fetch(`/api/predicciones?participanteId=${participanteId}`).then((r) => r.json()),
+      fetch('/api/predicciones', { headers: authHeaders }).then((r) => r.json()),
       fetch('/api/ranking').then((r) => r.json()),
     ]).then(([partidos, preds, ranking]) => {
-      setPartidos(partidos);
+      setPartidos(Array.isArray(partidos) ? partidos : []);
       const map: Record<number, { local: string; visitante: string }> = {};
-      for (const p of preds) map[p.partido_id] = { local: String(p.goles_local), visitante: String(p.goles_visitante) };
+      if (Array.isArray(preds)) for (const p of preds) map[p.partido_id] = { local: String(p.goles_local), visitante: String(p.goles_visitante) };
       setPredicciones(map);
 
-      const lista = ranking as RankingEntry[];
+      const lista = (Array.isArray(ranking) ? ranking : []) as RankingEntry[];
       const yo = lista.find((r) => String(r.id) === participanteId);
       if (yo) {
         const anterior = yo.posicion > 1 ? lista.find(r => r.posicion === yo.posicion - 1) : null;
@@ -105,7 +108,7 @@ function PrediccionesContent() {
         setMiRanking({ posicion: lista.length + 1, puntos: 0, puntosLider: lista[0]?.puntos ?? 0, puntosNext: null });
       }
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participanteId, router]);
 
@@ -125,18 +128,29 @@ function PrediccionesContent() {
 
   async function guardar() {
     setSaving(true);
+    setError('');
     const payload = Object.entries(predicciones).map(([pid, pred]) => ({
       partido_id: parseInt(pid),
       goles_local: parseInt(pred.local) || 0,
       goles_visitante: parseInt(pred.visitante) || 0,
     }));
-    await fetch('/api/predicciones', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ participanteId: parseInt(participanteId!), predicciones: payload }),
-    });
-    setSaving(false);
-    setGuardado(true);
+    try {
+      const res = await fetch('/api/predicciones', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-participante-id': String(participanteId),
+          'x-session-token': localStorage.getItem('prode_token') ?? '',
+        },
+        body: JSON.stringify({ predicciones: payload }),
+      });
+      if (!res.ok) throw new Error();
+      setGuardado(true);
+    } catch {
+      setError('No se pudieron guardar. Fijate la conexión y probá de nuevo.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   const predCount = Object.keys(predicciones).length;
@@ -272,6 +286,11 @@ function PrediccionesContent() {
       </div>
 
       <div className="pt-4 pb-6">
+        {error && (
+          <div className="mb-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3">
+            {error}
+          </div>
+        )}
         <button onClick={guardar} disabled={saving || guardado}
           className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-violet-950 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-400/30">
           {saving ? 'Guardando...' : guardado ? '✓ Predicciones guardadas' : 'Guardar predicciones'}

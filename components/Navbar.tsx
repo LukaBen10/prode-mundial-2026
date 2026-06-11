@@ -23,10 +23,13 @@ export default function Navbar() {
   }, [pathname]);
 
   function cerrarSesion() {
+    const token = localStorage.getItem('prode_token');
+    if (token) fetch('/api/logout', { method: 'POST', headers: { 'x-session-token': token } }).catch(() => {});
     localStorage.removeItem('prode_id');
     localStorage.removeItem('prode_codigo');
     localStorage.removeItem('prode_nombre');
     localStorage.removeItem('prode_admin');
+    localStorage.removeItem('prode_token');
     setLogueado(false);
     setMenuOpen(false);
     router.push('/');

@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { generarPartidosGrupos, generarEliminatorias } from '@/lib/data/partidos';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Operación de mantenimiento sensible (DDL + reseed + privilegios): requiere el secret.
+  if (!process.env.CRON_SECRET || req.nextUrl.searchParams.get('secret') !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
   const results: { column: string; status: string }[] = [];
 
   // ── participantes ──────────────────────────────────────────────

@@ -57,7 +57,8 @@ export default function MiProdePage() {
           setPuntosLider(ranking[0]?.puntos ?? 0);
         }
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [participanteId]);
 
   async function guardarAvisos(acepta: boolean) {

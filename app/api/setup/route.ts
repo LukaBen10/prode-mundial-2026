@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { generarPartidosGrupos } from '@/lib/data/partidos';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Operación de mantenimiento: requiere el secret (?secret=CRON_SECRET).
+  if (!process.env.CRON_SECRET || req.nextUrl.searchParams.get('secret') !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
   try {
     // Crear tablas
     await db.execute(`

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { hashPassword } from '@/lib/hash';
+import { hashPassword, generarToken } from '@/lib/hash';
+import { checkModeratorAuth } from '@/lib/adminAuth';
+
+const SESSION_DAYS = 14;
 
 function generarCodigo() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -20,11 +23,15 @@ export async function POST(req: NextRequest) {
     if (!sigue_ig) return NextResponse.json({ error: 'Tenés que seguir la cuenta de Instagram' }, { status: 400 });
     if (!acepta_bases) return NextResponse.json({ error: 'Tenés que aceptar las Bases y Condiciones' }, { status: 400 });
 
-    const existingUsuario = await db.execute({ sql: 'SELECT id FROM participantes WHERE nombre_usuario = ?', args: [nombre_usuario.trim()] });
+    // Anti-duplicados (case-insensitive para usuario y mail, igual que el login).
+    const existingUsuario = await db.execute({ sql: 'SELECT id FROM participantes WHERE LOWER(nombre_usuario) = LOWER(?)', args: [nombre_usuario.trim()] });
     if (existingUsuario.rows.length > 0) return NextResponse.json({ error: `El usuario "${nombre_usuario.trim()}" ya está en uso. Elegí otro.` }, { status: 409 });
 
     const existingDni = await db.execute({ sql: 'SELECT id FROM participantes WHERE dni = ?', args: [dni.trim()] });
     if (existingDni.rows.length > 0) return NextResponse.json({ error: 'Ya hay una cuenta con ese DNI.' }, { status: 409 });
+
+    const existingMail = await db.execute({ sql: 'SELECT id FROM participantes WHERE LOWER(mail) = LOWER(?)', args: [mail.trim()] });
+    if (existingMail.rows.length > 0) return NextResponse.json({ error: 'Ya hay una cuenta con ese mail.' }, { status: 409 });
 
     let codigo = generarCodigo();
     for (let i = 0; i < 5; i++) {
@@ -40,14 +47,26 @@ export async function POST(req: NextRequest) {
       args: [nombre_completo.trim(), nombre_completo.trim(), nombre_usuario.trim(), mail.trim(), whatsapp.trim(), dni.trim(), hashPassword(password), codigo, autoriza_imagen ? 1 : 0, acepta_avisos ? 1 : 0],
     });
 
-    return NextResponse.json({ id: Number(result.lastInsertRowid), nombre_completo: nombre_completo.trim(), nombre_usuario: nombre_usuario.trim(), codigo });
+    const participanteId = Number(result.lastInsertRowid);
+
+    // Crear sesión: el usuario queda logueado al registrarse (igual que /api/login).
+    const token = generarToken();
+    await db.execute({
+      sql: `INSERT INTO sessions (token, participante_id, expires_at) VALUES (?, ?, datetime('now', '+${SESSION_DAYS} days'))`,
+      args: [token, participanteId],
+    });
+
+    return NextResponse.json({ id: participanteId, nombre_completo: nombre_completo.trim(), nombre_usuario: nombre_usuario.trim(), codigo, token });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
+// Datos personales por código → solo moderadores/admin (antes era público).
 export async function GET(req: NextRequest) {
+  if (!(await checkModeratorAuth(req))) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+
   const codigo = req.nextUrl.searchParams.get('codigo');
   if (!codigo) return NextResponse.json({ error: 'Falta el código' }, { status: 400 });
 

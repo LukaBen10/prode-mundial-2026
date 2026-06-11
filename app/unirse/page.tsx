@@ -52,8 +52,9 @@ export default function UnirsePage() {
       localStorage.setItem('prode_id', String(data.id));
       localStorage.setItem('prode_codigo', data.codigo);
       localStorage.setItem('prode_nombre', data.nombre_usuario);
+      localStorage.setItem('prode_token', data.token ?? '');
 
-      router.push(`/predicciones?participanteId=${data.id}`);
+      router.push('/predicciones');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Algo salió mal, intentá de nuevo');
     } finally {
