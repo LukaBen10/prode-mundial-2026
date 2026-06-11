@@ -522,10 +522,8 @@ export default function AdminPage() {
     if ((await res.json()).ok) cargarParticipantes();
   }
 
-  async function buscarParticipante(q: string) {
-    setBusqueda(q);
-    if (q.length < 2) { setResultadosBusqueda([]); return; }
-    const res = await fetch(`/api/admin/puntos-extra?q=${encodeURIComponent(q)}`, { headers: getHeaders() });
+  async function cargarConsumos() {
+    const res = await fetch('/api/admin/puntos-extra', { headers: getHeaders() });
     const data = await res.json();
     setResultadosBusqueda(Array.isArray(data) ? data : []);
   }
@@ -621,6 +619,9 @@ export default function AdminPage() {
   // Pendientes de cargar resultado: no jugados y con equipos ya definidos
   const pendientes = partidos.filter(p => !p.jugado && p.equipo_local && p.equipo_visitante);
   const jugados = partidos.filter(p => p.jugado);
+  const consumosFiltrados = busqueda.trim()
+    ? resultadosBusqueda.filter(p => `${p.nombre_usuario} ${p.nombre_completo}`.toLowerCase().includes(busqueda.trim().toLowerCase()))
+    : resultadosBusqueda;
   const jugadosFiltrados = filtroJugados.trim()
     ? jugados.filter(p => `${p.equipo_local} ${p.equipo_visitante}`.toLowerCase().includes(filtroJugados.trim().toLowerCase()))
     : jugados;
@@ -702,6 +703,7 @@ export default function AdminPage() {
                 if (t.id === 'auditoria' && auditLog.length === 0) cargarAuditLog();
                 if (t.id === 'predicciones' && predicciones.length === 0) cargarPredicciones();
                 if (t.id === 'mensajes' && mensajesContacto.length === 0) cargarMensajes();
+                if (t.id === 'consumos' && resultadosBusqueda.length === 0) cargarConsumos();
               }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
                 tab === t.id ? 'text-white border-amber-400' : 'text-violet-300 border-transparent hover:text-white'
@@ -995,12 +997,12 @@ export default function AdminPage() {
       {tab === 'consumos' && (
         <div className="space-y-4">
           <p className="text-violet-300 text-sm">Buscá al cliente y cargale puntos por venir al local o donas especiales del Mundial.</p>
-          <input type="text" value={busqueda} onChange={e => buscarParticipante(e.target.value)}
+          <input type="text" value={busqueda} onChange={e => setBusqueda(e.target.value)}
             placeholder="Buscar por usuario o nombre..."
             className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
-          {resultadosBusqueda.length > 0 && (
+          {consumosFiltrados.length > 0 && (
             <div className="space-y-2">
-              {resultadosBusqueda.map(p => {
+              {consumosFiltrados.map(p => {
                 const donas = p.donas_especiales ?? 0;
                 return (
                   <div key={p.id} className="bg-violet-950/70 border border-white/15 rounded-xl px-4 py-3 space-y-3">
@@ -1056,8 +1058,11 @@ export default function AdminPage() {
               })}
             </div>
           )}
-          {busqueda.length >= 2 && resultadosBusqueda.length === 0 && (
-            <p className="text-violet-300 text-sm">No se encontró ningún usuario.</p>
+          {resultadosBusqueda.length === 0 && (
+            <p className="text-violet-300 text-sm">Cargando participantes…</p>
+          )}
+          {resultadosBusqueda.length > 0 && consumosFiltrados.length === 0 && (
+            <p className="text-violet-300 text-sm">No se encontró ningún usuario con “{busqueda}”.</p>
           )}
         </div>
       )}

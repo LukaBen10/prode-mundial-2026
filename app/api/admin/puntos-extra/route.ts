@@ -44,11 +44,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const query = req.nextUrl.searchParams.get('q') ?? '';
-  const result = await db.execute({
-    sql: 'SELECT id, nombre_usuario, nombre_completo, puntos, donas_especiales FROM participantes WHERE nombre_usuario LIKE ? OR nombre_completo LIKE ? LIMIT 10',
-    args: [`%${query}%`, `%${query}%`],
-  });
+  // Lista completa de participantes (el filtro se hace en el cliente).
+  const result = await db.execute(
+    'SELECT id, nombre_usuario, nombre_completo, puntos, donas_especiales FROM participantes ORDER BY nombre_usuario COLLATE NOCASE'
+  );
 
   return NextResponse.json(result.rows.map(r => ({
     id: r[0], nombre_usuario: r[1], nombre_completo: r[2], puntos: r[3], donas_especiales: r[4] ?? 0,
