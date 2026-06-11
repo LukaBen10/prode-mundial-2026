@@ -47,10 +47,11 @@ export default function ResultadosPage() {
     }).catch(() => setLoading(false));
   }, [participanteId]);
 
-  // Todos los jugados, en orden cronológico (del primero al último por fecha + hora).
-  const jugados = [...partidos]
-    .filter(p => p.jugado)
+  // Todos los partidos ya definidos (jugados y por jugar), en orden cronológico por fecha + hora.
+  const ordenados = [...partidos]
+    .filter(p => p.equipo_local && p.equipo_visitante)
     .sort((a, b) => `${a.fecha}T${a.hora || '00:00'}`.localeCompare(`${b.fecha}T${b.hora || '00:00'}`));
+  const jugadosCount = partidos.filter(p => p.jugado).length;
 
   if (!participanteId || loading) return <LoadingState />;
 
@@ -61,36 +62,59 @@ export default function ResultadosPage() {
         <div className="text-4xl mb-2">📊</div>
         <h1 className="text-3xl font-black tracking-tight">Resultados</h1>
         <p className="text-violet-300 text-sm">
-          {jugados.length === 0 ? 'Todavía no se jugó ningún partido' : `${jugados.length} ${jugados.length === 1 ? 'partido jugado' : 'partidos jugados'}`}
+          {jugadosCount === 0 ? 'Todavía no se jugó ningún partido — acá tenés el fixture' : `${jugadosCount} ${jugadosCount === 1 ? 'partido jugado' : 'partidos jugados'} · fixture completo`}
         </p>
       </div>
 
-      {jugados.length === 0 ? (
+      {ordenados.length === 0 ? (
         <div className="py-16 text-center space-y-3">
           <div className="text-5xl">⏳</div>
-          <p className="text-violet-200 font-bold text-lg">Todavía no se jugó ningún partido.</p>
-          <p className="text-violet-300 text-sm">Los resultados van a aparecer acá cuando arranquen.</p>
+          <p className="text-violet-200 font-bold text-lg">Todavía no hay partidos cargados.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {jugados.map((partido, i) => {
+          {ordenados.map((partido, i) => {
+            const nuevoDia = i === 0 || ordenados[i - 1].fecha !== partido.fecha;
+            const sep = nuevoDia && (
+              <div className="flex items-center gap-3 pt-3 first:pt-0">
+                <span className="text-xs font-bold text-amber-400 uppercase tracking-wide whitespace-nowrap">{formatFecha(partido.fecha)}</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+            );
+
+            // ── Partido por jugar ──
+            if (!partido.jugado) {
+              return (
+                <div key={partido.id} className="space-y-3">
+                  {sep}
+                  <div className="bg-violet-950/55 border border-white/10 rounded-xl p-4 opacity-70">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex-1 min-w-0 text-right font-semibold text-sm truncate text-violet-200">
+                        <Flag equipo={partido.equipo_local} />{partido.equipo_local}
+                      </div>
+                      <div className="flex flex-col items-center shrink-0 px-2 leading-tight">
+                        {partido.hora && <span className="text-violet-200 text-sm font-bold">{partido.hora}</span>}
+                        <span className="text-violet-400 text-[10px] uppercase tracking-wide">por jugar</span>
+                      </div>
+                      <div className="flex-1 min-w-0 font-semibold text-sm truncate text-violet-200">
+                        <Flag equipo={partido.equipo_visitante} />{partido.equipo_visitante}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // ── Partido jugado ──
             const pred = predicciones[partido.id];
             const gL = partido.goles_local ?? 0;
             const gV = partido.goles_visitante ?? 0;
             const pts = pred ? calcularPuntos(parseInt(pred.local) || 0, parseInt(pred.visitante) || 0, gL, gV) : null;
             const borderColor = pts === 3 ? 'border-amber-400/40' : pts === 1 ? 'border-blue-500/35' : pts === 0 ? 'border-red-500/20' : 'border-white/15';
-            const nuevoDia = i === 0 || jugados[i - 1].fecha !== partido.fecha;
 
             return (
               <div key={partido.id} className="space-y-3">
-                {/* Separador de día */}
-                {nuevoDia && (
-                  <div className="flex items-center gap-3 pt-3 first:pt-0">
-                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wide whitespace-nowrap">{formatFecha(partido.fecha)}</span>
-                    <div className="flex-1 h-px bg-white/10" />
-                  </div>
-                )}
-
+                {sep}
                 <div className={`bg-violet-950/70 border ${borderColor} rounded-xl p-4 space-y-3`}>
                   {/* Resultado real */}
                   <div className="flex items-center gap-2 sm:gap-3">
