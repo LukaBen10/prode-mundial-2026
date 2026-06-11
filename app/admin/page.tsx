@@ -164,6 +164,10 @@ export default function AdminPage() {
   const [mensajesContacto, setMensajesContacto] = useState<MensajeContacto[]>([]);
   const [loadingMensajes, setLoadingMensajes] = useState(false);
   const [confirmDelMsg, setConfirmDelMsg] = useState<number | null>(null);
+  const [respAbierta, setRespAbierta] = useState<number | null>(null);
+  const [textoResp, setTextoResp] = useState<Record<number, string>>({});
+  const [enviandoResp, setEnviandoResp] = useState<number | null>(null);
+  const [respMsg, setRespMsg] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const participanteId = localStorage.getItem('prode_id');
@@ -374,6 +378,28 @@ export default function AdminPage() {
     });
     setMensajesContacto(prev => prev.filter(m => m.id !== id));
     setConfirmDelMsg(null);
+  }
+
+  async function responderMensaje(id: number, to: string) {
+    const texto = textoResp[id];
+    if (!texto?.trim()) return;
+    setEnviandoResp(id);
+    setRespMsg(prev => ({ ...prev, [id]: '' }));
+    const res = await fetch('/api/admin/mensajes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ id, to, texto }),
+    });
+    const data = await res.json();
+    setEnviandoResp(null);
+    if (data.ok) {
+      setRespMsg(prev => ({ ...prev, [id]: '✓ Respuesta enviada por mail' }));
+      setMensajesContacto(prev => prev.map(m => m.id === id ? { ...m, leido: 1 } : m));
+      setRespAbierta(null);
+      setTextoResp(prev => ({ ...prev, [id]: '' }));
+    } else {
+      setRespMsg(prev => ({ ...prev, [id]: `Error: ${data.error}` }));
+    }
   }
 
   async function sincronizarResultados() {
@@ -1161,6 +1187,34 @@ export default function AdminPage() {
                   </div>
 
                   <p className="text-violet-200 text-sm mt-3 whitespace-pre-wrap leading-relaxed border-t border-white/15 pt-3">{m.mensaje}</p>
+
+                  {/* Panel de respuesta por mail (solo si el contacto es un mail) */}
+                  {m.contacto.includes('@') && (
+                    <div className="mt-3 border-t border-white/15 pt-3">
+                      {respAbierta === m.id ? (
+                        <div className="space-y-2">
+                          <textarea value={textoResp[m.id] ?? ''} onChange={e => setTextoResp(prev => ({ ...prev, [m.id]: e.target.value }))}
+                            placeholder={`Escribí tu respuesta para ${m.nombre}…`} rows={4}
+                            className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-3 py-2 text-white text-sm placeholder-violet-300/60 focus:outline-none focus:border-amber-400 resize-none" />
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => responderMensaje(m.id, m.contacto)} disabled={enviandoResp === m.id || !textoResp[m.id]?.trim()}
+                              className="bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-violet-950 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                              {enviandoResp === m.id ? 'Enviando…' : '✉️ Enviar mail'}
+                            </button>
+                            <button onClick={() => { setRespAbierta(null); setRespMsg(prev => ({ ...prev, [m.id]: '' })); }}
+                              className="text-violet-300 hover:text-white text-sm px-2">Cancelar</button>
+                          </div>
+                          <p className="text-[11px] text-violet-400">Sale desde el mail del prode. Si te responde, te llega a tu casilla.</p>
+                        </div>
+                      ) : (
+                        <button onClick={() => setRespAbierta(m.id)}
+                          className="text-amber-400 hover:text-amber-300 text-sm font-semibold">
+                          ✉️ Responder por mail
+                        </button>
+                      )}
+                      {respMsg[m.id] && <p className="text-xs text-amber-400 mt-2">{respMsg[m.id]}</p>}
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-end gap-2 mt-3">
                     {confirmDelMsg === m.id ? (
