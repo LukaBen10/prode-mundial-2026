@@ -136,6 +136,7 @@ export default function AdminPage() {
   // Auto-guardado de resultados (reemplaza el botón Guardar)
   const [guardandoAuto, setGuardandoAuto] = useState<Record<number, boolean>>({});
   const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const visitanteRefs = useRef<Record<number, HTMLInputElement | null>>({});
   useEffect(() => {
     const timers = saveTimers.current;
     return () => { Object.values(timers).forEach(clearTimeout); };
@@ -446,6 +447,46 @@ export default function AdminPage() {
       cargarResultado(partidoId, { local, visitante });
     }, 800);
   }
+
+  // Fila editable de un partido — sirve para pendientes y jugados (cualquiera se puede corregir).
+  // Auto-guarda al tener los dos goles y salta solo del local al visitante para anotar más rápido.
+  const filaPartido = (partido: Partido) => (
+    <div key={partido.id} className={`border rounded-xl p-4 ${partido.jugado ? 'bg-violet-950/50 border-amber-400/25' : 'bg-violet-950/70 border-white/15'}`}>
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-xs text-violet-300 w-16 shrink-0">{formatFecha(partido.fecha)}</span>
+        <span className="text-xs bg-violet-950/65 text-violet-300 px-2 py-0.5 rounded shrink-0">G {partido.grupo}</span>
+        <div className="flex-1 flex items-center gap-2 min-w-0">
+          <span className="text-sm font-medium truncate flex-1 text-right min-w-0">{partido.equipo_local}</span>
+          <input type="number" inputMode="numeric" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
+            onChange={e => {
+              const local = e.target.value;
+              setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local } }));
+              programarAutoguardado(partido.id, local, resultados[partido.id]?.visitante ?? '');
+              if (local.length === 1) visitanteRefs.current[partido.id]?.focus(); // auto-avance al visitante
+            }}
+            className="w-12 h-10 text-center bg-violet-950/65 border border-violet-400/40 rounded-lg text-white text-lg font-semibold focus:outline-none focus:border-amber-400 shrink-0" />
+          <span className="text-violet-300 shrink-0">-</span>
+          <input type="number" inputMode="numeric" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
+            ref={el => { visitanteRefs.current[partido.id] = el; }}
+            onChange={e => {
+              const visitante = e.target.value;
+              setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante } }));
+              programarAutoguardado(partido.id, resultados[partido.id]?.local ?? '', visitante);
+            }}
+            className="w-12 h-10 text-center bg-violet-950/65 border border-violet-400/40 rounded-lg text-white text-lg font-semibold focus:outline-none focus:border-amber-400 shrink-0" />
+          <span className="text-sm font-medium truncate flex-1 min-w-0">{partido.equipo_visitante}</span>
+        </div>
+        <span className="text-xs shrink-0 w-24 text-right" aria-live="polite">
+          {guardandoAuto[partido.id]
+            ? <span className="text-amber-400 animate-pulse">💾 Guardando…</span>
+            : partido.jugado
+              ? <span className="text-emerald-400/80">✓ Cargado</span>
+              : <span className="text-violet-400/70">Se guarda solo</span>}
+        </span>
+      </div>
+      {mensajes[partido.id] && <p className="text-xs text-amber-400 mt-2 pl-20">{mensajes[partido.id]}</p>}
+    </div>
+  );
 
   async function ajustarPuntosRapido(nombre_usuario: string, id: number, delta: number) {
     setAjustando(id);
@@ -889,57 +930,19 @@ export default function AdminPage() {
             {loadingPartidos ? <p className="text-violet-300">Cargando...</p> : pendientes.length === 0 ? (
               <p className="text-violet-300">No hay partidos pendientes.</p>
             ) : (
-              pendientes.map(partido => (
-                <div key={partido.id} className="bg-violet-950/70 border border-white/15 rounded-xl p-4">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs text-violet-300 w-16 shrink-0">{formatFecha(partido.fecha)}</span>
-                    <span className="text-xs bg-violet-950/65 text-violet-300 px-2 py-0.5 rounded">G {partido.grupo}</span>
-                    <div className="flex-1 flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium truncate flex-1 text-right min-w-0">{partido.equipo_local}</span>
-                      <input type="number" min={0} max={20} value={resultados[partido.id]?.local ?? ''}
-                        onChange={e => {
-                          const local = e.target.value;
-                          setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], local } }));
-                          programarAutoguardado(partido.id, local, resultados[partido.id]?.visitante ?? '');
-                        }}
-                        className="w-10 h-8 text-center bg-violet-950/65 border border-violet-400/40 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
-                      <span className="text-violet-300 shrink-0">-</span>
-                      <input type="number" min={0} max={20} value={resultados[partido.id]?.visitante ?? ''}
-                        onChange={e => {
-                          const visitante = e.target.value;
-                          setResultados(prev => ({ ...prev, [partido.id]: { ...prev[partido.id], visitante } }));
-                          programarAutoguardado(partido.id, resultados[partido.id]?.local ?? '', visitante);
-                        }}
-                        className="w-10 h-8 text-center bg-violet-950/65 border border-violet-400/40 rounded text-white text-base focus:outline-none focus:border-amber-400 shrink-0" />
-                      <span className="text-sm font-medium truncate flex-1 min-w-0">{partido.equipo_visitante}</span>
-                    </div>
-                    <span className="text-xs shrink-0 w-24 text-right" aria-live="polite">
-                      {guardandoAuto[partido.id]
-                        ? <span className="text-amber-400 animate-pulse">💾 Guardando…</span>
-                        : <span className="text-violet-400/70">Se guarda solo</span>}
-                    </span>
-                  </div>
-                  {mensajes[partido.id] && <p className="text-xs text-amber-400 mt-2 pl-20">{mensajes[partido.id]}</p>}
-                </div>
-              ))
+              pendientes.map(filaPartido)
             )}
           </section>
 
           {jugados.length > 0 && (
-            <section className="space-y-2">
-              <h2 className="font-semibold text-violet-300">Jugados ({jugados.length})</h2>
-              <div className="bg-violet-950/70 border border-white/15 rounded-2xl overflow-hidden">
-                {jugados.map(p => (
-                  <div key={p.id} className="flex items-center gap-3 text-sm px-4 py-3 border-b border-white/15 last:border-0">
-                    <span className="text-violet-300 text-xs w-14 shrink-0">{formatFecha(p.fecha)}</span>
-                    <span className="bg-violet-950/65 px-2 py-0.5 rounded text-xs text-violet-300">G {p.grupo}</span>
-                    <span className="flex-1 text-right text-violet-200">{p.equipo_local}</span>
-                    <span className="font-bold text-white px-2">{p.goles_local} - {p.goles_visitante}</span>
-                    <span className="flex-1 text-violet-200">{p.equipo_visitante}</span>
-                  </div>
-                ))}
+            <details className="mt-2">
+              <summary className="cursor-pointer font-semibold text-violet-300 hover:text-white transition-colors select-none">
+                Jugados ({jugados.length}) <span className="text-xs text-violet-400 font-normal">— tocá para ver o corregir</span>
+              </summary>
+              <div className="space-y-3 mt-3">
+                {jugados.map(filaPartido)}
               </div>
-            </section>
+            </details>
           )}
         </div>
       )}
