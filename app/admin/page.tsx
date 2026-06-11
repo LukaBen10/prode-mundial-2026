@@ -141,6 +141,7 @@ export default function AdminPage() {
     const timers = saveTimers.current;
     return () => { Object.values(timers).forEach(clearTimeout); };
   }, []);
+  const [filtroJugados, setFiltroJugados] = useState('');
 
   // Consumos
   const [busqueda, setBusqueda] = useState('');
@@ -587,6 +588,9 @@ export default function AdminPage() {
   // Pendientes de cargar resultado: no jugados y con equipos ya definidos
   const pendientes = partidos.filter(p => !p.jugado && p.equipo_local && p.equipo_visitante);
   const jugados = partidos.filter(p => p.jugado);
+  const jugadosFiltrados = filtroJugados.trim()
+    ? jugados.filter(p => `${p.equipo_local} ${p.equipo_visitante}`.toLowerCase().includes(filtroJugados.trim().toLowerCase()))
+    : jugados;
   // Partidos de eliminatoria (num 73-104) para definir cruces a mano
   const eliminatorias = partidos.filter(p => (p.num_partido ?? 0) >= 73);
 
@@ -940,7 +944,14 @@ export default function AdminPage() {
                 Jugados ({jugados.length}) <span className="text-xs text-violet-400 font-normal">— tocá para ver o corregir</span>
               </summary>
               <div className="space-y-3 mt-3">
-                {jugados.map(filaPartido)}
+                <input type="text" value={filtroJugados} onChange={e => setFiltroJugados(e.target.value)}
+                  placeholder="🔎 Buscar por equipo…"
+                  className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-2.5 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
+                {jugadosFiltrados.length === 0 ? (
+                  <p className="text-violet-300 text-sm px-1">Ningún partido jugado coincide con “{filtroJugados}”.</p>
+                ) : (
+                  jugadosFiltrados.map(filaPartido)
+                )}
               </div>
             </details>
           )}
