@@ -147,6 +147,7 @@ export default function AdminPage() {
   const [busqueda, setBusqueda] = useState('');
   const [resultadosBusqueda, setResultadosBusqueda] = useState<ParticipanteBusqueda[]>([]);
   const [msgConsumo, setMsgConsumo] = useState<Record<string, string>>({});
+  const [puntosPendientes, setPuntosPendientes] = useState<Record<string, number>>({});
 
   // Admins
   const [busquedaAdmin, setBusquedaAdmin] = useState('');
@@ -508,17 +509,28 @@ export default function AdminPage() {
     setResultadosBusqueda(Array.isArray(data) ? data : []);
   }
 
-  async function darPuntoConsumo(nombre_usuario: string, delta: number = 1) {
+  // Acumula el ajuste localmente; recién se aplica al tocar "Guardar".
+  function sumarPuntoPendiente(nombre_usuario: string, delta: number) {
+    setMsgConsumo(prev => { const n = { ...prev }; delete n[nombre_usuario]; return n; });
+    setPuntosPendientes(prev => ({ ...prev, [nombre_usuario]: (prev[nombre_usuario] ?? 0) + delta }));
+  }
+
+  async function guardarPuntosConsumo(nombre_usuario: string, id: number) {
+    const delta = puntosPendientes[nombre_usuario];
+    if (!delta) return;
+    setAjustando(id);
     const res = await fetch('/api/admin/puntos-extra', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getHeaders() },
       body: JSON.stringify({ nombre_usuario, puntos: delta }),
     });
     const data = await res.json();
+    setAjustando(null);
     if (data.ok) {
       const signo = delta > 0 ? '+' : '';
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `✓ ${signo}${delta} pt → total: ${data.puntosNuevos} pts` }));
       setResultadosBusqueda(prev => prev.map(p => p.nombre_usuario === nombre_usuario ? { ...p, puntos: data.puntosNuevos } : p));
+      setPuntosPendientes(prev => { const n = { ...prev }; delete n[nombre_usuario]; return n; });
       cargarParticipantes();
     } else {
       setMsgConsumo(prev => ({ ...prev, [nombre_usuario]: `Error: ${data.error}` }));
@@ -983,14 +995,25 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Punto por venir al local */}
-                    <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2.5">
+                    {/* Punto por venir al local — se acumula y se aplica con "Guardar" */}
+                    <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2.5 flex-wrap">
                       <span className="text-violet-200 text-sm">🏟️ Vino a ver un partido</span>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => darPuntoConsumo(p.nombre_usuario, -1)}
+                        <button onClick={() => sumarPuntoPendiente(p.nombre_usuario, -1)}
                           className="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">−1 pt</button>
-                        <button onClick={() => darPuntoConsumo(p.nombre_usuario, 1)}
+                        {puntosPendientes[p.nombre_usuario] ? (
+                          <span className="text-sm font-bold text-amber-400 tabular-nums min-w-[2.5rem] text-center">
+                            {puntosPendientes[p.nombre_usuario] > 0 ? '+' : ''}{puntosPendientes[p.nombre_usuario]}
+                          </span>
+                        ) : null}
+                        <button onClick={() => sumarPuntoPendiente(p.nombre_usuario, 1)}
                           className="bg-amber-400 hover:bg-amber-300 text-violet-950 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">+1 pt</button>
+                        {puntosPendientes[p.nombre_usuario] ? (
+                          <button onClick={() => guardarPuntosConsumo(p.nombre_usuario, p.id)} disabled={ajustando === p.id}
+                            className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
+                            {ajustando === p.id ? '...' : 'Guardar'}
+                          </button>
+                        ) : null}
                       </div>
                     </div>
 
