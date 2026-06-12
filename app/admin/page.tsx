@@ -996,9 +996,9 @@ export default function AdminPage() {
           </section>
 
           {jugados.length > 0 && (
-            <details className="mt-2">
+            <details open className="mt-2">
               <summary className="cursor-pointer font-semibold text-violet-300 hover:text-white transition-colors select-none">
-                Jugados ({jugados.length}) <span className="text-xs text-violet-400 font-normal">— tocá para ver o corregir</span>
+                ✓ Jugados ({jugados.length}) <span className="text-xs text-violet-400 font-normal">— resultados cargados (tocá para corregir o colapsar)</span>
               </summary>
               <div className="space-y-3 mt-3">
                 <input type="text" value={filtroJugados} onChange={e => setFiltroJugados(e.target.value)}
