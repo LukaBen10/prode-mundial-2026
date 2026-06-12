@@ -71,6 +71,7 @@ interface PredAdmin {
   grupo: string;
   fase: string;
   fecha: string;
+  partido_id: number;
   equipo_local: string;
   equipo_visitante: string;
   pred_local: number;
@@ -168,6 +169,9 @@ export default function AdminPage() {
   const [textoResp, setTextoResp] = useState<Record<number, string>>({});
   const [enviandoResp, setEnviandoResp] = useState<number | null>(null);
   const [respMsg, setRespMsg] = useState<Record<number, string>>({});
+  const [editPred, setEditPred] = useState<{ pid: number; partidoId: number } | null>(null);
+  const [editPredVals, setEditPredVals] = useState<{ local: string; visitante: string }>({ local: '', visitante: '' });
+  const [savingPred, setSavingPred] = useState(false);
 
   useEffect(() => {
     const participanteId = localStorage.getItem('prode_id');
@@ -399,6 +403,24 @@ export default function AdminPage() {
       setTextoResp(prev => ({ ...prev, [id]: '' }));
     } else {
       setRespMsg(prev => ({ ...prev, [id]: `Error: ${data.error}` }));
+    }
+  }
+
+  async function guardarEdicionPred(participanteId: number, partidoId: number) {
+    setSavingPred(true);
+    const res = await fetch('/api/admin/predicciones', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getHeaders() },
+      body: JSON.stringify({ participante_id: participanteId, partido_id: partidoId, goles_local: parseInt(editPredVals.local) || 0, goles_visitante: parseInt(editPredVals.visitante) || 0 }),
+    });
+    const data = await res.json();
+    setSavingPred(false);
+    if (data.ok) {
+      setEditPred(null);
+      cargarPredicciones();
+      cargarParticipantes();
+    } else {
+      alert(data.error || 'No se pudo guardar la predicción');
     }
   }
 
@@ -1124,22 +1146,54 @@ export default function AdminPage() {
                               <th className="text-center px-3 py-2 font-medium">Pred.</th>
                               <th className="text-center px-3 py-2 font-medium">Real</th>
                               <th className="text-right px-3 py-2 font-medium">Pts</th>
+                              {isSuperAdmin && <th className="px-2 py-2" />}
                             </tr>
                           </thead>
                           <tbody>
-                            {g.preds.map((p, i) => (
+                            {g.preds.map((p, i) => {
+                              const editando = editPred?.pid === g.id && editPred?.partidoId === p.partido_id;
+                              return (
                               <tr key={i} className="border-b border-white/15 last:border-0">
                                 <td className="px-3 py-2 text-violet-300 whitespace-nowrap">{p.grupo ? `G ${p.grupo}` : (p.fase || '')}</td>
                                 <td className="px-3 py-2 text-violet-200">
                                   {(p.equipo_local || 'Por definir')} <span className="text-violet-400">vs</span> {(p.equipo_visitante || 'Por definir')}
                                 </td>
-                                <td className="px-3 py-2 text-center font-bold text-white whitespace-nowrap">{p.pred_local}-{p.pred_visitante}</td>
+                                <td className="px-3 py-2 text-center font-bold text-white whitespace-nowrap">
+                                  {editando ? (
+                                    <span className="inline-flex items-center gap-1">
+                                      <input type="number" min={0} max={20} value={editPredVals.local} autoFocus
+                                        onChange={e => setEditPredVals(v => ({ ...v, local: e.target.value }))}
+                                        className="w-9 h-7 text-center bg-violet-950/65 border border-amber-400/60 rounded text-white" />
+                                      <span className="text-violet-400">-</span>
+                                      <input type="number" min={0} max={20} value={editPredVals.visitante}
+                                        onChange={e => setEditPredVals(v => ({ ...v, visitante: e.target.value }))}
+                                        className="w-9 h-7 text-center bg-violet-950/65 border border-amber-400/60 rounded text-white" />
+                                    </span>
+                                  ) : (
+                                    `${p.pred_local}-${p.pred_visitante}`
+                                  )}
+                                </td>
                                 <td className="px-3 py-2 text-center text-violet-300 whitespace-nowrap">{p.jugado ? `${p.real_local}-${p.real_visitante}` : '—'}</td>
                                 <td className={`px-3 py-2 text-right font-bold ${p.puntos === 3 ? 'text-amber-400' : p.puntos === 1 ? 'text-amber-400' : 'text-violet-400'}`}>
                                   {p.jugado ? p.puntos : '—'}
                                 </td>
+                                {isSuperAdmin && (
+                                  <td className="px-2 py-2 text-right whitespace-nowrap">
+                                    {editando ? (
+                                      <span className="inline-flex items-center gap-1.5">
+                                        <button onClick={() => guardarEdicionPred(g.id, p.partido_id)} disabled={savingPred}
+                                          className="text-emerald-400 hover:text-emerald-300 font-bold disabled:opacity-50" title="Guardar">{savingPred ? '…' : '✓'}</button>
+                                        <button onClick={() => setEditPred(null)} className="text-violet-400 hover:text-white" title="Cancelar">✕</button>
+                                      </span>
+                                    ) : (
+                                      <button onClick={() => { setEditPred({ pid: g.id, partidoId: p.partido_id }); setEditPredVals({ local: String(p.pred_local), visitante: String(p.pred_visitante) }); }}
+                                        className="text-violet-400 hover:text-amber-400 transition-colors" title="Editar predicción">✏️</button>
+                                    )}
+                                  </td>
+                                )}
                               </tr>
-                            ))}
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
