@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { nombre_usuario, puntos } = await req.json();
+    const { nombre_usuario, puntos, consumicion } = await req.json();
     if (!nombre_usuario || puntos == null) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
     }
@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
       sql: 'UPDATE participantes SET puntos = puntos + ? WHERE nombre_usuario = ?',
       args: [puntos, nombre_usuario.trim()],
     });
+
+    // Si es por venir al local, contar la(s) consumición(es) — sirve para el desempate del ranking.
+    if (consumicion) {
+      await db.execute({
+        sql: 'UPDATE participantes SET consumiciones = MAX(0, consumiciones + ?) WHERE nombre_usuario = ?',
+        args: [puntos, nombre_usuario.trim()],
+      });
+    }
 
     const puntosNuevos = (part.rows[0][2] as number) + puntos;
     const signo = puntos > 0 ? `+${puntos}` : String(puntos);

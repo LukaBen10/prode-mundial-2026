@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
     { name: 'acepta_avisos',   sql: 'ALTER TABLE participantes ADD COLUMN acepta_avisos INTEGER NOT NULL DEFAULT 0' },
     { name: 'avisos_definido', sql: 'ALTER TABLE participantes ADD COLUMN avisos_definido INTEGER NOT NULL DEFAULT 0' },
     { name: 'donas_especiales', sql: 'ALTER TABLE participantes ADD COLUMN donas_especiales INTEGER NOT NULL DEFAULT 0' },
+    { name: 'consumiciones',    sql: 'ALTER TABLE participantes ADD COLUMN consumiciones INTEGER NOT NULL DEFAULT 0' },
   ];
   for (const col of colsParticipantes) {
     try {
