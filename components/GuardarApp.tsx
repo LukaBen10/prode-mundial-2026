@@ -64,10 +64,12 @@ export default function GuardarApp() {
             </button>
           </>
         ) : plataforma === 'ios' ? (
-          <p className="text-violet-200 text-sm leading-relaxed">
-            En tu iPhone: tocá el botón <strong className="text-white">Compartir</strong> (el cuadradito con la flecha ↑,
-            abajo) y después <strong className="text-amber-300">&ldquo;Agregar a inicio&rdquo;</strong>. Queda como una app. 🍩
-          </p>
+          <div className="text-violet-200 text-sm leading-relaxed space-y-1.5">
+            <p>En iPhone se agrega en <strong className="text-white">2 pasos</strong> (Apple no deja hacerlo con un botón):</p>
+            <p><strong className="text-white">1.</strong> Tocá <strong className="text-white">Compartir</strong> — el cuadradito con la flecha <span className="text-amber-300">↑</span>, abajo al centro.</p>
+            <p><strong className="text-white">2.</strong> Bajá y tocá <strong className="text-amber-300">&ldquo;Agregar a inicio&rdquo;</strong> → <strong className="text-white">Agregar</strong>.</p>
+            <p className="text-violet-300 text-xs">Te queda el ícono del prode en la pantalla, como una app. 🍩</p>
+          </div>
         ) : (
           <p className="text-violet-200 text-sm leading-relaxed">
             En tu celular, abrí el menú del navegador (los <strong className="text-white">tres puntitos ⋮</strong>) y tocá{' '}
