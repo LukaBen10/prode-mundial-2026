@@ -563,7 +563,7 @@ export default function AdminPage() {
     const res = await fetch('/api/admin/puntos-extra', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getHeaders() },
-      body: JSON.stringify({ nombre_usuario, puntos: delta }),
+      body: JSON.stringify({ nombre_usuario, puntos: delta, consumicion: true }),
     });
     const data = await res.json();
     setAjustando(null);
@@ -595,10 +595,8 @@ export default function AdminPage() {
     }
   }
 
-  async function buscarAdmin(q: string) {
-    setBusquedaAdmin(q);
-    if (q.length < 2) { setResultadosAdmin([]); return; }
-    const res = await fetch(`/api/admin/puntos-extra?q=${encodeURIComponent(q)}`, { headers: getHeaders() });
+  async function cargarAdminsBusqueda() {
+    const res = await fetch('/api/admin/puntos-extra', { headers: getHeaders() });
     const data = await res.json();
     setResultadosAdmin(Array.isArray(data) ? data : []);
   }
@@ -644,6 +642,9 @@ export default function AdminPage() {
   const consumosFiltrados = busqueda.trim()
     ? resultadosBusqueda.filter(p => `${p.nombre_usuario} ${p.nombre_completo}`.toLowerCase().includes(busqueda.trim().toLowerCase()))
     : resultadosBusqueda;
+  const adminsFiltrados = busquedaAdmin.trim()
+    ? resultadosAdmin.filter(p => `${p.nombre_usuario} ${p.nombre_completo}`.toLowerCase().includes(busquedaAdmin.trim().toLowerCase()))
+    : resultadosAdmin;
   const jugadosFiltrados = filtroJugados.trim()
     ? jugados.filter(p => `${p.equipo_local} ${p.equipo_visitante}`.toLowerCase().includes(filtroJugados.trim().toLowerCase()))
     : jugados;
@@ -726,6 +727,7 @@ export default function AdminPage() {
                 if (t.id === 'predicciones' && predicciones.length === 0) cargarPredicciones();
                 if (t.id === 'mensajes' && mensajesContacto.length === 0) cargarMensajes();
                 if (t.id === 'consumos' && resultadosBusqueda.length === 0) cargarConsumos();
+                if (t.id === 'admins' && resultadosAdmin.length === 0) cargarAdminsBusqueda();
               }}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors -mb-px border-b-2 ${
                 tab === t.id ? 'text-white border-amber-400' : 'text-violet-300 border-transparent hover:text-white'
@@ -1391,12 +1393,12 @@ export default function AdminPage() {
           {/* Asignar rol a usuario */}
           <section className="space-y-3">
             <h2 className="font-semibold text-violet-200">Asignar rol a un participante</h2>
-            <input type="text" value={busquedaAdmin} onChange={e => buscarAdmin(e.target.value)}
+            <input type="text" value={busquedaAdmin} onChange={e => setBusquedaAdmin(e.target.value)}
               placeholder="Buscar por usuario o nombre..."
               className="w-full bg-violet-950/65 border border-violet-400/40 rounded-xl px-4 py-3 text-white placeholder-violet-300/60 focus:outline-none focus:border-amber-400" />
-            {resultadosAdmin.length > 0 && (
+            {adminsFiltrados.length > 0 && (
               <div className="space-y-2">
-                {resultadosAdmin.map(p => {
+                {adminsFiltrados.map(p => {
                   const nivelActual = (adminsActuales.find(a => a.id === p.id)?.is_admin as number) ?? 0;
                   const esSA = nivelActual >= 3;
                   return (
@@ -1419,8 +1421,11 @@ export default function AdminPage() {
                 })}
               </div>
             )}
-            {busquedaAdmin.length >= 2 && resultadosAdmin.length === 0 && (
-              <p className="text-violet-300 text-sm">No se encontró ningún usuario.</p>
+            {resultadosAdmin.length === 0 && (
+              <p className="text-violet-300 text-sm">Cargando participantes…</p>
+            )}
+            {resultadosAdmin.length > 0 && adminsFiltrados.length === 0 && (
+              <p className="text-violet-300 text-sm">No se encontró ningún usuario con “{busquedaAdmin}”.</p>
             )}
           </section>
         </div>
