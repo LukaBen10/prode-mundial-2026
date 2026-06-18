@@ -280,6 +280,12 @@ function PrediccionesContent() {
                 {partido.estadio && <span>🏟️ {partido.estadio}, {partido.ciudad}</span>}
                 <span className="ml-auto">{definido ? <DeadlineBadge partido={partido} /> : <span className="text-violet-400">A definir</span>}</span>
               </div>
+              {partido.jugado && (
+                <div className="border-t border-white/15 pt-2 flex items-center justify-center gap-2 text-sm">
+                  <span className="text-violet-300">Resultado final:</span>
+                  <span className="font-black text-white tabular-nums">{partido.goles_local} - {partido.goles_visitante}</span>
+                </div>
+              )}
             </div>
           );
         })}
