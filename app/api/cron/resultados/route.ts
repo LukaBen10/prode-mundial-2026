@@ -70,18 +70,26 @@ export async function GET(req: NextRequest) {
     const log: string[] = [];
 
     for (const apiMatch of terminados) {
-      const gL = apiMatch.score.fullTime.home;
-      const gV = apiMatch.score.fullTime.away;
-      if (gL === null || gV === null) continue;
+      const gH = apiMatch.score.fullTime.home;
+      const gA = apiMatch.score.fullTime.away;
+      if (gH === null || gA === null) continue;
 
       const esHome = fromApiName(apiMatch.homeTeam.name);
       const esAway = fromApiName(apiMatch.awayTeam.name);
-      const match = dbPartidos.find(p =>
+      // Match directo o invertido (el fixture puede tener los equipos al revés que la API).
+      const directo = dbPartidos.find(p =>
         p.equipo_local.toLowerCase() === esHome.toLowerCase() &&
         p.equipo_visitante.toLowerCase() === esAway.toLowerCase()
       );
+      const match = directo ?? dbPartidos.find(p =>
+        p.equipo_local.toLowerCase() === esAway.toLowerCase() &&
+        p.equipo_visitante.toLowerCase() === esHome.toLowerCase()
+      );
       if (!match) continue;
 
+      // Si está invertido, los goles van al revés para respetar el orden guardado en la DB.
+      const gL = directo ? gH : gA;
+      const gV = directo ? gA : gH;
       await db.execute({
         sql: 'UPDATE partidos SET goles_local = ?, goles_visitante = ?, jugado = 1 WHERE id = ?',
         args: [gL, gV, match.id],
@@ -89,7 +97,7 @@ export async function GET(req: NextRequest) {
 
       const predsActualizadas = await calcularYGuardarPuntos(match.id, gL, gV);
       actualizados++;
-      log.push(`${esHome} ${gL}-${gV} ${esAway} → ${predsActualizadas} pred`);
+      log.push(`${match.equipo_local} ${gL}-${gV} ${match.equipo_visitante} → ${predsActualizadas} pred`);
     }
 
     // Eliminatorias (aislado: si falla, no afecta a los grupos)
