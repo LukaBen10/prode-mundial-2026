@@ -91,7 +91,10 @@ function PrediccionesContent() {
     const authHeaders = { 'x-participante-id': String(participanteId), 'x-session-token': localStorage.getItem('prode_token') ?? '' };
     Promise.all([
       fetch('/api/partidos').then((r) => r.json()),
-      fetch('/api/predicciones', { headers: authHeaders }).then((r) => r.json()),
+      fetch('/api/predicciones', { headers: authHeaders }).then((r) => {
+        if (r.status === 401) { localStorage.removeItem('prode_token'); router.push('/login'); return []; }
+        return r.json();
+      }),
       fetch('/api/ranking').then((r) => r.json()),
     ]).then(([partidos, preds, ranking]) => {
       setPartidos(Array.isArray(partidos) ? partidos : []);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { hashPassword, verifyPassword, generarToken } from '@/lib/hash';
 
-const SESSION_DAYS = 14;
+const SESSION_DAYS = 90;
 
 export async function POST(req: NextRequest) {
   try {

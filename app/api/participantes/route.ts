@@ -3,7 +3,7 @@ import db from '@/lib/db';
 import { hashPassword, generarToken } from '@/lib/hash';
 import { checkModeratorAuth } from '@/lib/adminAuth';
 
-const SESSION_DAYS = 14;
+const SESSION_DAYS = 90;
 
 function generarCodigo() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();

@@ -193,8 +193,8 @@ export default function AdminPage() {
         const level = data.level ?? 0;
 
         if (level < 1) {
-          // Sesión inválida o sin permisos de admin
-          window.location.href = '/mi-prode';
+          // Sesión vencida o sin permisos → a login para re-entrar
+          window.location.href = '/login';
           return;
         }
 
