@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const grupo = req.nextUrl.searchParams.get('grupo');
   const fase = req.nextUrl.searchParams.get('fase');
 
-  let sql = 'SELECT * FROM partidos WHERE 1=1';
+  let sql = 'SELECT id, fase, grupo, equipo_local, equipo_visitante, fecha, goles_local, goles_visitante, jugado, hora, estadio, ciudad, num_partido FROM partidos WHERE 1=1';
   const args: (string | number)[] = [];
 
   if (grupo) { sql += ' AND grupo = ?'; args.push(grupo); }

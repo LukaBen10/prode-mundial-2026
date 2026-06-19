@@ -13,7 +13,7 @@ export async function GET() {
     LEFT JOIN predicciones pr ON pr.participante_id = p.id
     GROUP BY p.id, p.nombre_usuario, p.puntos, p.fuera_premios, p.consumiciones, p.donas_especiales
     ORDER BY p.puntos DESC, exactos DESC, ganadores DESC, p.consumiciones DESC, p.donas_especiales DESC, p.id ASC
-    LIMIT 50
+    LIMIT 200
   `);
 
   const ranking = result.rows.map((r, i) => ({

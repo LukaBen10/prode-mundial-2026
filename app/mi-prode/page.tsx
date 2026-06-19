@@ -37,7 +37,10 @@ export default function MiProdePage() {
     fetch('/api/avisos', {
       headers: { 'x-participante-id': participanteId, 'x-session-token': localStorage.getItem('prode_token') ?? '' },
     })
-      .then(r => r.ok ? r.json() : null)
+      .then(r => {
+        if (r.status === 401) { localStorage.removeItem('prode_token'); router.push('/login'); return null; }
+        return r.ok ? r.json() : null;
+      })
       .then(d => { if (d) { setAceptaAvisos(!!d.acepta_avisos); setAvisosDefinido(!!d.avisos_definido); setDonas(d.donas_especiales ?? 0); } })
       .catch(() => {});
 

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { checkModeratorAuth, checkSuperAdminAuth } from '@/lib/adminAuth';
 import { calcularPuntos } from '@/lib/scoring';
+import { audit } from '@/lib/audit';
+import { getAdminId } from '@/lib/apiHelpers';
 
 /** GET — todas las predicciones de todos, con su partido y resultado. Moderador+. */
 export async function GET(req: NextRequest) {
@@ -73,6 +75,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    await audit(getAdminId(req), 'Editó predicción', `participante ${participante_id} · partido ${partido_id} → ${gL}-${gV}`);
     return NextResponse.json({ ok: true, puntos: nuevoPts });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
