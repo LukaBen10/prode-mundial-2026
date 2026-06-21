@@ -208,7 +208,10 @@ export default function AdminPage() {
           cargarParticipantes(participanteId);
           cargarPartidos();
         } else {
+          // Nivel 1 (consumos): cargar la lista al entrar. El setTab programático
+          // no dispara el onClick del tab, así que hay que pedir los datos a mano.
           setTab('consumos');
+          cargarConsumos();
         }
       } catch {
         window.location.href = '/mi-prode';
@@ -226,6 +229,10 @@ export default function AdminPage() {
   }
 
   async function cargarParticipantes(pid?: string) {
+    // Nivel 1 (consumos) no tiene acceso a esta lista: el endpoint le devolvería 401
+    // y lo patearía a /login. Como las acciones de consumo refrescan esta lista,
+    // hay que cortar acá para que un admin de consumos pueda trabajar tranquilo.
+    if (Number(localStorage.getItem('prode_admin') ?? 0) < 2) return;
     setLoadingParts(true);
     const id = pid ?? localStorage.getItem('prode_id') ?? '';
     const res = await fetch('/api/admin/participantes', {
@@ -697,13 +704,15 @@ export default function AdminPage() {
               <span><strong className="text-white">{jugados.length}</strong> partidos jugados</span>
             </div>
           )}
-          <button
-            onClick={() => cargarParticipantes()}
-            disabled={loadingParts}
-            className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
-          >
-            {loadingParts ? '⏳' : '🔄 Actualizar'}
-          </button>
+          {adminLevel >= 2 && (
+            <button
+              onClick={() => cargarParticipantes()}
+              disabled={loadingParts}
+              className="text-xs bg-violet-950/65 hover:bg-violet-800/60 border border-violet-400/40 text-violet-200 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            >
+              {loadingParts ? '⏳' : '🔄 Actualizar'}
+            </button>
+          )}
         </div>
       </div>
 
