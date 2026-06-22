@@ -95,6 +95,12 @@ export default function LoginPage() {
         </button>
       </form>
 
+      <p className="text-center">
+        <Link href="/recuperar" className="text-violet-300 hover:text-amber-300 text-sm underline underline-offset-2">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </p>
+
       <p className="text-center text-violet-300 text-sm">
         ¿Todavía no te anotaste?{' '}
         <Link href="/unirse" className="text-amber-400 hover:text-amber-300 underline">

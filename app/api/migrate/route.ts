@@ -131,6 +131,24 @@ export async function GET(req: NextRequest) {
     results.push({ column: 'mensajes_contacto', status: `error: ${err instanceof Error ? err.message : String(err)}` });
   }
 
+  // ── tabla password_resets (recuperación de contraseña) ─────────
+  try {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        token           TEXT    NOT NULL UNIQUE,
+        participante_id INTEGER NOT NULL,
+        expires_at      TEXT    NOT NULL,
+        used            INTEGER NOT NULL DEFAULT 0,
+        created_at      TEXT    DEFAULT (datetime('now'))
+      )
+    `);
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_resets_token ON password_resets(token)');
+    results.push({ column: 'password_resets', status: 'tabla lista' });
+  } catch (err) {
+    results.push({ column: 'password_resets', status: `error: ${err instanceof Error ? err.message : String(err)}` });
+  }
+
   // ── superadmin ────────────────────────────────────────────────
   try {
     const r = await db.execute({ sql: "UPDATE participantes SET is_admin = 3 WHERE nombre_usuario = 'luka'", args: [] });
