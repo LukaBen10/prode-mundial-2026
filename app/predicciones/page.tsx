@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { BANDERAS } from '@/lib/data/banderas';
 import FlagIcon from '@/components/FlagIcon';
@@ -76,9 +76,8 @@ function PrediccionesContent() {
   const [predicciones, setPredicciones] = useState<Record<number, { local: string; visitante: string }>>({});
   const [vista, setVista] = useState('A'); // grupo (A-L) o fase eliminatoria
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [guardado, setGuardado] = useState(false);
-  const [error, setError] = useState('');
+  const [estadoGuardado, setEstadoGuardado] = useState<Record<number, 'guardando' | 'guardado' | 'error'>>({});
+  const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const [nombre, setNombre] = useState('');
   const [miRanking, setMiRanking] = useState<{ posicion: number; puntos: number; puntosLider: number; puntosNext: number | null } | null>(null);
 
@@ -115,6 +114,12 @@ function PrediccionesContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [participanteId, router]);
 
+  // Limpiar timers de auto-guardado pendientes al desmontar.
+  useEffect(() => {
+    const timers = saveTimers.current;
+    return () => { Object.values(timers).forEach(clearTimeout); };
+  }, []);
+
   const esGrupo = GRUPOS.includes(vista);
   const partidosVista = esGrupo
     ? partidos.filter((p) => p.grupo === vista)
@@ -122,21 +127,23 @@ function PrediccionesContent() {
   const tituloVista = esGrupo ? `Grupo ${vista}` : FASES_ELIM.find((f) => f.fase === vista)?.label ?? vista;
 
   function updatePred(partidoId: number, side: 'local' | 'visitante', value: string) {
-    setPredicciones((prev) => ({
-      ...prev,
-      [partidoId]: { local: prev[partidoId]?.local ?? '0', visitante: prev[partidoId]?.visitante ?? '0', [side]: value },
-    }));
-    setGuardado(false);
+    const cur = predicciones[partidoId] ?? { local: '', visitante: '' };
+    const next = { local: cur.local, visitante: cur.visitante, [side]: value };
+    setPredicciones((prev) => ({ ...prev, [partidoId]: next }));
+    programarGuardado(partidoId, next.local, next.visitante);
   }
 
-  async function guardar() {
-    setSaving(true);
-    setError('');
-    const payload = Object.entries(predicciones).map(([pid, pred]) => ({
-      partido_id: parseInt(pid),
-      goles_local: parseInt(pred.local) || 0,
-      goles_visitante: parseInt(pred.visitante) || 0,
-    }));
+  // Cuando ya están los dos goles, guarda esa predicción sola tras una breve pausa (debounce).
+  function programarGuardado(partidoId: number, local: string, visitante: string) {
+    if (saveTimers.current[partidoId]) clearTimeout(saveTimers.current[partidoId]);
+    if (local.trim() === '' || visitante.trim() === '') return; // espera a que estén los dos goles
+    saveTimers.current[partidoId] = setTimeout(() => {
+      guardarPartido(partidoId, local, visitante);
+    }, 800);
+  }
+
+  async function guardarPartido(partidoId: number, local: string, visitante: string) {
+    setEstadoGuardado((prev) => ({ ...prev, [partidoId]: 'guardando' }));
     try {
       const res = await fetch('/api/predicciones', {
         method: 'POST',
@@ -145,14 +152,15 @@ function PrediccionesContent() {
           'x-participante-id': String(participanteId),
           'x-session-token': localStorage.getItem('prode_token') ?? '',
         },
-        body: JSON.stringify({ predicciones: payload }),
+        body: JSON.stringify({ predicciones: [{ partido_id: partidoId, goles_local: parseInt(local) || 0, goles_visitante: parseInt(visitante) || 0 }] }),
       });
-      if (!res.ok) throw new Error();
-      setGuardado(true);
+      if (res.status === 401) { localStorage.removeItem('prode_token'); router.push('/login'); return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      // Si el partido cerró justo (kickoff), el server la rechaza: lo marcamos como error.
+      setEstadoGuardado((prev) => ({ ...prev, [partidoId]: data.guardadas > 0 ? 'guardado' : 'error' }));
     } catch {
-      setError('No se pudieron guardar. Fijate la conexión y probá de nuevo.');
-    } finally {
-      setSaving(false);
+      setEstadoGuardado((prev) => ({ ...prev, [partidoId]: 'error' }));
     }
   }
 
@@ -281,7 +289,12 @@ function PrediccionesContent() {
                 <span>📅 {formatFecha(partido.fecha)}</span>
                 <span>🕐 {partido.hora}hs AR</span>
                 {partido.estadio && <span>🏟️ {partido.estadio}, {partido.ciudad}</span>}
-                <span className="ml-auto">{definido ? <DeadlineBadge partido={partido} /> : <span className="text-violet-400">A definir</span>}</span>
+                <span className="ml-auto flex items-center gap-2" aria-live="polite">
+                  {estadoGuardado[partido.id] === 'guardando' && <span className="text-amber-400 animate-pulse">💾 Guardando…</span>}
+                  {estadoGuardado[partido.id] === 'guardado' && <span className="text-emerald-400">✓ Guardado</span>}
+                  {estadoGuardado[partido.id] === 'error' && <span className="text-red-400">No se guardó</span>}
+                  {definido ? <DeadlineBadge partido={partido} /> : <span className="text-violet-400">A definir</span>}
+                </span>
               </div>
               {partido.jugado && (
                 <div className="border-t border-white/15 pt-2 flex items-center justify-center gap-2 text-sm">
@@ -294,16 +307,11 @@ function PrediccionesContent() {
         })}
       </div>
 
-      <div className="pt-4 pb-6">
-        {error && (
-          <div className="mb-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3">
-            {error}
-          </div>
-        )}
-        <button onClick={guardar} disabled={saving || guardado}
-          className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-violet-950 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-400/30">
-          {saving ? 'Guardando...' : guardado ? '✓ Predicciones guardadas' : 'Guardar predicciones'}
-        </button>
+      <div className="pt-2 pb-6">
+        <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-sm text-emerald-300">
+          <span>✨</span>
+          <span>Tus predicciones se guardan solas. No hace falta apretar nada.</span>
+        </div>
       </div>
     </div>
   );
