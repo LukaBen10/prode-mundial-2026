@@ -1,17 +1,32 @@
 name: Sync resultados en vivo
 
-# Sincroniza los resultados del prode cada 5 minutos (más "en vivo" que los crons de Vercel).
-# Requiere el secret CRON_SECRET configurado en el repo (Settings → Secrets and variables → Actions).
+# OJO: los cron de GitHub Actions NO respetan la alta frecuencia. Aunque pidamos
+# cada 5 min, en la práctica disparan cada 1-6 h. Para tener resultados realmente
+# "en vivo", cada disparo abre un BUCLE que sincroniza cada 60 s durante ~5h48m.
+# Con cancel-in-progress, cada nuevo disparo reemplaza al anterior → así, mientras
+# GitHub dispare al menos cada ~6 h (lo hace), el sync corre cada minuto sin cortes.
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 * * * *'   # nominal cada hora; GitHub dispara cuando puede (cada 1-6 h)
   workflow_dispatch: {}
+
+# Un solo bucle activo a la vez: el disparo más nuevo cancela al anterior y arranca limpio.
+concurrency:
+  group: sync-en-vivo
+  cancel-in-progress: true
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 350   # ~5h50m, casi el máximo de un job de GitHub (6 h)
     steps:
-      - name: Disparar sync de resultados
+      - name: Sync continuo de resultados (cada 60 s)
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" "https://prodedonut.com.ar/api/cron/resultados?secret=${{ secrets.CRON_SECRET }}")
-          echo "Sync resultados → HTTP $code"
+          fin=$((SECONDS + 348*60))
+          n=0
+          while [ $SECONDS -lt $fin ]; do
+            resp=$(curl -s -w " [HTTP %{http_code}]" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "https://prodedonut.com.ar/api/cron/resultados")
+            n=$((n+1))
+            echo "$(date -u +%H:%M:%S) [#$n] $resp"
+            sleep 60
+          done
