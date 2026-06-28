@@ -22,10 +22,11 @@ interface FDMatch {
  * (`/api/admin/sync-resultados`). Al vivir en un solo lugar, el matcheo de
  * partidos y la carga de puntos nunca pueden divergir entre ambos caminos.
  *
- * Por cada partido terminado de la API, lo matchea contra el fixture pendiente
- * (jugado=0) probando el orden directo o invertido (el fixture puede tener los
- * equipos al revés que la API) y guarda los goles en el orden de la DB. El
- * recálculo de puntos es idempotente (delta) gracias a `calcularYGuardarPuntos`.
+ * Por cada partido terminado de la API, lo matchea contra el fixture de grupos
+ * probando el orden directo o invertido (el fixture puede tener los equipos al
+ * revés que la API) y guarda los goles en el orden de la DB. Procesa también los
+ * partidos ya jugados: si football-data corrige un resultado, lo actualiza (antes
+ * quedaba con el dato viejo). El recálculo de puntos es idempotente (delta).
  *
  * @throws Error si la API de fútbol responde con un status no-ok.
  * @returns Cantidad de partidos actualizados y el log de cambios.
@@ -40,8 +41,11 @@ export async function sincronizarResultados(
   if (!res.ok) throw new Error(`API fútbol: ${res.status}`);
 
   const { matches = [] } = (await res.json()) as { matches: FDMatch[] };
-  const dbRes = await db.execute('SELECT id, equipo_local, equipo_visitante FROM partidos WHERE jugado = 0');
-  const pendientes = dbRes.rows.map(r => ({ id: r[0] as number, local: r[1] as string, visitante: r[2] as string }));
+  // Traemos TODOS los partidos de grupos (no solo los pendientes): si football-data
+  // corrige un resultado ya cargado, también lo actualizamos. Antes, al filtrar por
+  // jugado=0, un resultado mal cargado quedaba para siempre con el dato viejo.
+  const dbRes = await db.execute("SELECT id, equipo_local, equipo_visitante, goles_local, goles_visitante, jugado FROM partidos WHERE fase = 'grupos'");
+  const partidos = dbRes.rows.map(r => ({ id: r[0] as number, local: r[1] as string, visitante: r[2] as string, gl: r[3] as number | null, gv: r[4] as number | null, jugado: r[5] as number }));
 
   let actualizados = 0;
   const log: string[] = [];
@@ -53,10 +57,10 @@ export async function sincronizarResultados(
     const esHome = fromApiName(m.homeTeam.name);
     const esAway = fromApiName(m.awayTeam.name);
     // Match directo o invertido: el fixture de la DB puede tener los equipos al revés que la API.
-    const directo = pendientes.find(p =>
+    const directo = partidos.find(p =>
       p.local.toLowerCase() === esHome.toLowerCase() && p.visitante.toLowerCase() === esAway.toLowerCase()
     );
-    const found = directo ?? pendientes.find(p =>
+    const found = directo ?? partidos.find(p =>
       p.local.toLowerCase() === esAway.toLowerCase() && p.visitante.toLowerCase() === esHome.toLowerCase()
     );
     if (!found) continue;
@@ -64,10 +68,13 @@ export async function sincronizarResultados(
     // Si está invertido, los goles van al revés para respetar el orden guardado en la DB.
     const gL = directo ? gH : gA;
     const gV = directo ? gA : gH;
+    // Ya cargado con el mismo resultado → nada que hacer (evita recálculos y logs inútiles).
+    if (found.jugado === 1 && found.gl === gL && found.gv === gV) continue;
+    const corregido = found.jugado === 1; // ya estaba cargado pero la fuente cambió el resultado
     await db.execute({ sql: 'UPDATE partidos SET goles_local=?, goles_visitante=?, jugado=1 WHERE id=?', args: [gL, gV, found.id] });
     const predsN = await calcularYGuardarPuntos(found.id, gL, gV);
     actualizados++;
-    log.push(`${found.local} ${gL}-${gV} ${found.visitante} (${predsN} pred)`);
+    log.push(`${found.local} ${gL}-${gV} ${found.visitante}${corregido ? ' (corregido)' : ''} (${predsN} pred)`);
   }
 
   // Eliminatorias (aislado: si falla, no afecta a los grupos).

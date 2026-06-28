@@ -46,11 +46,12 @@ export async function sincronizarEliminatorias(apiKey: string): Promise<string[]
   const { matches = [] } = await res.json() as { matches: FDMatch[] };
 
   const dbRes = await db.execute(
-    'SELECT id, fase, equipo_local, equipo_visitante, fecha, hora, jugado FROM partidos WHERE num_partido >= 73'
+    'SELECT id, fase, equipo_local, equipo_visitante, fecha, hora, jugado, goles_local, goles_visitante FROM partidos WHERE num_partido >= 73'
   );
   const elim = dbRes.rows.map(r => ({
     id: r[0] as number, fase: r[1] as string, local: r[2] as string,
     visitante: r[3] as string, fecha: r[4] as string, hora: r[5] as string, jugado: r[6] as number,
+    gl: r[7] as number | null, gv: r[8] as number | null,
   }));
 
   for (const m of matches) {
@@ -64,26 +65,32 @@ export async function sincronizarEliminatorias(apiKey: string): Promise<string[]
     const homeName = m.homeTeam.name ? fromApiName(m.homeTeam.name) : '';
     const awayName = m.awayTeam.name ? fromApiName(m.awayTeam.name) : '';
 
-    // 1. Definir el cruce cuando se conocen los equipos
-    if (homeName && awayName && (found.local !== homeName || found.visitante !== awayName)) {
+    // 1. Definir el cruce a medida que football-data conoce los equipos.
+    //    Actualizamos aunque venga uno solo (el bracket se va completando de a poco:
+    //    el otro lado se carga en un sync posterior). Antes exigíamos los dos a la vez
+    //    y los cruces a medio definir quedaban vacíos.
+    const nuevoLocal = homeName || found.local;
+    const nuevoVisitante = awayName || found.visitante;
+    if (nuevoLocal !== found.local || nuevoVisitante !== found.visitante) {
       await db.execute({
         sql: 'UPDATE partidos SET equipo_local=?, equipo_visitante=? WHERE id=?',
-        args: [homeName, awayName, found.id],
+        args: [nuevoLocal, nuevoVisitante, found.id],
       });
-      found.local = homeName;
-      found.visitante = awayName;
-      log.push(`Cruce: ${homeName} vs ${awayName}`);
+      found.local = nuevoLocal;
+      found.visitante = nuevoVisitante;
+      log.push(`Cruce: ${nuevoLocal || '(?)'} vs ${nuevoVisitante || '(?)'}`);
     }
 
-    // 2. Cargar resultado cuando el partido termina
+    // 2. Cargar o corregir el resultado al terminar (también si la fuente lo cambia).
     const gL = m.score.fullTime.home, gV = m.score.fullTime.away;
-    if (m.status === 'FINISHED' && gL !== null && gV !== null && found.jugado === 0) {
+    if (m.status === 'FINISHED' && gL !== null && gV !== null && (found.jugado !== 1 || found.gl !== gL || found.gv !== gV)) {
       await db.execute({
         sql: 'UPDATE partidos SET goles_local=?, goles_visitante=?, jugado=1 WHERE id=?',
         args: [gL, gV, found.id],
       });
+      found.jugado = 1; found.gl = gL; found.gv = gV;
       await calcularYGuardarPuntos(found.id, gL, gV);
-      log.push(`${homeName} ${gL}-${gV} ${awayName}`);
+      log.push(`${found.local} ${gL}-${gV} ${found.visitante}`);
     }
   }
 
