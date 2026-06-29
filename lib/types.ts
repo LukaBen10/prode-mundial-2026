@@ -20,4 +20,5 @@ export interface RankingEntry {
   nombre_usuario: string;
   puntos: number;
   fuera_premios?: number;
+  consumiciones?: number;
 }

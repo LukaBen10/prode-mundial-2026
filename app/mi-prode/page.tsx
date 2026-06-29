@@ -27,6 +27,7 @@ export default function MiProdePage() {
   const [avisosDefinido, setAvisosDefinido] = useState(true); // true hasta cargar, para no parpadear el banner
   const [savingAvisos, setSavingAvisos] = useState(false);
   const [donas, setDonas] = useState(0);
+  const [consumiciones, setConsumiciones] = useState(0);
 
   useEffect(() => {
     if (!participanteId) return;
@@ -52,6 +53,7 @@ export default function MiProdePage() {
         if (yo) {
           setPosicion(yo.posicion);
           setPuntos(yo.puntos);
+          setConsumiciones(yo.consumiciones ?? 0);
           setPuntosLider(ranking[0]?.puntos ?? 0);
           const anterior = yo.posicion > 1 ? ranking.find(r => r.posicion === yo.posicion - 1) : null;
           setPuntosNext(anterior ? anterior.puntos - yo.puntos : null);
@@ -140,6 +142,24 @@ export default function MiProdePage() {
               <div className="text-violet-300 text-xs">Puntos del líder</div>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Puntos por venir al local (consumiciones) — transparencia: que cada uno chequee */}
+      <div className="bg-violet-950/70 border border-white/15 rounded-2xl p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <span className="text-2xl shrink-0">🏟️</span>
+            <div className="min-w-0">
+              <h2 className="font-bold text-white">Puntos por venir al local</h2>
+              <p className="text-violet-300 text-xs leading-relaxed mt-0.5">
+                {consumiciones === 0
+                  ? <>Todavía no tenés. Veníte a ver un partido a <strong className="text-white">Donut Makers</strong> y sumás +1. 🍩</>
+                  : <>Sumaste <strong className="text-white">{consumiciones}</strong> {consumiciones === 1 ? 'punto' : 'puntos'} por venir a ver los partidos al local. ¿No te cierra? Avisanos.</>}
+              </p>
+            </div>
+          </div>
+          <span className="text-3xl font-black text-amber-400 tabular-nums shrink-0">{consumiciones}</span>
         </div>
       </div>
 
