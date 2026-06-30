@@ -20,7 +20,10 @@ interface FDMatch {
   utcDate: string;
   homeTeam: { name: string | null };
   awayTeam: { name: string | null };
-  score: { fullTime: { home: number | null; away: number | null } };
+  score: {
+    fullTime: { home: number | null; away: number | null };
+    penalties?: { home: number | null; away: number | null } | null;
+  };
 }
 
 /** Convierte un timestamp UTC a la hora de pared en Argentina (UTC-3). */
@@ -82,7 +85,14 @@ export async function sincronizarEliminatorias(apiKey: string): Promise<string[]
     }
 
     // 2. Cargar o corregir el resultado al terminar (también si la fuente lo cambia).
-    const gL = m.score.fullTime.home, gV = m.score.fullTime.away;
+    // football-data mete la tanda de penales DENTRO de fullTime (ej. un 1-1 que se
+    // define 4-3 por penales viene como fullTime 5-4). En el prode el penal NO cuenta:
+    // vale el resultado a los 120' (empate), así que restamos los penales si los hubo.
+    let gL = m.score.fullTime.home, gV = m.score.fullTime.away;
+    if (m.score.penalties && gL !== null && gV !== null) {
+      gL -= m.score.penalties.home ?? 0;
+      gV -= m.score.penalties.away ?? 0;
+    }
     if (m.status === 'FINISHED' && gL !== null && gV !== null && (found.jugado !== 1 || found.gl !== gL || found.gv !== gV)) {
       await db.execute({
         sql: 'UPDATE partidos SET goles_local=?, goles_visitante=?, jugado=1 WHERE id=?',
