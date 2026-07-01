@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { checkModeratorAuth, checkSuperAdminAuth } from '@/lib/adminAuth';
-import { calcularPuntos } from '@/lib/scoring';
 import { audit } from '@/lib/audit';
 import { getAdminId } from '@/lib/apiHelpers';
 
@@ -53,30 +52,30 @@ export async function POST(req: NextRequest) {
     if (participante_id == null || partido_id == null || goles_local == null || goles_visitante == null) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
     }
-    const gL = parseInt(String(goles_local)) || 0;
-    const gV = parseInt(String(goles_visitante)) || 0;
+    const gL = parseInt(String(goles_local));
+    const gV = parseInt(String(goles_visitante));
+    if (!Number.isInteger(gL) || !Number.isInteger(gV) || gL < 0 || gV < 0 || gL > 99 || gV > 99) {
+      return NextResponse.json({ error: 'Goles inválidos (enteros 0-99)' }, { status: 400 });
+    }
 
-    const predRes = await db.execute({ sql: 'SELECT id, puntos FROM predicciones WHERE participante_id = ? AND partido_id = ?', args: [participante_id, partido_id] });
+    // Anti-trampa: igual que para los usuarios, no se puede editar la predicción de un
+    // partido que ya arrancó o se jugó (evitaría darse el resultado exacto en retrospectiva).
+    const partRes = await db.execute({ sql: 'SELECT fecha, hora, jugado FROM partidos WHERE id = ?', args: [partido_id] });
+    const partido = partRes.rows[0];
+    if (!partido) return NextResponse.json({ error: 'Partido inexistente' }, { status: 404 });
+    const kickoffMs = new Date(`${partido[0]}T${(partido[1] as string) || '19:00'}:00-03:00`).getTime();
+    if (Number(partido[2]) === 1 || Date.now() >= kickoffMs) {
+      return NextResponse.json({ error: 'No se puede editar la predicción de un partido que ya arrancó o se jugó' }, { status: 400 });
+    }
+
+    const predRes = await db.execute({ sql: 'SELECT id FROM predicciones WHERE participante_id = ? AND partido_id = ?', args: [participante_id, partido_id] });
     if (predRes.rows.length === 0) return NextResponse.json({ error: 'No existe esa predicción' }, { status: 404 });
     const predId = predRes.rows[0][0] as number;
-    const viejoPts = (predRes.rows[0][1] as number) ?? 0;
 
     await db.execute({ sql: 'UPDATE predicciones SET goles_local = ?, goles_visitante = ? WHERE id = ?', args: [gL, gV, predId] });
 
-    // Si el partido ya se jugó, recalcular los puntos de esta predicción (delta, idempotente).
-    const partRes = await db.execute({ sql: 'SELECT jugado, goles_local, goles_visitante FROM partidos WHERE id = ?', args: [partido_id] });
-    const partido = partRes.rows[0];
-    let nuevoPts = viejoPts;
-    if (partido && Number(partido[0]) === 1) {
-      nuevoPts = calcularPuntos(gL, gV, partido[1] as number, partido[2] as number);
-      await db.execute({ sql: 'UPDATE predicciones SET puntos = ? WHERE id = ?', args: [nuevoPts, predId] });
-      if (nuevoPts !== viejoPts) {
-        await db.execute({ sql: 'UPDATE participantes SET puntos = puntos + ? WHERE id = ?', args: [nuevoPts - viejoPts, participante_id] });
-      }
-    }
-
     await audit(getAdminId(req), 'Editó predicción', `participante ${participante_id} · partido ${partido_id} → ${gL}-${gV}`);
-    return NextResponse.json({ ok: true, puntos: nuevoPts });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }

@@ -15,6 +15,10 @@ export async function POST(req: NextRequest) {
     if (partido_id == null || goles_local == null || goles_visitante == null) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
     }
+    const gL = Number(goles_local), gV = Number(goles_visitante);
+    if (!Number.isInteger(gL) || !Number.isInteger(gV) || gL < 0 || gV < 0 || gL > 99 || gV > 99) {
+      return NextResponse.json({ error: 'Goles inválidos (deben ser enteros entre 0 y 99)' }, { status: 400 });
+    }
 
     const partidoRes = await db.execute({ sql: 'SELECT equipo_local, equipo_visitante FROM partidos WHERE id = ?', args: [partido_id] });
     const local = partidoRes.rows[0]?.[0] as string ?? '?';
@@ -22,12 +26,12 @@ export async function POST(req: NextRequest) {
 
     await db.execute({
       sql: 'UPDATE partidos SET goles_local = ?, goles_visitante = ?, jugado = 1 WHERE id = ?',
-      args: [goles_local, goles_visitante, partido_id],
+      args: [gL, gV, partido_id],
     });
 
-    const prediccionesActualizadas = await calcularYGuardarPuntos(partido_id, goles_local, goles_visitante);
+    const prediccionesActualizadas = await calcularYGuardarPuntos(partido_id, gL, gV);
 
-    await audit(getAdminId(req), 'Cargó resultado', `${local} ${goles_local}-${goles_visitante} ${visitante} (${prediccionesActualizadas} pred)`);
+    await audit(getAdminId(req), 'Cargó resultado', `${local} ${gL}-${gV} ${visitante} (${prediccionesActualizadas} pred)`);
 
     return NextResponse.json({ ok: true, prediccionesActualizadas });
   } catch (err) {

@@ -93,7 +93,7 @@ export async function sincronizarEliminatorias(apiKey: string): Promise<string[]
       gL -= m.score.penalties.home ?? 0;
       gV -= m.score.penalties.away ?? 0;
     }
-    if (m.status === 'FINISHED' && gL !== null && gV !== null && (found.jugado !== 1 || found.gl !== gL || found.gv !== gV)) {
+    if (m.status === 'FINISHED' && gL !== null && gV !== null && Number.isInteger(gL) && Number.isInteger(gV) && gL >= 0 && gV >= 0 && (found.jugado !== 1 || found.gl !== gL || found.gv !== gV)) {
       await db.execute({
         sql: 'UPDATE partidos SET goles_local=?, goles_visitante=?, jugado=1 WHERE id=?',
         args: [gL, gV, found.id],

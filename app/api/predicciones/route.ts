@@ -52,6 +52,11 @@ export async function POST(req: NextRequest) {
       const { partido_id, goles_local, goles_visitante } = pred ?? {};
       if (partido_id == null || goles_local == null || goles_visitante == null) continue;
 
+      // Sanear los goles server-side: enteros 0-99. El front ya lo hace, pero un usuario
+      // puede pegarle al endpoint a mano y mandar negativos, decimales, enormes o basura.
+      const gl = Number(goles_local), gv = Number(goles_visitante);
+      if (!Number.isInteger(gl) || !Number.isInteger(gv) || gl < 0 || gv < 0 || gl > 99 || gv > 99) { rechazadas++; continue; }
+
       // No se puede predecir un partido ya jugado o que ya arrancó (kickoff en hora Argentina).
       const p = info.get(Number(partido_id));
       if (!p) continue;
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
               VALUES (?, ?, ?, ?)
               ON CONFLICT(participante_id, partido_id)
               DO UPDATE SET goles_local = excluded.goles_local, goles_visitante = excluded.goles_visitante`,
-        args: [participanteId, partido_id, goles_local, goles_visitante],
+        args: [participanteId, partido_id, gl, gv],
       });
       guardadas++;
     }

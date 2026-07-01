@@ -6,10 +6,8 @@ import db from '@/lib/db';
  * Devuelve el nivel is_admin (0 = no autenticado o sesión inválida).
  */
 async function getAuthLevel(req: NextRequest): Promise<number> {
-  // Bypass de emergencia con password de admin (solo para operaciones internas).
-  // Requiere que ADMIN_PASSWORD esté seteado: si está vacío, el bypass queda deshabilitado.
-  if (process.env.ADMIN_PASSWORD && req.headers.get('x-admin-password') === process.env.ADMIN_PASSWORD) return 3;
-
+  // El nivel de admin sale SIEMPRE de una sesión válida en la DB (token + participante_id).
+  // No hay bypass por password/header: el panel funciona con el login normal.
   const id    = req.headers.get('x-admin-participante-id');
   const token = req.headers.get('x-session-token');
   if (!id || !token) return 0;

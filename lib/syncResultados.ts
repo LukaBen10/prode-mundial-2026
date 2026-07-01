@@ -68,6 +68,8 @@ export async function sincronizarResultados(
     // Si está invertido, los goles van al revés para respetar el orden guardado en la DB.
     const gL = directo ? gH : gA;
     const gV = directo ? gA : gH;
+    // Defensa: no cargar goles inválidos aunque la API los mande raros.
+    if (!Number.isInteger(gL) || !Number.isInteger(gV) || gL < 0 || gV < 0) continue;
     // Ya cargado con el mismo resultado → nada que hacer (evita recálculos y logs inútiles).
     if (found.jugado === 1 && found.gl === gL && found.gv === gV) continue;
     const corregido = found.jugado === 1; // ya estaba cargado pero la fuente cambió el resultado
